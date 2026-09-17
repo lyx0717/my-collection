@@ -1,0 +1,167 @@
+@import 'tailwindcss';
+
+@theme {
+  /* 暖墨黑底 · 铜金点缀的“私人藏品馆”色系 */
+  --color-ink-950: #0d0c0a;
+  --color-ink-900: #12100d;
+  --color-ink-850: #16140f;
+  --color-ink-800: #1e1b15;
+  --color-ink-700: #2b2720;
+  --color-ink-600: #3b352b;
+
+  --color-paper: #ece7dc;
+  --color-paper-dim: #b8b0a1;
+  --color-paper-muted: #857d6e;
+
+  --color-gold: #c9a35c;
+  --color-gold-bright: #e3c484;
+  --color-gold-dim: #7a6538;
+
+  --font-serif: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+  --font-mono: 'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-ink-950);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 顶部一层极淡的铜金光晕，像展柜顶灯 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 90% 42% at 50% -8%, rgba(201, 163, 92, 0.08), transparent 65%),
+    radial-gradient(ellipse 60% 30% at 85% 110%, rgba(201, 163, 92, 0.04), transparent 70%);
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+::selection {
+  background: rgba(201, 163, 92, 0.28);
+  color: var(--color-paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* 细滚动条 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-700);
+  border-radius: 8px;
+  border: 2px solid var(--color-ink-950);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-dim);
+}
+
+/* 铜金发丝线 */
+.rule-gold {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(201, 163, 92, 0.55) 18%,
+    rgba(201, 163, 92, 0.55) 82%,
+    transparent
+  );
+}
+
+/* 封面水印大字 */
+.cover-watermark {
+  font-family: var(--font-serif);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -52%);
+  font-size: clamp(4.5rem, 9vw, 7.5rem);
+  line-height: 1;
+  letter-spacing: 0;
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.16;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.35);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.25s ease both;
+}
+
+.animate-rise {
+  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-drawer {
+  animation: drawer-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
