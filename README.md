@@ -62,15 +62,20 @@ pnpm preview    # 本地预览生产构建
 
 构建命令 `pnpm build`，发布目录 `dist`，其余默认即可。
 
-### GitHub Pages
+### GitHub Pages（本项目已配置，推送即自动部署）
+
+仓库内置 `.github/workflows/deploy.yml`：每次 push 到 `main`，GitHub Actions 自动安装依赖、构建并发布到 Pages，无需手动操作。首次使用需在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
+
+当前线上地址：<https://lyx0717.github.io/my-collection/>
+
+如需手动构建部署也可以：
 
 ```bash
 pnpm build
-# 把 dist/ 目录内容推送到 gh-pages 分支，或使用 gh-pages 插件：
 pnpm dlx gh-pages -d dist
 ```
 
-部署后访问 `https://<用户名>.github.io/<仓库名>/`，Hash 路由保证刷新不 404。
+Hash 路由保证部署在子路径下刷新也不 404。
 
 ### Nginx / 自有服务器
 
