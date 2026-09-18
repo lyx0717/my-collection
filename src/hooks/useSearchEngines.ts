@@ -38,7 +38,7 @@ export function useSearchEngines() {
     const next = engines.filter((e) => e.id !== id)
     setEngines(next)
     saveCustomEngines(next)
-    if (activeId === id) select('baidu')
+    if (activeId === id) select('bing')
   }, [engines, activeId, select])
 
   return { engines, active, select, addEngine, removeEngine }

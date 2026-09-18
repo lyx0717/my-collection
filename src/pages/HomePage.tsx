@@ -39,6 +39,7 @@ export default function HomePage() {
   const {
     bookmarks,
     collections,
+    status,
     toggleStar,
     removeBookmark,
     addCollection,
@@ -219,6 +220,9 @@ export default function HomePage() {
         onAddCollection={() => setCollectionModal({ mode: 'create' })}
         onEditCollection={(col) => setCollectionModal({ mode: 'edit', collection: col })}
         onDeleteCollection={(col) => setDeletingCollection(col)}
+        cloudOn={status !== 'local' && status !== 'loading'}
+        syncing={status === 'syncing'}
+        offline={status === 'offline'}
         mobileOpen={mobileMenu}
         onCloseMobile={() => setMobileMenu(false)}
       />

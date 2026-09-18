@@ -7,8 +7,9 @@ export interface SearchEngine {
 }
 
 export const BUILTIN_ENGINES: SearchEngine[] = [
-  { id: 'baidu', name: '百度', url: 'https://www.baidu.com/s?wd=%s', builtin: true },
   { id: 'bing', name: '必应', url: 'https://www.bing.com/search?q=%s', builtin: true },
+  { id: 'Yandex', name: 'Yandex', url: 'https://yandex.com/search?text=%s', builtin: true },
+  { id: 'baidu', name: '百度', url: 'https://www.baidu.com/s?wd=%s', builtin: true },
   { id: 'google', name: 'Google', url: 'https://www.google.com/search?q=%s', builtin: true },
 ]
 
@@ -36,7 +37,7 @@ export function saveCustomEngines(engines: SearchEngine[]) {
 }
 
 export function loadActiveEngineId(): string {
-  return localStorage.getItem(ACTIVE_KEY) || 'baidu'
+  return localStorage.getItem(ACTIVE_KEY) || 'bing'
 }
 
 export function saveActiveEngineId(id: string) {

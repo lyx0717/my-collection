@@ -33,12 +33,22 @@ function normalizeEntry(raw: Record<string, unknown>): ParsedImportBookmark | nu
     (typeof raw.folder === 'string' && raw.folder) ||
     (typeof raw.collectionName === 'string' && raw.collectionName) ||
     undefined
+  const collectionId =
+    typeof raw.collectionId === 'string' && raw.collectionId ? raw.collectionId : undefined
   const createdAtRaw = raw.createdAt ?? raw.created ?? raw.date_added
   const createdAt =
     typeof createdAtRaw === 'string' && !Number.isNaN(Date.parse(createdAtRaw))
       ? new Date(createdAtRaw).toISOString()
       : undefined
-  return { url, title, description: description || undefined, tags, collectionName, createdAt }
+  return {
+    url,
+    title,
+    description: description || undefined,
+    tags,
+    collectionName,
+    collectionId,
+    createdAt,
+  }
 }
 
 interface ITabItem {

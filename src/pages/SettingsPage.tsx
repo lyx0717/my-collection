@@ -2,6 +2,7 @@ import { useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   ArrowLeft,
   Bookmark,
+  Cloud,
   Download,
   FileUp,
   Folder,
@@ -17,13 +18,14 @@ import { useBookmarks } from '../store/BookmarksContext'
 import { useToast } from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
 import CollectionModal from '../components/CollectionModal'
+import SyncPanel from '../components/settings/SyncPanel'
 import Favicon from '../components/Favicon'
 import { parseImportFile, type ParsedImport } from '../lib/importFile'
 import { dedupeKey, extractDomain } from '../lib/url'
 import { bookmarkletHref } from '../lib/bookmarklet'
 import type { Collection, ParsedImportBookmark } from '../types'
 
-type Section = 'data' | 'collections' | 'tags' | 'bookmarklet' | 'about'
+type Section = 'sync' | 'data' | 'collections' | 'tags' | 'bookmarklet' | 'about'
 
 interface PreviewEntry extends ParsedImportBookmark {
   key: string
@@ -42,6 +44,7 @@ export default function SettingsPage() {
     removeCollection,
     renameTag,
     removeTag,
+    mergeCollections,
     downloadJson,
     downloadNetscape,
     resetToSeed,
@@ -84,13 +87,26 @@ export default function SettingsPage() {
         return
       }
       setParsed(result)
+      // 分组名 → 现有 id（含备份文件自带的分组定义）
+      const incomingCols = result.collections ?? []
       const colByName = new Map(collections.map((c) => [c.name, c.id]))
+      incomingCols.forEach((c) => {
+        if (!colByName.has(c.name)) colByName.set(c.name, c.id)
+      })
+      const validIds = new Set([
+        ...collections.map((c) => c.id),
+        ...incomingCols.map((c) => c.id),
+      ])
       setPreview(
         result.bookmarks.map((b) => {
           const key = dedupeKey(b.url)
-          const target = b.collectionName
-            ? colByName.get(b.collectionName) ?? '__new'
-            : ''
+          // 优先使用备份携带的分组 id；其次按文件夹名匹配；否则新建同名分组
+          const target =
+            b.collectionId && validIds.has(b.collectionId)
+              ? b.collectionId
+              : b.collectionName
+                ? colByName.get(b.collectionName) ?? '__new'
+                : ''
           return { ...b, key, duplicate: existingKeys.has(key), selected: !existingKeys.has(key), target }
         }),
       )
@@ -118,6 +134,8 @@ export default function SettingsPage() {
 
   const confirmImport = () => {
     if (!preview) return
+    // 先合入备份自带的分组（保留 id 与 emoji）
+    if (parsed?.collections?.length) mergeCollections(parsed.collections)
     // 为「新建同名分组」创建分组
     const folderToCol = new Map<string, string>()
     for (const folder of folderOptions) {
@@ -135,7 +153,12 @@ export default function SettingsPage() {
         url: p.url,
         title: p.title,
         description: p.description,
-        collectionId: p.collectionName ? folderToCol.get(p.collectionName) : undefined,
+        collectionId:
+          p.target && p.target !== '__new'
+            ? p.target
+            : p.collectionName
+              ? folderToCol.get(p.collectionName)
+              : undefined,
         tags: p.tags,
         createdAt: p.createdAt,
       }))
@@ -174,6 +197,7 @@ export default function SettingsPage() {
   }
 
   const navItems: Array<{ key: Section; label: string; icon: ReactNode }> = [
+    { key: 'sync', label: '云端同步', icon: <Cloud size={15} /> },
     { key: 'data', label: '数据导入导出', icon: <HardDrive size={15} /> },
     { key: 'collections', label: '分组管理', icon: <Folder size={15} /> },
     { key: 'tags', label: '标签管理', icon: <Tag size={15} /> },
@@ -220,6 +244,15 @@ export default function SettingsPage() {
         </nav>
 
         <div className="min-w-0 flex-1 space-y-10 pb-20">
+          {/* ============ 云端同步 ============ */}
+          <section id="sec-sync" className="scroll-mt-24">
+            <SectionTitle
+              title="云端同步"
+              desc="配置 Cloudflare Worker 后，书签实时存到云端，多设备共享；断网时使用本地缓存。"
+            />
+            <SyncPanel />
+          </section>
+
           {/* ============ 数据 ============ */}
           <section id="sec-data" className="scroll-mt-24">
             <SectionTitle title="数据导入导出" desc="所有书签保存在当前浏览器本地，建议每月导出一次 JSON 备份。" />

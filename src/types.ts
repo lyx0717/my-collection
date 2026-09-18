@@ -49,5 +49,7 @@ export interface ParsedImportBookmark {
   description?: string
   tags: string[]
   collectionName?: string
+  /** 本站完整备份携带的分组 id */
+  collectionId?: string
   createdAt?: string
 }
