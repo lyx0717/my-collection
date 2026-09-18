@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>书签收藏站 · 高保真设计稿 v1</title>
+<style>
+/* ============ 设计 Token（与未来 Tailwind @theme 一致） ============ */
+:root{
+  --bg:#F7F6F3;          /* 页面暖白 */
+  --surface:#FFFFFF;     /* 卡片 */
+  --surface-2:#FAFAF8;   /* 次级面 */
+  --ink:#1C1B19;         /* 主文字 */
+  --ink-2:#57544E;       /* 次文字 */
+  --ink-3:#928E86;       /* 弱文字 */
+  --line:#ECEAE4;        /* 发丝边 */
+  --line-2:#E2DFD8;
+  --accent:#3E5CFF;      /* 链接蓝 */
+  --accent-ink:#2C47E0;
+  --accent-soft:#EEF0FF; /* 蓝浅底 */
+  --star:#F5A524;
+  --danger:#E5484D;
+  --radius:14px;
+  --shadow-1:0 1px 2px rgba(28,27,25,.05);
+  --shadow-2:0 8px 24px -12px rgba(28,27,25,.18), 0 2px 6px rgba(28,27,25,.05);
+  --shadow-pop:0 24px 60px -20px rgba(28,27,25,.35), 0 4px 14px rgba(28,27,25,.08);
+  --font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Inter","Helvetica Neue",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#E7E6E1;font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;padding:56px 0 120px}
+.canvas{width:1360px;margin:0 auto}
+@media(max-width:1420px){.canvas{width:1240px}}
+
+/* ============ 画板外框 ============ */
+.board{margin-bottom:72px}
+.board-head{display:flex;align-items:baseline;gap:14px;margin:0 8px 16px}
+.board-no{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.08em}
+.board-title{font-size:19px;font-weight:700;letter-spacing:.01em}
+.board-desc{font-size:13px;color:#7B786F}
+.win{background:var(--surface);border-radius:14px;box-shadow:0 2px 10px rgba(28,27,25,.08),0 24px 60px -24px rgba(28,27,25,.25);overflow:hidden;border:1px solid #DDDAD2}
+.win-bar{height:42px;background:#F2F1EE;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 16px}
+.dot{width:11px;height:11px;border-radius:50%}
+.dot.r{background:#EC6A5E}.dot.y{background:#F4BE4F}.dot.g{background:#61C453}
+.url-pill{margin-left:14px;background:#fff;border:1px solid var(--line);border-radius:7px;height:26px;display:flex;align-items:center;gap:7px;padding:0 12px;font-size:12px;color:#8A867C;flex:1;max-width:420px}
+.url-pill .lock{width:10px;height:10px}
+.win-scale-note{margin-left:auto;font-size:11px;color:#A09C93}
+.app{display:flex;height:748px;background:var(--bg);text-align:left}
+
+/* ============ 侧栏 ============ */
+.side{width:236px;flex:none;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 12px 12px;gap:2px}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 14px}
+.brand-mark{width:30px;height:30px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px -3px rgba(62,92,255,.5)}
+.brand-name{font-size:14.5px;font-weight:700;letter-spacing:.02em}
+.brand-sub{font-size:10.5px;color:var(--ink-3);margin-top:1px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7.5px 10px;border-radius:9px;font-size:13.5px;color:var(--ink-2);cursor:default;font-weight:500}
+.nav-item svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}
+.nav-item .n{margin-left:auto;font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.nav-item:hover{background:var(--surface-2)}
+.nav-item.active{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.nav-item.active .n{color:var(--accent)}
+.nav-sep{font-size:10.5px;font-weight:600;letter-spacing:.14em;color:var(--ink-3);padding:14px 10px 5px;display:flex;align-items:center;justify-content:space-between}
+.nav-sep .plus{color:var(--ink-3);font-size:14px;line-height:1}
+.nav-sep .plus:hover{color:var(--accent)}
+.side-foot{margin-top:auto;padding:10px;border-radius:10px;background:var(--surface-2);font-size:11px;line-height:1.6;color:var(--ink-3);display:flex;gap:8px;align-items:flex-start}
+.side-foot svg{width:14px;height:14px;flex:none;margin-top:1px;stroke:var(--ink-3);fill:none;stroke-width:1.8}
+
+/* ============ 顶栏 ============ */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:62px;flex:none;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 26px}
+.search{flex:1;max-width:520px;height:38px;background:var(--bg);border:1px solid var(--line);border-radius:11px;display:flex;align-items:center;gap:9px;padding:0 12px;color:var(--ink-3)}
+.search svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9}
+.search input{border:0;background:transparent;outline:0;flex:1;font-size:13.5px;color:var(--ink);font-family:inherit}
+.search input::placeholder{color:#ACA89F}
+.kbd{font-size:10.5px;border:1px solid var(--line-2);border-bottom-width:2px;border-radius:5px;padding:2px 6px;color:var(--ink-3);background:#fff;font-family:ui-monospace,Menlo,monospace}
+.icon-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--ink-2)}
+.icon-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8}
+.icon-btn:hover{border-color:var(--line-2);background:var(--surface-2)}
+.btn{display:inline-flex;align-items:center;gap:7px;border-radius:11px;font-family:inherit;font-size:13.5px;font-weight:600;cursor:default;border:1px solid transparent;white-space:nowrap}
+.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.1}
+.btn-primary{background:var(--accent);color:#fff;padding:0 15px;height:38px;box-shadow:0 6px 14px -6px rgba(62,92,255,.55)}
+.btn-primary:hover{background:var(--accent-ink)}
+.btn-ghost{background:#fff;color:var(--ink-2);border-color:var(--line);padding:0 14px;height:38px}
+.btn-ghost:hover{background:var(--surface-2)}
+.btn-lg{height:46px;padding:0 22px;font-size:14.5px;border-radius:12px}
+
+/* ============ 工具条 ============ */
+.content{flex:1;padding:22px 26px 0;overflow:hidden}
+.toolbar{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.ctx-title{font-size:20px;font-weight:700;letter-spacing:.01em}
+.ctx-count{font-size:12.5px;color:var(--ink-3);margin-left:2px}
+.toolbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.seg{display:flex;background:#EFEEEA;border-radius:10px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;width:30px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#8F8B82}
+.seg button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(28,27,25,.12)}
+.sortbtn{display:flex;align-items:center;gap:6px;height:34px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:0 12px;font-size:12.5px;color:var(--ink-2);font-family:inherit}
+.sortbtn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* ============ 列表行（卡片化） ============ */
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:11px 14px;box-shadow:var(--shadow-1);transition:box-shadow .18s,border-color .18s,transform .18s}
+.row:hover,.row.is-hover{border-color:var(--line-2);box-shadow:var(--shadow-2);transform:translateY(-1px)}
+.fav{width:38px;height:38px;border-radius:10px;flex:none;position:relative;display:flex;align-items:center;justify-content:center;background:#F4F3EF;overflow:hidden}
+.fav img{position:absolute;width:21px;height:21px;border-radius:4px}
+.fav-letter{font-size:13.5px;font-weight:700}
+.row-main{min-width:0;flex:1}
+.row-title{display:flex;align-items:center;gap:7px;font-size:14.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-sub{margin-top:2px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3)}
+.domain{white-space:nowrap}
+.dot-sep{width:3px;height:3px;border-radius:50%;background:#C9C5BC}
+.row-tags{display:flex;gap:6px;flex:none}
+.tag{font-size:11.5px;color:var(--ink-2);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:2px 8px;white-space:nowrap}
+.tag::before{content:"#";color:var(--ink-3);margin-right:2px}
+.row-date{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;width:52px;text-align:right;flex:none}
+.row-actions{display:flex;gap:2px;flex:none;opacity:0;transition:opacity .15s}
+.row.is-hover .row-actions{opacity:1}
+.act{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#A39F95;background:transparent;border:0}
+.act svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
+.act:hover{background:var(--bg);color:var(--ink-2)}
+.act.star-on{color:var(--star);opacity:1}
+.act.star-on svg{fill:var(--star);stroke:var(--star)}
+.star-visible{color:var(--star)}
+.star-visible svg{fill:var(--star);stroke:var(--star);width:15px;height:15px}
+.fade-bottom{height:72px;margin-top:-60px;background:linear-gradient(to bottom,rgba(247,246,243,0),var(--bg));position:relative;z-index:2;pointer-events:none}
+
+/* ============ 网格卡片 ============ */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.gcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-1);transition:box-shadow .18s,transform .18s}
+.gcard:hover,.gcard.is-hover{box-shadow:var(--shadow-2);transform:translateY(-2px)}
+.gcover{height:128px;position:relative;display:flex;align-items:center;justify-content:center}
+.gcover .gfav{width:52px;height:52px;border-radius:15px;background:rgba(255,255,255,.16);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.gcover .gfav img{position:absolute;width:28px;height:28px;border-radius:6px}
+.gcover .gl{font-size:20px;font-weight:700;color:#fff}
+.gstar{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.gstar svg{width:14px;height:14px;fill:var(--star);stroke:var(--star);stroke-width:1.5}
+.gstar.off{background:rgba(255,255,255,.7)}
+.gstar.off svg{fill:none;stroke:#7C786F}
+.gbody{padding:12px 14px 14px}
+.gtitle{font-size:13.5px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px}
+.gsub{margin-top:6px;display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-3)}
+.gtags{margin-top:9px;display:flex;gap:5px;flex-wrap:wrap}
+.gtags .tag{font-size:10.5px;padding:1.5px 7px}
+
+/* 封面自动版式的品牌渐变（无 og:image 时） */
+.grad-1{background:linear-gradient(135deg,#24292F,#4B5563)}
+.grad-2{background:linear-gradient(135deg,#EA4C89,#C2266B)}
+.grad-3{background:linear-gradient(135deg,#38BDF8,#0EA5E9)}
+.grad-4{background:linear-gradient(135deg,#06B6D4,#0E7490)}
+.grad-5{background:linear-gradient(135deg,#FF6600,#C2410C)}
+.grad-6{background:linear-gradient(135deg,#5C6AC4,#3247AE)}
+.grad-7{background:linear-gradient(135deg,#22C55E,#15803D)}
+.grad-8{background:linear-gradient(135deg,#0057A4,#0C3E75)}
+
+/* ============ 弹窗 ============ */
+.stage{background:#DCDAD4;border-radius:14px;border:1px solid #D6D3CB;display:flex;gap:40px;justify-content:center;padding:56px 40px}
+.modal{width:440px;background:#fff;border-radius:18px;box-shadow:var(--shadow-pop);overflow:hidden}
+.modal-head{padding:20px 22px 0;display:flex;align-items:flex-start;justify-content:space-between}
+.modal-title{font-size:17px;font-weight:700}
+.modal-sub{font-size:12px;color:var(--ink-3);margin-top:3px}
+.modal-x{width:30px;height:30px;border-radius:8px;color:var(--ink-3);display:flex;align-items:center;justify-content:center}
+.modal-x svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.modal-body{padding:16px 22px 22px}
+.pill-from{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--accent-ink);background:var(--accent-soft);border-radius:20px;padding:4px 10px;margin-bottom:14px}
+.pill-from svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.input{width:100%;height:40px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font-size:13.5px;color:var(--ink);font-family:inherit;background:#fff;outline:0}
+.input:focus,.textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(62,92,255,.12)}
+.input::placeholder,.textarea::placeholder{color:#B5B1A8}
+.textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;resize:none;outline:0;line-height:1.6}
+.input-with-fav{position:relative}
+.input-with-fav .fav{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:7px}
+.input-with-fav .fav img{width:14px;height:14px}
+.input-with-fav .input{padding-left:42px}
+.input-with-fav .fav .fav-letter{font-size:10px}
+.field-row{display:flex;gap:12px}
+.field-row .field{flex:1}
+.select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23928E86' stroke-width='2.4'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.fetch-hint{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px dashed var(--line-2);border-radius:11px;padding:13px 14px;font-size:12.5px;color:var(--ink-2);margin-bottom:14px}
+.spinner{width:16px;height:16px;border:2px solid #DAD7CF;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fetched-banner{display:flex;gap:11px;background:#F4FAF6;border:1px solid #D9ECDF;border-radius:11px;padding:11px 13px;margin-bottom:14px;align-items:flex-start}
+.fetched-banner svg{width:15px;height:15px;stroke:#2B9E58;fill:none;stroke-width:2.2;flex:none;margin-top:1px}
+.fetched-banner b{font-size:12.5px;color:#1E7C47}
+.fetched-banner p{font-size:11.5px;color:#4F8A66;margin-top:1px}
+.cover-preview{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+.cover-preview .thumb{width:72px;height:48px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.cover-preview .thumb img{width:22px;height:22px}
+.cover-preview .thumb .gl{font-size:16px;font-weight:700;color:#fff}
+.cover-preview .cp-text{font-size:11.5px;color:var(--ink-3);line-height:1.55}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding-top:4px}
+.stage-label{text-align:center;font-size:12.5px;font-weight:600;color:#6E6B63;margin-top:16px}
+.state-tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;padding:3px 9px;border-radius:20px;margin-bottom:12px}
+.state-tag.a{background:#EEF0FF;color:#3E5CFF}
+.state-tag.b{background:#E9F7EE;color:#2B9E58}
+
+/* ============ 手机画板 ============ */
+.phone-wrap{display:flex;gap:56px;justify-content:center;padding:20px 0 10px}
+.phone{width:396px;background:#11100F;border-radius:44px;padding:11px;box-shadow:0 30px 70px -30px rgba(28,27,25,.5)}
+.phone-screen{background:var(--bg);border-radius:34px;overflow:hidden;height:772px;position:relative;display:flex;flex-direction:column}
+.m-status{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:13px;font-weight:600;flex:none}
+.m-status .right{display:flex;gap:5px;align-items:center;font-size:11px}
+.m-head{padding:6px 20px 12px;display:flex;align-items:center;justify-content:space-between;flex:none}
+.m-title{font-size:22px;font-weight:700}
+.m-icon{width:38px;height:38px;border-radius:12px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-2)}
+.m-icon svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.9}
+.m-search{margin:0 20px 12px;height:42px;background:#fff;border:1px solid var(--line);border-radius:13px;display:flex;align-items:center;gap:9px;padding:0 13px;flex:none}
+.m-search svg{width:16px;height:16px;stroke:#A39F95;fill:none;stroke-width:1.9}
+.m-search span{font-size:13px;color:#ACA89F}
+.m-chips{display:flex;gap:8px;padding:0 20px 12px;overflow:hidden;flex:none;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 18px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 18px),transparent)}
+.m-chip{font-size:12.5px;font-weight:500;padding:7px 13px;border-radius:20px;background:#fff;border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.m-chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.m-list{padding:2px 20px;display:flex;flex-direction:column;gap:8px;overflow:hidden;flex:1}
+.m-row{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:11px}
+.m-row .fav{width:36px;height:36px}
+.m-row .fav img{width:20px;height:20px}
+.m-row .fav .fav-letter{font-size:13px}
+.m-row-t{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px}
+.m-row-d{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.m-row .star-visible svg{width:14px;height:14px}
+.m-tabbar{height:70px;flex:none;background:rgba(255,255,255,.92);border-top:1px solid var(--line);display:flex;backdrop-filter:blur(12px);padding-bottom:8px}
+.m-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10.5px;color:#A39F95}
+.m-tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}
+.m-tab.on{color:var(--accent)}
+.phone-note{text-align:center;font-size:12.5px;color:#6E6B63;margin-top:18px}
+
+/* ============ 设置 / 导入 ============ */
+.settings{display:flex;min-height:640px}
+.set-nav{width:212px;flex:none;border-right:1px solid var(--line);padding:22px 14px;background:#fff}
+.set-nav-item{padding:9px 12px;border-radius:9px;font-size:13.5px;color:var(--ink-2);font-weight:500}
+.set-nav-item.on{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.set-main{flex:1;padding:26px 34px;overflow:hidden}
+.set-h{font-size:20px;font-weight:700;margin-bottom:4px}
+.set-p{font-size:13px;color:var(--ink-3);margin-bottom:22px}
+.card-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow-1)}
+.drop{border:1.5px dashed var(--line-2);border-radius:14px;background:var(--surface-2);padding:26px;text-align:center}
+.drop .up-ic{width:42px;height:42px;border-radius:12px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:var(--accent)}
+.drop .up-ic svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.9}
+.drop b{font-size:14px}
+.drop p{font-size:12px;color:var(--ink-3);margin-top:5px}
+.browser-tags{display:flex;gap:7px;justify-content:center;margin-top:13px;flex-wrap:wrap}
+.b-tag{font-size:11px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:3px 9px;color:var(--ink-2)}
+.import-preview{margin-top:20px}
+.ip-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ip-head b{font-size:13.5px}
+.ip-stat{font-size:11.5px;color:var(--ink-3)}
+.ip-dup{font-size:11.5px;color:#B4681C;background:#FBF1E2;border-radius:6px;padding:2px 8px}
+table.ip{width:100%;border-collapse:collapse;font-size:12.5px}
+table.ip th{text-align:left;font-size:11px;color:var(--ink-3);font-weight:600;padding:7px 9px;border-bottom:1px solid var(--line)}
+table.ip td{padding:9px;border-bottom:1px solid #F3F1EC;vertical-align:middle}
+.mini-fav{width:24px;height:24px;border-radius:7px;background:#F4F3EF;display:inline-flex;align-items:center;justify-content:center;position:relative;vertical-align:middle;margin-right:9px;overflow:hidden}
+.mini-fav img{position:absolute;width:14px;height:14px}
+.mini-fav .fav-letter{font-size:9.5px}
+.ip select{font-size:11.5px;border:1px solid var(--line);border-radius:7px;padding:4px 6px;background:#fff;font-family:inherit;color:var(--ink-2)}
+.dup-row td{color:var(--ink-3)}
+.foot-row{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+.link-btn{font-size:12.5px;color:var(--accent);font-weight:500;display:inline-flex;gap:6px;align-items:center}
+.link-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* ============ 空态 ============ */
+.empty-app{display:flex;align-items:center;justify-content:center;height:640px}
+.empty{text-align:center;width:460px}
+.empty-ill{width:108px;height:108px;margin:0 auto 24px;border-radius:30px;background:linear-gradient(150deg,#F2F4FF,#E6EAFF);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px #E0E5FF}
+.empty-ill svg{width:48px;height:48px;stroke:var(--accent);fill:none;stroke-width:1.5}
+.empty h2{font-size:23px;font-weight:700;margin-bottom:10px}
+.empty p{font-size:14px;color:var(--ink-3);line-height:1.7;margin-bottom:26px}
+.empty-add{display:flex;gap:10px}
+.empty-add .input{height:46px;border-radius:12px;flex:1}
+.empty-or{margin:18px 0 14px;font-size:12px;color:var(--ink-3);display:flex;align-items:center;gap:12px}
+.empty-or::before,.empty-or::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ============ 设计规范页 ============ */
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.spec-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow-1)}
+.spec-card h3{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);text-transform:uppercase;margin-bottom:16px}
+.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sw{border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.sw-c{height:52px}
+.sw-t{padding:7px 9px;font-size:10.5px;line-height:1.4}
+.sw-t b{display:block;font-size:11px;color:var(--ink)}
+.sw-t span{color:var(--ink-3);font-family:ui-monospace,Menlo,monospace}
+.type-row{display:flex;align-items:baseline;gap:14px;padding:7px 0;border-bottom:1px solid #F5F4F0}
+.type-row:last-child{border:0}
+.type-row .tag-mono{font-size:10px;color:var(--ink-3);font-family:ui-monospace,Menlo,monospace;width:72px;flex:none}
+.comp-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.comp-row:last-child{margin-bottom:0}
+.states-note{font-size:11.5px;color:var(--ink-3);margin-top:12px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="canvas">
+
+  <!-- ============ 画板 0：设计规范 ============ -->
+  <section class="board">
+    <div class="board-head">
+      <span class="board-no">00</span><span class="board-title">设计规范</span>
+      <span class="board-desc">精致卡片风 · 暖白浅色 · 系统无衬线字体；所有颜色/圆角/阴影在此固化</span>
+    </div>
+    <div class="win"><div class="win-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <div class="url-pill"><svg class="lock" viewBox="0 0 24 24" fill="none" stroke="#8A867C" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>bookmarks.local/design</div>
+    </div>
+    <div style="background:var(--bg);padding:28px">
+      <div class="spec-grid">
+        <div class="spec-card">
+          <h3>Color</h3>
+          <div class="swatches">
+            <div class="sw"><div class="sw-c" style="background:#F7F6F3"></div><div class="sw-t"><b>页面底</b><span>#F7F6F3</span></div></div>
+            <div class="sw"><div class="sw-c" style="background:#FFFFFF;border-bottom:1px solid #eee"></div><div class="sw-t"><b>卡片</b><span>#FFFFFF</span></div></div>
+            <div class="sw"><div class="sw-c" style="background:#1C1B19"></div><div class="sw-t"><b>主文字</b><span>#1C1B19</span></div></div>
+            <div class="sw"><div class="sw-c" style="background:#928E86"></div><div class="sw-t"><b>弱文字</b><span>#928E86</span></div></div>
+            <div class="sw"><div class="sw-c" style="background:#ECEAE4"></div><div class="sw-t"><b>描边</b><span>#ECEAE4</span></div></div>
+            <div class="sw"><div class="sw-c" style="background:#3E5CFF"></div><div class="sw-t"><b>强调蓝</b><span>#3E5CFF</span></div></div>
+            <div class="sw"><div class="sw-c" style="background:#EEF0FF"></div><div class="sw-t"><b>蓝浅底</b><span>#EEF0FF</span></div></div>
+            <div class="sw"><div class="sw-c" style="background:#F5A524"></div><div class="sw-t"><b>星标</b><span>#F5A524</span></div></div>
+          </div>
+        </div>
+        <div class="spec-card">
+          <h3>Typography &amp; Radius</h3>
+          <div class="type-row"><span class="tag-mono">20 / 700</span><span style="font-size:20px;font-weight:700">页面标题 全部书签</span></div>
+          <div class="type-row"><span class="tag-mono">17 / 700</span><span style="font-size:17px;font-weight:700">弹窗标题</span></div>
+          <div class="type-row"><span class="tag-mono">14.5 / 600</span><span style="font-size:14.5px;font-weight:600">书签标题 GitHub</span></div>
+          <div class="type-row"><span class="tag-mono">13 / 400</span><span style="font-size:13px;color:var(--ink-2)">正文 · 标签 · 分组名称</span></div>
+          <div class="type-row"><span class="tag-mono">12 / 400</span><span style="font-size:12px;color:var(--ink-3)">github.com · 09月15日</span></div>
+          <div class="type-row" style="margin-top:14px"><span class="tag-mono">Radius</span><span>卡片 14 · 弹窗 18 · 网格封面 16 · 输入框 10-12 · favicon 10</span></div>
+        </div>
+        <div class="spec-card">
+          <h3>Components</h3>
+          <div class="comp-row">
+            <button class="btn btn-primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>添加书签</button>
+            <button class="btn btn-ghost"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>导入书签</button>
+            <span class="tag">前端</span>
+            <span class="m-chip on" style="cursor:default">全部</span>
+            <span class="m-chip" style="cursor:default">开发工具</span>
+          </div>
+          <div class="comp-row">
+            <div class="seg" style="cursor:default"><button class="on"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.3"/><circle cx="3.5" cy="12" r="1.3"/><circle cx="3.5" cy="18" r="1.3"/></svg></button><button><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button></div>
+            <span class="star-visible"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></span>
+            <span style="font-size:11.5px;color:var(--ink-3)">星标填充 #F5A524；hover 行操作浮显</span>
+          </div>
+          <p class="states-note">焦点态：蓝色描边 + 3px 12% 透明蓝光环；危险操作（删除）使用 #E5484D；<br/>所有可点区域具备键盘 focus 样式，动效 150–200ms，尊重系统「减少动态效果」。</p>
+        </div>
+        <div class="spec-card">
+          <h3>Favicon 三级兜底</h3>
+          <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px">
+            <div class="fav" style="position:relative"><img src="https://favicon.im/github.com?larger=true" alt=""><span class="fav-letter" style="color:#1F2328">G</span></div>
+            <div class="fav" style="position:relative;background:#E2F3FF"><img src="https://favicon.im/vitejs.dev?larger=true" alt=""><span class="fav-letter" style="color:#4E5BD6">V</span></div>
+            <div class="fav" style="position:relative;background:#FCE7F0"><img src="https://favicon.im/dribbble.com?larger=true" alt=""><span class="fav-letter" style="color:#D13D7A">D</span></div>
+            <div class="fav" style="position:relative;background:#E4F3FB"><img src="https://favicon.im/react.dev?larger=true" alt=""><span class="fav-letter" style="color:#0A7EA4">R</span></div>
+            <div class="fav" style="position:relative;background:#E9F1E2"><span class="fav-letter" style="color:#5B8C2A">内</span></div>
+            <div class="fav" style="position:relative;background:#F3ECEF"><span class="fav-letter" style="color:#9B59B6">Z</span></div>
+            <span style="font-size:11.5px;color:var(--ink-3)">前四个在线获取；后两个为失败后的首字母色块（按域名哈希取色，零请求）</span>
+          </div>
+          <p class="states-note">链路：favicon.im/domain → https://域名/favicon.ico → 首字母色块。<br/>图片直接用 &lt;img onerror&gt; 逐级降级，不受 CORS 影响。</p>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- ============ 画板 1：桌面列表视图 ============ -->
+  <section class="board">
+    <div class="board-head">
+      <span class="board-no">01</span><span class="board-title">书签库 · 列表视图（桌面）</span>
+      <span class="board-desc">默认视图：左侧分组+标签导航，右侧高密度卡片行；hover 浮显星标/编辑/删除/访问；⌘K 搜索、N 新增</span>
+    </div>
+    <div class="win">
+      <div class="win-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <div class="url-pill"><svg class="lock" viewBox="0 0 24 24" fill="none" stroke="#8A867C" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>bookmarks.local</div>
+      </div>
+      <div class="app">
+        <aside class="side">
+          <div class="brand"><span class="brand-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg></span>
+            <div><div class="brand-name">我的书签</div><div class="brand-sub">Bookmarks</div></div></div>
+          <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg>全部书签<span class="n">22</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg>星标书签<span class="n">5</span></div>
+          <div class="nav-sep">分组 <span class="plus">＋</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" style="stroke:none;fill:currentColor"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>开发工具<span class="n">7</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" style="stroke:none;fill:currentColor"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>设计灵感<span class="n">6</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" style="stroke:none;fill:currentColor"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>阅读长文<span class="n">5</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" style="stroke:none;fill:currentColor"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>生活实用<span class="n">4</span></div>
+          <div class="nav-item" style="color:var(--ink-3)"><svg viewBox="0 0 24 24" style="stroke:none;fill:currentColor;opacity:.7"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>未分组<span class="n">—</span></div>
+          <div class="nav-sep">标签</div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" style="stroke-width:1.6"><path d="M20.6 13.4 12 22l-9-9V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.3" style="fill:currentColor;stroke:none"/></svg>前端<span class="n">5</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" style="stroke-width:1.6"><path d="M20.6 13.4 12 22l-9-9V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.3" style="fill:currentColor;stroke:none"/></svg>工具<span class="n">7</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" style="stroke-width:1.6"><path d="M20.6 13.4 12 22l-9-9V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.3" style="fill:currentColor;stroke:none"/></svg>设计灵感<span class="n">6</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" style="stroke-width:1.6"><path d="M20.6 13.4 12 22l-9-9V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.3" style="fill:currentColor;stroke:none"/></svg>长读<span class="n">4</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" style="stroke-width:1.6"><path d="M20.6 13.4 12 22l-9-9V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.3" style="fill:currentColor;stroke:none"/></svg>社区<span class="n">3</span></div>
+          <div class="side-foot"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>数据仅保存在本浏览器，记得定期在设置页导出 JSON 备份</div>
+        </aside>
+        <div class="main">
+          <div class="topbar">
+            <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input placeholder="搜索书签、标签或域名…" readonly><span class="kbd">⌘K</span></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7.1 19l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 4.6 14H4.5a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 6 7.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 12 4.6V4.5a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.8l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V11h.1a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 0z" style="display:none"/></svg></div>
+            <button class="btn btn-primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>添加书签</button>
+          </div>
+          <div class="content">
+            <div class="toolbar">
+              <span class="ctx-title">全部书签</span><span class="ctx-count">22 条</span>
+              <div class="toolbar-right">
+                <div class="seg"><button class="on"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.3"/><circle cx="3.5" cy="12" r="1.3"/><circle cx="3.5" cy="18" r="1.3"/></svg></button>
+                <button><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button></div>
+                <button class="sortbtn">最新收录<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+              </div>
+            </div>
+            <div class="rows">
+              <div class="row">
+                <div class="fav"><img src="https://favicon.im/github.com?larger=true" alt="" onerror="this.style.display='none'"><span class="fav-letter" style="color:#1F2328">G</span></div>
+                <div class="row-main"><div class="row-title"><span class="star-visible"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></span>GitHub · 全球最大代码托管平台</div>
+                  <div class="row-sub"><span class="domain">github.com</span><span class="dot-sep"></span><span>开发工具</span></div></div>
+                <div class="row-tags"><span class="tag">工具</span><span class="tag">社区</span></div>
+                <span class="row-date">09-15</span>
+                <div class="row-actions"><button class="act star-on"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h10v10"/></svg></button></div>
+              </div>
+              <div class="row">
+                <div class="fav" style="background:#E7F0FF"><img src="https://favicon.im/developer.mozilla.org?larger=true" alt="" onerror="this.style.display='none'"><span class="fav-letter" style="color:#0057A4">M</span></div>
+                <div class="row-main"><div class="row-title">MDN Web Docs — Web 开发权威文档</div>
+                  <div class="row-sub"><span class="domain">developer.mozilla.org</span><span class="dot-sep"></span><span>开发工具</span></div></div>
+                <div class="row-tags"><span class="tag">前端</span><span class="tag">文档</span></div>
+                <span class="row-date">09-14</span>
+                <div class="row-actions"><button class="act"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h10v10"/></svg></button></div>
+              </div>
+              <div class="row">
+                <div class="fav" style="background:#E2F3FF"><img src="https://favicon.im/vitejs.dev?larger=true" alt="" onerror="this.style.display='none'"><span class="fav-letter" style="color:#4E5BD6">V</span></div>
+                <div class="row-main"><div class="row-title">Vite · 下一代前端构建工具</div>
+                  <div class="row-sub"><span class="domain">vitejs.dev</span><span class="dot-sep"></span><span>开发工具</span></div></div>
+                <div class="row-tags"><span class="tag">前端</span><span class="tag">工具</span></div>
+                <span class="row-date">09-14</span>
+                <div class="row-actions"><button class="act"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h10v10"/></svg></button></div>
+              </div>
+              <div class="row">
+                <div class="fav" style="background:#DFF8F0"><img src="https://favicon.im/tailwindcss.com?larger=true" alt="" onerror="this.style.display='none'"><span class="fav-letter" style="color:#0E9F8E">T</span></div>
+                <div class="row-main"><div class="row-title">Tailwind CSS · 实用优先的 CSS 框架</div>
+                  <div class="row-sub"><span class="domain">tailwindcss.com</span><span class="dot-sep"></span><span>开发工具</span></div></div>
+                <div class="row-tags"><span class="tag">前端</span><span class="tag">CSS</span></div>
+                <span class="row-date">09-13</span>
+                <div class="row-actions"><button class="act"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h10v10"/></svg></button></div>
+              </div>
+              <div class="row">
+                <div class="fav" style="background:#FCE7F0"><img src="https://favicon.im/dribbble.com?larger=true" alt="" onerror="this.style.display='none'"><span class="fav-letter" style="color:#D13D7A">D</span></div>
+                <div class="row-main"><div class="row-title"><span class="star-visible" style="margin-right:0"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></span>Dribbble · 设计师作品灵感社区</div>
+                  <div class="row-sub"><span class="domain">dribbble.com</span><span class="dot-sep"></span><span>设计灵感</span></div></div>
+                <div class="row-tags"><span class="tag">灵感</span><span class="tag">社区</span></div>
+                <span class="row-date">09-12</span>
+                <div class="row-actions"><button class="act star-on"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h10v10"/></svg></button></div>
+              </div>
+              <div class="row">
+                <div class="fav" style="background:#FFF6E2"><img src="https://favicon.im/ruanyifeng.com?larger=true" alt="" onerror="this.style.display='none'"><span class="fav-letter" style="color:#B8860B">阮</span></div>
+                <div class="row-main"><div class="row-title">科技爱好者周刊（阮一峰）</div>
+                  <div class="row-sub"><span class="domain">ruanyifeng.com</span><span class="dot-sep"></span><span>阅读长文</span></div></div>
+                <div class="row-tags"><span class="tag">周刊</span><span class="tag">长读</span></div>
+                <span class="row-date">09-12</span>
+                <div class="row-actions"><button class="act"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h10v10"/></svg></button></div>
+              </div>
+              <div class="row">
+                <div class="fav" style="background:#E0F0FF"><img src="https://favicon.im/bilibili.com?larger=true" alt="" onerror="this.style.display='none'"><span class="fav-letter" style="color:#00A1D6">B</span></div>
+                <div class="row-main"><div class="row-title">哔哩哔哩 (゜-゜)つロ 干杯</div>
+                  <div class="row-sub"><span class="domain">bilibili.com</span><span class="dot-sep"></span><span>生活实用</span></div></div>
+                <div class="row-tags"><span class="tag">视频</span></div>
+                <span class="row-date">09-10</span>
+                <div class="row-actions"><button class="act"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h10v10"/></svg></button></div>
+              </div>
+              <div class="row is-hover">
+                <div class="fav" style="background:#FFEEE5"><img src="https://favicon.im/stackoverflow.com?larger=true" alt="" onerror="this.style.display='none'"><span class="fav-letter" style="color:#E8741E">S</span></div>
+                <div class="row-main"><div class="row-title">Stack Overflow · 程序员问答社区</div>
+                  <div class="row-sub"><span class="domain">stackoverflow.com</span><span class="dot-sep"></span><span>开发工具</span></div></div>
+                <div class="row-tags"><span class="tag">前端</span><span class="tag">社区</span></div>
+                <span class="row-date">09-08</span>
+                <div class="row-actions"><button class="act"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h10v10"/></svg></button></div>
+              </div>
+              <div class="row">
+                <div class="fav" style="background:#EEEAFB"><img src="https://favicon.im/mobbin.com?larger=true" alt="" onerror="this.style.display='none'"><span class="fav-letter" style="color:#6B4FE0">M</span></div>
+                <div class="row-main"><div class="row-title">Mobbin · 全球 App 与网页设计参考库</div>
+                  <div class="row-sub"><span class="domain">mobbin.com</span><span class="dot-sep"></span><span>设计灵感</span></div></div>
+                <div class="row-tags"><span class="tag">灵感</span><span class="tag">UI</span></div>
+                <span class="row-date">09-05</span>
+                <div class="row-actions"><button class="act"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button><button class="act"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h10v10"/></svg></button></div>
+              </div>
+            </div>
+            <div class="fade-bottom"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 画板 2：网格视图 ============ -->
+  <section class="board">
+    <div class="board-head">
+      <span class="board-no">02</span><span class="board-title">书签库 · 网格视图（桌面）</span>
+      <span class="board-desc">同一数据切换视觉浏览：有 og:image 时显示网站封面；无封面时用「品牌渐变 + 大 favicon」自动版式，任何网站都不丑</span>
+    </div>
+    <div class="win">
+      <div class="win-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <div class="url-pill"><svg class="lock" viewBox="0 0 24 24" fill="none" stroke="#8A867C" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>bookmarks.local/?view=grid</div>
+      </div>
+      <div class="app">
+        <aside class="side">
+          <div class="brand"><span class="brand-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg></span>
+            <div><div class="brand-name">我的书签</div><div class="brand-sub">Bookmarks</div></div></div>
+          <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg>全部书签<span class="n">22</span></div>
+          <div class="nav-item"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg>星标书签<span class="n">5</span></div>
+          <div class="nav-sep">分组</div>
+          <div class="nav-item">开发工具<span class="n">7</span></div>
+          <div class="nav-item">设计灵感<span class="n">6</span></div>
+          <div class="nav-item">阅读长文<span class="n">5</span></div>
+          <div class="nav-item">生活实用<span class="n">4</span></div>
+          <div class="nav-sep">标签</div>
+          <div class="nav-item">前端<span class="n">5</span></div>
+          <div class="nav-item">工具<span class="n">7</span></div>
+          <div class="nav-item">灵感<span class="n">6</span></div>
+        </aside>
+        <div class="main">
+          <div class="topbar">
+            <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="搜索书签、标签或域名…" readonly><span class="kbd">⌘K</span></div>
+            <button class="btn btn-primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>添加书签</button>
+          </div>
+          <div class="content">
+            <div class="toolbar">
+              <span class="ctx-title">全部书签</span><span class="ctx-count">22 条</span>
+              <div class="toolbar-right">
+                <div class="seg"><button><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.3"/><circle cx="3.5" cy="12" r="1.3"/><circle cx="3.5" cy="18" r="1.3"/></svg></button>
+                  <button class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button></div>
+                <button class="sortbtn">最新收录<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+              </div>
+            </div>
+            <div class="grid">
+              <div class="gcard"><div class="gcover grad-1"><div class="gfav"><img src="https://favicon.im/github.com?larger=true" onerror="this.style.display='none'"><span class="gl">G</span></div><div class="gstar"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></div></div>
+                <div class="gbody"><div class="gtitle">GitHub · 全球最大代码托管平台</div><div class="gsub">github.com</div><div class="gtags"><span class="tag">工具</span><span class="tag">社区</span></div></div></div>
+              <div class="gcard is-hover"><div class="gcover grad-2"><div class="gfav"><img src="https://favicon.im/dribbble.com?larger=true" onerror="this.style.display='none'"><span class="gl">D</span></div><div class="gstar"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></div></div>
+                <div class="gbody"><div class="gtitle">Dribbble · 设计师作品灵感社区</div><div class="gsub">dribbble.com</div><div class="gtags"><span class="tag">灵感</span></div></div></div>
+              <div class="gcard"><div class="gcover grad-3"><div class="gfav"><img src="https://favicon.im/tailwindcss.com?larger=true" onerror="this.style.display='none'"><span class="gl">T</span></div><div class="gstar off"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></div></div>
+                <div class="gbody"><div class="gtitle">Tailwind CSS · 实用优先的 CSS 框架</div><div class="gsub">tailwindcss.com</div><div class="gtags"><span class="tag">前端</span></div></div></div>
+              <div class="gcard"><div class="gcover grad-4"><div class="gfav"><img src="https://favicon.im/react.dev?larger=true" onerror="this.style.display='none'"><span class="gl">R</span></div><div class="gstar off"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></div></div>
+                <div class="gbody"><div class="gtitle">React 官方中文文档</div><div class="gsub">react.dev</div><div class="gtags"><span class="tag">前端</span><span class="tag">文档</span></div></div></div>
+              <div class="gcard"><div class="gcover grad-5"><div class="gfav"><img src="https://favicon.im/news.ycombinator.com?larger=true" onerror="this.style.display='none'"><span class="gl">Y</span></div><div class="gstar off"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></div></div>
+                <div class="gbody"><div class="gtitle">Hacker News</div><div class="gsub">news.ycombinator.com</div><div class="gtags"><span class="tag">长读</span><span class="tag">社区</span></div></div></div>
+              <div class="gcard"><div class="gcover grad-6"><div class="gfav"><img src="https://favicon.im/behance.net?larger=true" onerror="this.style.display='none'"><span class="gl">B</span></div><div class="gstar"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></div></div>
+                <div class="gbody"><div class="gtitle">Behance · Adobe 设计作品集平台</div><div class="gsub">behance.net</div><div class="gtags"><span class="tag">灵感</span></div></div></div>
+              <div class="gcard"><div class="gcover grad-7"><div class="gfav"><img src="https://favicon.im/coolors.co?larger=true" onerror="this.style.display='none'"><span class="gl">C</span></div><div class="gstar off"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></div></div>
+                <div class="gbody"><div class="gtitle">Coolors · 配色方案生成器</div><div class="gsub">coolors.co</div><div class="gtags"><span class="tag">设计</span><span class="tag">工具</span></div></div></div>
+              <div class="gcard"><div class="gcover grad-8"><div class="gfav"><img src="https://favicon.im/developer.mozilla.org?larger=true" onerror="this.style.display='none'"><span class="gl">M</span></div><div class="gstar off"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></div></div>
+                <div class="gbody"><div class="gtitle">MDN Web Docs — Web 开发权威文档</div><div class="gsub">developer.mozilla.org</div><div class="gtags"><span class="tag">文档</span></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 画板 3：添加弹窗 ============ -->
+  <section class="board">
+    <div class="board-head">
+      <span class="board-no">03</span><span class="board-title">添加书签弹窗 · 两个状态</span>
+      <span class="board-desc">粘贴 URL → Microlink 抓取标题/描述/封面/favicon（免费 25 次/天）→ 预填可改 → 保存；失败则静默降级为纯手填</span>
+    </div>
+    <div class="stage">
+      <div>
+        <div class="state-tag a">状态 A · 抓取中</div>
+        <div class="modal">
+          <div class="modal-head"><div><div class="modal-title">添加书签</div><div class="modal-sub">粘贴链接，自动补全网站信息</div></div>
+            <div class="modal-x"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></div></div>
+          <div class="modal-body">
+            <div class="field"><label>网址</label>
+              <div class="input-with-fav"><span class="fav"></span>
+                <input class="input" value="https://overreacted.io/the-two-sides-of-works-on-my-machine/" readonly></div></div>
+            <div class="fetch-hint"><span class="spinner"></span>正在获取网站标题、描述与封面…（约 1 秒）</div>
+            <div class="field"><label>标题</label><input class="input" placeholder="抓取后自动填入，也可手动填写" readonly></div>
+            <div class="field"><label>描述</label><textarea class="textarea" rows="2" placeholder="网页简介或你的备注" readonly></textarea></div>
+            <div class="field-row"><div class="field"><label>分组</label><input class="input select" value="未分组" readonly></div>
+              <div class="field"><label>标签</label><input class="input" placeholder="逗号分隔" readonly></div></div>
+            <div class="modal-foot"><button class="btn btn-ghost">取消</button><button class="btn btn-primary" style="opacity:.5;pointer-events:none">保存书签</button></div>
+          </div>
+        </div>
+        <div class="stage-label">约 1 秒，Microlink 免费接口</div>
+      </div>
+      <div>
+        <div class="state-tag b">状态 B · 抓取完成，可修改</div>
+        <div class="modal">
+          <div class="modal-head"><div><div class="modal-title">添加书签</div><div class="modal-sub">粘贴链接，自动补全网站信息</div></div>
+            <div class="modal-x"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></div></div>
+          <div class="modal-body">
+            <span class="pill-from"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg>来自书签小工具</span>
+            <div class="field"><label>网址</label>
+              <div class="input-with-fav"><span class="fav" style="background:#E7F0FF"><img src="https://favicon.im/overreacted.io?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#0E3A6B">O</span></span>
+                <input class="input" value="https://overreacted.io/the-two-sides-of-works-on-my-machine/" readonly></div></div>
+            <div class="fetched-banner"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><div><b>已自动获取网站信息</b><p>标题、描述、封面与图标均可手动修改</p></div></div>
+            <div class="field"><label>标题</label><input class="input" value="The Two Sides of “It Works on My Machine”" readonly></div>
+            <div class="field"><label>描述</label><textarea class="textarea" rows="2" readonly>调试环境问题的经典长文：问题往往不在代码，而在两台机器环境之间那条没人说得清的差异。</textarea></div>
+            <div class="cover-preview"><div class="thumb grad-8"><img src="https://favicon.im/overreacted.io?larger=true" onerror="this.style.display='none'"><span class="gl">O</span></div>
+              <div class="cp-text">封面将在网格视图显示；<br/>无封面时使用自动品牌版式。</div></div>
+            <div class="field-row"><div class="field"><label>分组</label><input class="input select" value="阅读长文" readonly></div>
+              <div class="field"><label>标签</label><input class="input" value="长读， 调试， 英文" readonly></div></div>
+            <div class="modal-foot"><button class="btn btn-ghost">取消</button><button class="btn btn-primary"><svg viewBox="0 0 24 24" style="stroke:#fff"><path d="M20 6 9 17l-5-5"/></svg>保存书签</button></div>
+          </div>
+        </div>
+        <div class="stage-label">bookmarklet 携带 URL+标题进入时，直接是此状态</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 画板 4：移动端 ============ -->
+  <section class="board">
+    <div class="board-head">
+      <span class="board-no">04</span><span class="board-title">移动端书签库（390px）</span>
+      <span class="board-desc">侧栏收纳为顶部分组 chips；单列卡片行；搜索置顶；底部两个一级入口（书签 / 设置），添加用右上角 ＋</span>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><div class="phone-screen">
+        <div class="m-status"><span>9:41</span><span class="right"><svg width="16" height="11" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1" width="3" height="11" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".35"/></svg>
+          <svg width="22" height="11" viewBox="0 0 25 12" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="1" width="20" height="10" rx="2.5"/><rect x="3" y="3" width="14" height="6" rx="1.5" fill="currentColor" stroke="none"/><path d="M23 4v4" stroke-linecap="round"/></svg></span></div>
+        <div class="m-head"><div class="m-title">书签</div>
+          <div style="display:flex;gap:9px"><div class="m-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" style="stroke:var(--accent)"/></svg></div>
+            <div class="m-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div></div></div>
+        <div class="m-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><span>搜索书签、标签…</span></div>
+        <div class="m-chips"><span class="m-chip on">全部 22</span><span class="m-chip">★ 星标</span><span class="m-chip">开发工具</span><span class="m-chip">设计灵感</span><span class="m-chip">阅读长文</span><span class="m-chip">生活实用</span></div>
+        <div class="m-list">
+          <div class="m-row"><div class="fav" style="background:#F4F3EF"><img src="https://favicon.im/github.com?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#1F2328">G</span></div>
+            <div style="min-width:0;flex:1"><div class="m-row-t"><span class="star-visible" style="margin-right:5px"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></span>GitHub</div><div class="m-row-d">github.com · #工具</div></div></div>
+          <div class="m-row"><div class="fav" style="background:#E7F0FF"><img src="https://favicon.im/developer.mozilla.org?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#0057A4">M</span></div>
+            <div style="min-width:0;flex:1"><div class="m-row-t">MDN Web Docs</div><div class="m-row-d">developer.mozilla.org · #前端</div></div></div>
+          <div class="m-row"><div class="fav" style="background:#E2F3FF"><img src="https://favicon.im/vitejs.dev?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#4E5BD6">V</span></div>
+            <div style="min-width:0;flex:1"><div class="m-row-t">Vite · 下一代前端构建工具</div><div class="m-row-d">vitejs.dev · #前端</div></div></div>
+          <div class="m-row"><div class="fav" style="background:#FFF6E2"><img src="https://favicon.im/ruanyifeng.com?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#B8860B">阮</span></div>
+            <div style="min-width:0;flex:1"><div class="m-row-t">科技爱好者周刊</div><div class="m-row-d">ruanyifeng.com · #周刊</div></div></div>
+          <div class="m-row"><div class="fav" style="background:#FCE7F0"><img src="https://favicon.im/dribbble.com?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#D13D7A">D</span></div>
+            <div style="min-width:0;flex:1"><div class="m-row-t"><span class="star-visible" style="margin-right:5px"><svg viewBox="0 0 24 24"><polygon points="12 2 15.1 8.6 22 9.5 17 14.1 18.3 21 12 17.5 5.7 21 7 14.1 2 9.5 8.9 8.6"/></svg></span>Dribbble</div><div class="m-row-d">dribbble.com · #灵感</div></div></div>
+          <div class="m-row"><div class="fav" style="background:#E0F0FF"><img src="https://favicon.im/bilibili.com?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#00A1D6">B</span></div>
+            <div style="min-width:0;flex:1"><div class="m-row-t">哔哩哔哩</div><div class="m-row-d">bilibili.com · #视频</div></div></div>
+          <div class="m-row"><div class="fav" style="background:#EEF9EC"><img src="https://favicon.im/xiachufang.com?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#5BA829">下</span></div>
+            <div style="min-width:0;flex:1"><div class="m-row-t">下厨房</div><div class="m-row-d">xiachufang.com · #美食</div></div></div>
+        </div>
+        <div class="m-tabbar">
+          <div class="m-tab on"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg>书签</div>
+          <div class="m-tab"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7.1 19l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 4.6 14H4.5a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 6 7.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 12 4.6V4.5a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.8l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V11h.1a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 0z"/></svg>设置</div>
+        </div>
+      </div></div>
+      <div class="phone"><div class="phone-screen" style="background:#fff">
+        <div class="m-status"><span>9:41</span><span class="right"><span style="font-size:11px">●●●</span></span></div>
+        <div style="padding:10px 20px 14px"><div class="m-title" style="font-size:20px">添加书签</div></div>
+        <div style="padding:0 20px;flex:1">
+          <span class="pill-from"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg>来自书签小工具</span>
+          <div class="field"><label>网址</label>
+            <div class="input-with-fav"><span class="fav" style="background:#E7F0FF"><img src="https://favicon.im/mdn.dev?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#0057A4">M</span></span>
+              <input class="input" value="developer.mozilla.org" readonly></div></div>
+          <div class="field"><label>标题</label><input class="input" value="MDN Web Docs" readonly></div>
+          <div class="field"><label>描述</label><textarea class="textarea" rows="3" readonly>Web 开发者的权威技术文档库</textarea></div>
+          <div class="field-row"><div class="field"><label>分组</label><input class="input select" value="开发工具" readonly></div>
+            <div class="field"><label>标签</label><input class="input" value="前端，文档" readonly></div></div>
+        </div>
+        <div style="padding:14px 20px 30px;border-top:1px solid var(--line);display:flex;gap:10px">
+          <button class="btn btn-ghost" style="flex:1;justify-content:center">取消</button>
+          <button class="btn btn-primary" style="flex:1.6;justify-content:center">保存书签</button>
+        </div>
+      </div></div>
+    </div>
+    <div class="phone-note">左：书签库主界面　|　右：在任意网页点书签栏小工具后拉起的添加表单（移动端同样支持 #/add 深链）</div>
+  </section>
+
+  <!-- ============ 画板 5：导入流程 ============ -->
+  <section class="board">
+    <div class="board-head">
+      <span class="board-no">05</span><span class="board-title">设置 · 导入浏览器书签</span>
+      <span class="board-desc">解析 Chrome / Safari / Edge / Firefox 导出的 Netscape HTML：文件夹→分组、按 URL 自动去重、导入前预览确认；同时支持导出 JSON 备份和标准 HTML</span>
+    </div>
+    <div class="win">
+      <div class="win-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <div class="url-pill"><svg class="lock" viewBox="0 0 24 24" fill="none" stroke="#8A867C" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>bookmarks.local/#/settings</div>
+      </div>
+      <div class="settings" style="background:var(--bg)">
+        <nav class="set-nav">
+          <div style="font-size:10.5px;font-weight:600;letter-spacing:.14em;color:var(--ink-3);padding:0 12px 8px">设置</div>
+          <div class="set-nav-item on">数据导入导出</div>
+          <div class="set-nav-item">分组管理</div>
+          <div class="set-nav-item">书签小工具</div>
+          <div class="set-nav-item">外观</div>
+          <div class="set-nav-item">关于</div>
+        </nav>
+        <main class="set-main">
+          <div class="set-h">数据导入导出</div>
+          <div class="set-p">所有书签保存在当前浏览器本地；建议每月导出一次 JSON 备份。</div>
+          <div class="card-box">
+            <div class="drop">
+              <div class="up-ic"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>
+              <b>拖入书签 HTML 文件，或点击选择</b>
+              <p>在浏览器「书签管理器 → 导出书签」即可得到该文件；也支持 Raindrop / Linkding 的 JSON、CSV</p>
+              <div class="browser-tags"><span class="b-tag">Chrome</span><span class="b-tag">Safari</span><span class="b-tag">Edge</span><span class="b-tag">Firefox</span><span class="b-tag">Arc</span></div>
+            </div>
+            <div class="import-preview">
+              <div class="ip-head"><b>导入预览</b><span class="ip-stat">识别到 128 条书签 · 原文件夹将映射为分组</span><span class="ip-dup">7 条重复将自动跳过</span></div>
+              <table class="ip">
+                <thead><tr><th style="width:24px"></th><th>标题</th><th>原文件夹</th><th style="width:150px">导入到分组</th></tr></thead>
+                <tbody>
+                  <tr><td><input type="checkbox" checked style="accent-color:var(--accent)"></td>
+                    <td><span class="mini-fav" style="background:#F4F3EF"><img src="https://favicon.im/developer.mozilla.org?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#0057A4">M</span></span>MDN Web Docs</td>
+                    <td style="color:var(--ink-3)">书签栏 / 开发资料</td><td><select><option>开发工具</option><option>设计灵感</option><option>阅读长文</option><option>生活实用</option><option>未分组</option></select></td></tr>
+                  <tr><td><input type="checkbox" checked style="accent-color:var(--accent)"></td>
+                    <td><span class="mini-fav" style="background:#FCE9F4"><img src="https://favicon.im/figma.com?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#A259FF">F</span></span>Figma 社区</td>
+                    <td style="color:var(--ink-3)">其他书签 / 设计</td><td><select><option>设计灵感</option></select></td></tr>
+                  <tr><td><input type="checkbox" checked style="accent-color:var(--accent)"></td>
+                    <td><span class="mini-fav" style="background:#FDECEA"><img src="https://favicon.im/nytimes.com?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#B0262B">N</span></span>How to Focus in the Age of…</td>
+                    <td style="color:var(--ink-3)">待读</td><td><select><option>阅读长文</option></select></td></tr>
+                  <tr class="dup-row"><td><input type="checkbox" disabled></td>
+                    <td><span class="mini-fav" style="background:#F4F3EF"><img src="https://favicon.im/github.com?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#1F2328">G</span></span>GitHub<span style="margin-left:8px;font-size:11px;color:#B4681C">已存在，跳过</span></td>
+                    <td>—</td><td>—</td></tr>
+                  <tr><td><input type="checkbox" checked style="accent-color:var(--accent)"></td>
+                    <td><span class="mini-fav" style="background:#F3EFE6"><img src="https://favicon.im/w3.org?larger=true" onerror="this.style.display='none'"><span class="fav-letter" style="color:#8A6D3B">W</span></span>W3C 标准</td>
+                    <td style="color:var(--ink-3)">收藏夹栏 / 资料</td><td><select><option>未分组</option><option>开发工具</option></select></td></tr>
+                </tbody>
+              </table>
+              <div class="foot-row">
+                <span style="font-size:11.5px;color:var(--ink-3)">已选 121 条，将在导入后自动获取 favicon</span>
+                <div style="display:flex;gap:10px"><button class="btn btn-ghost">取消</button><button class="btn btn-primary">导入 121 条</button></div>
+              </div>
+            </div>
+            <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);display:flex;gap:12px;align-items:center">
+              <span style="font-size:12.5px;color:var(--ink-2);font-weight:600">导出与备份</span>
+              <span style="flex:1"></span>
+              <button class="btn btn-ghost"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>导出 JSON</button>
+              <button class="btn btn-ghost"><svg viewBox="0 0 24 24"><path d="M12 21V9m0 0 4 4m-4-4-4 4M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/></svg>导出浏览器 HTML</button>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 画板 6：空态 ============ -->
+  <section class="board">
+    <div class="board-head">
+      <span class="board-no">06</span><span class="board-title">首次使用 · 空态引导</span>
+      <span class="board-desc">空态不是终点而是入口：粘贴第一个链接，或一键导入浏览器现有书签；降低启动成本</span>
+    </div>
+    <div class="win">
+      <div class="win-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <div class="url-pill"><svg class="lock" viewBox="0 0 24 24" fill="none" stroke="#8A867C" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>bookmarks.local</div>
+      </div>
+      <div class="empty-app">
+        <div class="empty">
+          <div class="empty-ill"><svg viewBox="0 0 24 24"><path d="M6 3.5h12A1.5 1.5 0 0 1 19.5 5v15.5l-7.5-5-7.5 5V5A1.5 1.5 0 0 1 6 3.5z"/><path d="M9 8h6M9 11.5h6"/></svg></div>
+          <h2>开始收藏第一个书签</h2>
+          <p>把任何想留住的链接粘贴到这里，标题、描述和图标会自动补全。<br/>也可以把浏览器里的书签一次性全部导入。</p>
+          <div class="empty-add">
+            <input class="input" placeholder="粘贴一个链接，例如 https://github.com" readonly>
+            <button class="btn btn-primary btn-lg"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>添加</button>
+          </div>
+          <div class="empty-or">或者</div>
+          <button class="btn btn-ghost btn-lg"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>从 Chrome / Safari 导入现有书签</button>
+          <p style="margin-top:16px;font-size:11.5px">数据仅保存在本浏览器，随时可在设置页导出备份</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p style="text-align:center;color:#8F8B82;font-size:12px;margin-top:-30px">
+    高保真设计稿 v1 · 共 7 个画板（00 规范 + 01–06 界面）· 确认后进入开发
+  </p>
+</div>
+</body>
+</html>

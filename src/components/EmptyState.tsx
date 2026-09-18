@@ -1,25 +1,21 @@
 import type { ReactNode } from 'react'
-import { SearchX } from 'lucide-react'
+import { Bookmark } from 'lucide-react'
 
 interface EmptyStateProps {
-  title?: string
+  title: string
   hint?: string
   action?: ReactNode
 }
 
-export default function EmptyState({
-  title = '没有找到匹配的藏品',
-  hint = '换个关键词，或清空分类与标签筛选试试。',
-  action,
-}: EmptyStateProps) {
+export default function EmptyState({ title, hint, action }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-ink-700 px-6 py-20 text-center">
-      <span className="flex h-12 w-12 items-center justify-center rounded-full border border-gold/25 text-gold/70">
-        <SearchX size={20} strokeWidth={1.6} />
+    <div className="flex flex-col items-center rounded-2xl border border-dashed border-line2 bg-surface/60 px-6 py-20 text-center">
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft text-accent">
+        <Bookmark size={22} strokeWidth={1.6} />
       </span>
-      <p className="mt-4 font-serif text-lg text-paper-dim">{title}</p>
-      <p className="mt-1.5 max-w-xs text-sm leading-6 text-paper-muted">{hint}</p>
-      {action && <div className="mt-5">{action}</div>}
+      <p className="mt-4 text-[17px] font-semibold text-ink">{title}</p>
+      {hint && <p className="mt-1.5 max-w-sm text-[13px] leading-6 text-ink3">{hint}</p>}
+      {action && <div className="mt-6">{action}</div>}
     </div>
   )
 }

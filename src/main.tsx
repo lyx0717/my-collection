@@ -3,14 +3,17 @@ import { createRoot } from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
 import './index.css'
 import App from './App'
-import { CollectionProvider } from './store/CollectionContext'
+import { BookmarksProvider } from './store/BookmarksContext'
+import { ToastProvider } from './components/Toast'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <CollectionProvider>
-      <HashRouter>
-        <App />
-      </HashRouter>
-    </CollectionProvider>
+    <BookmarksProvider>
+      <ToastProvider>
+        <HashRouter>
+          <App />
+        </HashRouter>
+      </ToastProvider>
+    </BookmarksProvider>
   </StrictMode>,
 )

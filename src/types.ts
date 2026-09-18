@@ -1,22 +1,53 @@
-export type Category = 'movie' | 'food' | 'article' | 'site'
-
-export interface Item {
+export interface Bookmark {
   id: string
-  /** 名称 */
+  url: string
   title: string
-  category: Category
-  /** 导演 / 餐厅与地名 / 作者来源 / 站点名 */
-  source?: string
-  /** 外链地址 */
-  url?: string
-  /** 封面图地址，留空时使用排版封面 */
-  cover?: string
-  /** 短评 / 备注 */
   description?: string
+  /** 规范化域名，去 www，用于图标/筛选/去重 */
+  domain: string
+  faviconUrl?: string
+  cover?: string
+  /** undefined = 未分组 */
+  collectionId?: string
   tags: string[]
-  /** ISO 时间，同时决定藏品登记号顺序 */
+  starred: boolean
   createdAt: string
+  updatedAt: string
 }
 
-/** 表单提交时的数据（id 与 createdAt 由存储层补齐/保留） */
-export type ItemInput = Omit<Item, 'id' | 'createdAt'>
+export interface Collection {
+  id: string
+  name: string
+  emoji?: string
+  order: number
+}
+
+export interface StoreShape {
+  version: 2
+  bookmarks: Bookmark[]
+  collections: Collection[]
+}
+
+/** 新建/编辑表单提交的数据 */
+export type BookmarkInput = Omit<Bookmark, 'id' | 'createdAt' | 'updatedAt' | 'domain' | 'starred'> & {
+  starred?: boolean
+}
+
+export type ViewMode = 'list' | 'grid'
+export type SortMode = 'desc' | 'asc' | 'az'
+
+/** 侧栏作用域 */
+export type Scope =
+  | { type: 'all' }
+  | { type: 'starred' }
+  | { type: 'none' }
+  | { type: 'collection'; id: string }
+
+export interface ParsedImportBookmark {
+  url: string
+  title: string
+  description?: string
+  tags: string[]
+  collectionName?: string
+  createdAt?: string
+}
