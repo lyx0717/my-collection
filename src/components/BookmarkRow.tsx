@@ -1,4 +1,4 @@
-import { ArrowUpRight, Pencil, Star } from 'lucide-react'
+import { ArrowUpRight, Pencil, Star, Trash2 } from 'lucide-react'
 import type { Bookmark } from '../types'
 import { shortDate } from '../lib/date'
 import Favicon from './Favicon'
@@ -7,6 +7,7 @@ interface BookmarkRowProps {
   bookmark: Bookmark
   collectionName?: string
   onEdit: (bm: Bookmark) => void
+  onDelete: (bm: Bookmark) => void
   onToggleStar: (id: string) => void
   onTagClick?: (tag: string) => void
   onDomainClick?: (domain: string) => void
@@ -16,6 +17,7 @@ export default function BookmarkRow({
   bookmark,
   collectionName,
   onEdit,
+  onDelete,
   onToggleStar,
   onTagClick,
   onDomainClick,
@@ -90,6 +92,13 @@ export default function BookmarkRow({
           className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[#a39f95] hover:bg-canvas hover:text-ink2"
         >
           <Pencil size={14} />
+        </button>
+        <button
+          onClick={() => onDelete(bookmark)}
+          aria-label={`删除 ${bookmark.title}`}
+          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[#a39f95] hover:bg-danger/10 hover:text-danger"
+        >
+          <Trash2 size={14} />
         </button>
         <a
           href={bookmark.url}

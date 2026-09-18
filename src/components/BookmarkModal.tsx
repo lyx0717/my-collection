@@ -4,9 +4,9 @@ import {
   CheckCircle2,
   ExternalLink,
   Loader2,
+  Plus,
   Sparkles,
   Star,
-  Trash2,
   X,
 } from 'lucide-react'
 import type { Bookmark } from '../types'
@@ -32,7 +32,7 @@ export default function BookmarkModal({
   fromBookmarklet,
   onClose,
 }: BookmarkModalProps) {
-  const { collections, addBookmark, updateBookmark, removeBookmark, findDuplicate } =
+  const { collections, bookmarks, addBookmark, updateBookmark, addCollection, findDuplicate } =
     useBookmarks()
   const toast = useToast()
 
@@ -48,7 +48,10 @@ export default function BookmarkModal({
   const [fetchStatus, setFetchStatus] = useState<FetchStatus>('idle')
   const [urlError, setUrlError] = useState('')
   const [forceSave, setForceSave] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [creatingCollection, setCreatingCollection] = useState(false)
+  const [newColName, setNewColName] = useState('')
+  const [newColEmoji, setNewColEmoji] = useState('')
+  const [colError, setColError] = useState('')
 
   const fetchedFor = useRef<string>('')
   const titleTouched = useRef(Boolean(editing || preset?.title))
@@ -131,6 +134,40 @@ export default function BookmarkModal({
       toast(`「${payload.title}」已收藏`)
     }
     onClose()
+  }
+
+  const enteredTags = parseTags(tagsText)
+  const tagSuggestions = useMemo(() => {
+    const counter = new Map<string, number>()
+    for (const bm of bookmarks) for (const t of bm.tags) counter.set(t, (counter.get(t) ?? 0) + 1)
+    return [...counter.entries()]
+      .filter(([t]) => !enteredTags.includes(t))
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh'))
+      .slice(0, 10)
+      .map(([t]) => t)
+  }, [bookmarks, enteredTags])
+
+  const appendTag = (tag: string) => {
+    const next = [...enteredTags, tag]
+    setTagsText(tagsToText(next))
+  }
+
+  const createCollection = () => {
+    const name = newColName.trim()
+    if (!name) {
+      setColError('请填写分组名称')
+      return
+    }
+    if (collections.some((c) => c.name === name)) {
+      setColError('已存在同名分组')
+      return
+    }
+    const created = addCollection(name, newColEmoji.trim() || undefined)
+    setCollectionId(created.id)
+    setNewColName('')
+    setNewColEmoji('')
+    setColError('')
+    setCreatingCollection(false)
   }
 
   const inputCls =
@@ -280,87 +317,115 @@ export default function BookmarkModal({
             />
           </div>
 
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <label className={labelCls} htmlFor="bm-col">
-                分组
-              </label>
+          <div>
+            <label className={labelCls} htmlFor="bm-col">
+              分组
+            </label>
+            {creatingCollection ? (
+              <div className="flex gap-2">
+                <input
+                  autoFocus
+                  value={newColEmoji}
+                  onChange={(e) => setNewColEmoji(e.target.value)}
+                  maxLength={4}
+                  placeholder="emoji"
+                  className={`${inputCls} w-20 shrink-0 text-center`}
+                />
+                <input
+                  value={newColName}
+                  onChange={(e) => {
+                    setNewColName(e.target.value)
+                    setColError('')
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), createCollection())}
+                  placeholder="新分组名称"
+                  className={inputCls}
+                />
+                <button
+                  type="button"
+                  onClick={createCollection}
+                  className="h-10 shrink-0 rounded-[10px] bg-accent px-3 text-[12.5px] font-semibold text-white hover:bg-accent-ink"
+                >
+                  创建
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreatingCollection(false)
+                    setColError('')
+                  }}
+                  aria-label="取消新建分组"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-line2 text-ink3 hover:bg-surface-2"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            ) : (
               <select
                 id="bm-col"
-                className={`${inputCls} appearance-none bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23928E86%22 stroke-width=%222.4%22%3E%3Cpath d=%22m6 9 6 6 6-6%22/%3E%3C/svg%3E')] bg-[position:right_12px_center] bg-no-repeat pr-8`}
-                value={collectionId}
-                onChange={(e) => setCollectionId(e.target.value)}
+                className={`${inputCls} cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23928E86%22 stroke-width=%222.4%22%3E%3Cpath d=%22m6 9 6 6 6-6%22/%3E%3C/svg%3E')] bg-[position:right_12px_center] bg-no-repeat pr-8`}
+                value={collectionId || '__none__'}
+                onChange={(e) => {
+                  if (e.target.value === '__new__') {
+                    setCreatingCollection(true)
+                  } else {
+                    setCollectionId(e.target.value === '__none__' ? '' : e.target.value)
+                  }
+                }}
               >
-                <option value="">未分组</option>
+                <option value="__none__">未分组</option>
                 {collections.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.emoji ? `${c.emoji} ` : ''}
                     {c.name}
                   </option>
                 ))}
+                <option value="__new__">＋ 新建分组…</option>
               </select>
-            </div>
-            <div className="flex-1">
-              <label className={labelCls} htmlFor="bm-tags">
-                标签
-              </label>
-              <input
-                id="bm-tags"
-                className={inputCls}
-                value={tagsText}
-                onChange={(e) => setTagsText(e.target.value)}
-                placeholder="前端， 工具"
-              />
-            </div>
+            )}
+            {colError && <p className="mt-1.5 text-[12px] text-danger">{colError}</p>}
+          </div>
+
+          <div>
+            <label className={labelCls} htmlFor="bm-tags">
+              标签
+            </label>
+            <input
+              id="bm-tags"
+              className={inputCls}
+              value={tagsText}
+              onChange={(e) => setTagsText(e.target.value)}
+              placeholder="用逗号分隔，如：前端， 工具"
+            />
+            {tagSuggestions.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {tagSuggestions.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => appendTag(t)}
+                    className="flex items-center gap-0.5 rounded-md border border-line bg-canvas px-2 py-[3px] text-[11.5px] text-ink2 hover:border-accent/40 hover:text-accent"
+                  >
+                    <Plus size={10} />
+                    {t}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         <div className="flex items-center justify-between border-t border-line px-[22px] py-3.5">
-          {editing ? (
-            confirmDelete ? (
-              <div className="flex items-center gap-2">
-                <span className="text-[12px] text-danger">确认删除这条书签？</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    removeBookmark(editing.id)
-                    toast(`「${editing.title}」已删除`)
-                    onClose()
-                  }}
-                  className="h-8 rounded-lg bg-danger px-3 text-[12px] font-semibold text-white hover:bg-[#d03d42]"
-                >
-                  确认删除
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirmDelete(false)}
-                  className="h-8 rounded-lg px-2 text-[12px] text-ink3 hover:bg-surface-2"
-                >
-                  取消
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(true)}
-                className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12.5px] font-medium text-ink3 transition-colors hover:bg-danger/10 hover:text-danger"
-              >
-                <Trash2 size={14} />
-                删除
-              </button>
-            )
-          ) : (
-            <button
-              type="button"
-              onClick={() => setStarred((s) => !s)}
-              className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12.5px] font-medium transition-colors ${
-                starred ? 'text-star' : 'text-ink3 hover:bg-surface-2'
-              }`}
-            >
-              <Star size={15} className={starred ? 'fill-star' : undefined} />
-              {starred ? '已星标' : '加星标'}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setStarred((s) => !s)}
+            className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12.5px] font-medium transition-colors ${
+              starred ? 'text-star' : 'text-ink3 hover:bg-surface-2'
+            }`}
+          >
+            <Star size={15} className={starred ? 'fill-star' : undefined} />
+            {starred ? '已星标' : '加星标'}
+          </button>
           <div className="flex items-center gap-2.5">
             {url && (
               <a

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   ArrowDownWideNarrow,
@@ -16,9 +16,11 @@ import type { Bookmark, Scope, SortMode, ViewMode } from '../types'
 import { dedupeKey } from '../lib/url'
 import Sidebar from '../components/Sidebar'
 import Topbar from '../components/Topbar'
+import BookmarkFilterInput from '../components/BookmarkFilterInput'
 import BookmarkRow from '../components/BookmarkRow'
 import BookmarkGridCard from '../components/BookmarkGridCard'
 import BookmarkModal from '../components/BookmarkModal'
+import ConfirmDialog from '../components/ConfirmDialog'
 import EmptyState from '../components/EmptyState'
 
 const VIEW_KEY = 'mybookmarks:view'
@@ -36,11 +38,12 @@ export default function HomePage() {
     bookmarks,
     collections,
     toggleStar,
+    removeBookmark,
     addCollection,
   } = useBookmarks()
   const toast = useToast()
   const [params, setParams] = useSearchParams()
-  const searchRef = useRef<HTMLInputElement>(null)
+  const [deleting, setDeleting] = useState<Bookmark | null>(null)
 
   const [modal, setModal] = useState<
     | { mode: 'add' }
@@ -149,21 +152,22 @@ export default function HomePage() {
       const el = e.target as HTMLElement | null
       const typing =
         el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)
+      const filter = document.getElementById('bookmark-filter-input')
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
-        searchRef.current?.focus()
+        filter?.focus()
         return
       }
       if (typing || e.metaKey || e.ctrlKey || e.altKey) return
       if (e.key === '/') {
         e.preventDefault()
-        searchRef.current?.focus()
+        filter?.focus()
       } else if (e.key === 'n') {
         e.preventDefault()
         setModal({ mode: 'add' })
       } else if (e.key === 'Escape' && query) {
         updateParams((p) => p.delete('q'))
-        searchRef.current?.blur()
+        filter?.blur()
       }
     }
     window.addEventListener('keydown', onKey)
@@ -210,11 +214,8 @@ export default function HomePage() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar
-          query={query}
-          onQuery={(q) => updateParams((p) => (q ? p.set('q', q) : p.delete('q')))}
           onAdd={() => setModal({ mode: 'add' })}
           onOpenMenu={() => setMobileMenu(true)}
-          searchRef={searchRef}
         />
 
         {/* 手机分组 chips */}
@@ -249,6 +250,11 @@ export default function HomePage() {
               <span className="text-[12.5px] text-ink3">
                 {visible.length} 条
               </span>
+              <BookmarkFilterInput
+                value={query}
+                count={visible.length}
+                onChange={(q) => updateParams((p) => (q ? p.set('q', q) : p.delete('q')))}
+              />
               <div className="ml-auto flex items-center gap-2.5">
                 <div className="flex rounded-[10px] bg-[#efeeea] p-[3px]">
                   <button
@@ -366,6 +372,7 @@ export default function HomePage() {
                       bm.collectionId ? collectionMap.get(bm.collectionId)?.name : undefined
                     }
                     onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
+                    onDelete={(b) => setDeleting(b)}
                     onToggleStar={toggleStar}
                     onTagClick={toggleTag}
                     onDomainClick={(d) => updateParams((p) => p.set('d', d))}
@@ -381,6 +388,8 @@ export default function HomePage() {
                     onToggleStar={toggleStar}
                     onTagClick={toggleTag}
                     onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
+                    onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
+                    onDelete={(b) => setDeleting(b)}
                   />
                 ))}
               </div>
@@ -423,6 +432,21 @@ export default function HomePage() {
           preset={{ url: modal.url, title: modal.title }}
           fromBookmarklet={modal.bookmarklet}
           onClose={() => setModal(null)}
+        />
+      )}
+
+      {deleting && (
+        <ConfirmDialog
+          title="删除这条书签？"
+          message={`「${deleting.title}」将从书库中删除，此操作无法撤销。`}
+          confirmText="删除"
+          danger
+          onConfirm={() => {
+            removeBookmark(deleting.id)
+            toast(`「${deleting.title}」已删除`)
+            setDeleting(null)
+          }}
+          onCancel={() => setDeleting(null)}
         />
       )}
     </div>
