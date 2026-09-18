@@ -40,17 +40,17 @@ export default function BookmarkGridCard({
         ) : (
           <>
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,.14),transparent_70%)]" />
-            <span className="absolute left-1/2 top-1/2 flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden rounded-[15px] bg-white/15 backdrop-blur-sm">
+            <span className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden rounded-[18px] bg-white/15 backdrop-blur-sm">
               {!logoFailed ? (
                 <img
                   src={`https://favicon.im/${bookmark.domain}?larger=true`}
                   alt=""
                   loading="lazy"
                   onError={() => setLogoFailed(true)}
-                  className="h-7 w-7 rounded-md"
+                  className="h-9 w-9 rounded-lg"
                 />
               ) : (
-                <span className="text-[20px] font-bold text-white">
+                <span className="text-[26px] font-bold text-white">
                   {domainLetter(bookmark.domain)}
                 </span>
               )}

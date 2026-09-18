@@ -24,6 +24,18 @@
   color-scheme: light;
 }
 
+/* 输入类元素统一去除默认 outline，焦点态用边框 + 光环表达 */
+input,
+textarea,
+select {
+  outline: none;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+}
+
 body {
   background-color: var(--color-canvas);
   color: var(--color-ink);

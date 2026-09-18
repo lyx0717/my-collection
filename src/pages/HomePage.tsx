@@ -20,8 +20,10 @@ import BookmarkFilterInput from '../components/BookmarkFilterInput'
 import BookmarkRow from '../components/BookmarkRow'
 import BookmarkGridCard from '../components/BookmarkGridCard'
 import BookmarkModal from '../components/BookmarkModal'
+import CollectionModal from '../components/CollectionModal'
 import ConfirmDialog from '../components/ConfirmDialog'
 import EmptyState from '../components/EmptyState'
+import type { Collection } from '../types'
 
 const VIEW_KEY = 'mybookmarks:view'
 
@@ -40,10 +42,18 @@ export default function HomePage() {
     toggleStar,
     removeBookmark,
     addCollection,
+    renameCollection,
+    removeCollection,
   } = useBookmarks()
   const toast = useToast()
   const [params, setParams] = useSearchParams()
   const [deleting, setDeleting] = useState<Bookmark | null>(null)
+  const [collectionModal, setCollectionModal] = useState<
+    | { mode: 'create' }
+    | { mode: 'edit'; collection: Collection }
+    | null
+  >(null)
+  const [deletingCollection, setDeletingCollection] = useState<Collection | null>(null)
 
   const [modal, setModal] = useState<
     | { mode: 'add' }
@@ -175,17 +185,16 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, params])
 
-  const handleAddCollection = () => {
-    const name = window.prompt('新分组的名称')?.trim()
-    if (!name) return
-    if (collections.some((c) => c.name === name)) {
-      toast('已存在同名分组', 'err')
-      return
+  const handleSubmitCollection = (name: string, emoji?: string) => {
+    if (collectionModal?.mode === 'edit') {
+      renameCollection(collectionModal.collection.id, name, emoji)
+      toast(`分组「${name}」已更新`)
+    } else {
+      const created = addCollection(name, emoji)
+      toast(`分组「${name}」已创建`)
+      setScope({ type: 'collection', id: created.id })
+      setMobileMenu(false)
     }
-    const created = addCollection(name)
-    toast(`分组「${name}」已创建`)
-    setScope({ type: 'collection', id: created.id })
-    setMobileMenu(false)
   }
 
   const hasActiveFilter = Boolean(query || activeTags.length || domainFilter) || scope.type !== 'all'
@@ -207,7 +216,9 @@ export default function HomePage() {
         onTag={(t) => {
           toggleTag(t)
         }}
-        onAddCollection={handleAddCollection}
+        onAddCollection={() => setCollectionModal({ mode: 'create' })}
+        onEditCollection={(col) => setCollectionModal({ mode: 'edit', collection: col })}
+        onDeleteCollection={(col) => setDeletingCollection(col)}
         mobileOpen={mobileMenu}
         onCloseMobile={() => setMobileMenu(false)}
       />
@@ -447,6 +458,36 @@ export default function HomePage() {
             setDeleting(null)
           }}
           onCancel={() => setDeleting(null)}
+        />
+      )}
+
+      {collectionModal && (
+        <CollectionModal
+          initial={collectionModal.mode === 'edit' ? collectionModal.collection : null}
+          existingNames={collections.map((c) => c.name)}
+          onSubmit={handleSubmitCollection}
+          onClose={() => setCollectionModal(null)}
+        />
+      )}
+
+      {deletingCollection && (
+        <ConfirmDialog
+          title={`删除分组「${deletingCollection.name}」？`}
+          message="分组内的书签不会被删除，会移动到「未分组」。"
+          confirmText="删除分组"
+          danger
+          onConfirm={() => {
+            removeCollection(deletingCollection.id)
+            toast(`分组「${deletingCollection.name}」已删除`)
+            setDeletingCollection(null)
+            if (
+              scope.type === 'collection' &&
+              scope.id === deletingCollection.id
+            ) {
+              setScope({ type: 'all' })
+            }
+          }}
+          onCancel={() => setDeletingCollection(null)}
         />
       )}
     </div>

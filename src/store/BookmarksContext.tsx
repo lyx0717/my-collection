@@ -82,6 +82,8 @@ interface BookmarksContextValue {
   addCollection: (name: string, emoji?: string) => Collection
   renameCollection: (id: string, name: string, emoji?: string) => void
   removeCollection: (id: string) => void
+  renameTag: (oldName: string, newName: string) => void
+  removeTag: (name: string) => void
   replaceAll: (data: StoreShape) => void
   resetToSeed: () => void
   clearAll: () => void
@@ -215,6 +217,29 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
     }))
   }, [])
 
+  const renameTag = useCallback((oldName: string, newNameRaw: string) => {
+    const newName = newNameRaw.trim()
+    if (!newName || newName === oldName) return
+    setStore((s) => ({
+      ...s,
+      bookmarks: s.bookmarks.map((bm) => {
+        if (!bm.tags.includes(oldName)) return bm
+        // 目标标签已存在则合并（去重）
+        const tags = bm.tags.map((t) => (t === oldName ? newName : t))
+        return { ...bm, tags: [...new Set(tags)] }
+      }),
+    }))
+  }, [])
+
+  const removeTag = useCallback((name: string) => {
+    setStore((s) => ({
+      ...s,
+      bookmarks: s.bookmarks.map((bm) =>
+        bm.tags.includes(name) ? { ...bm, tags: bm.tags.filter((t) => t !== name) } : bm,
+      ),
+    }))
+  }, [])
+
   const replaceAll = useCallback((data: StoreShape) => setStore(data), [])
   const resetToSeed = useCallback(() => setStore(structuredClone(SEED_DATA)), [])
   const clearAll = useCallback(
@@ -255,6 +280,8 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
       addCollection,
       renameCollection,
       removeCollection,
+      renameTag,
+      removeTag,
       replaceAll,
       resetToSeed,
       clearAll,
@@ -273,6 +300,8 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
       addCollection,
       renameCollection,
       removeCollection,
+      renameTag,
+      removeTag,
       replaceAll,
       resetToSeed,
       clearAll,

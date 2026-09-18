@@ -334,42 +334,44 @@ export default function BookmarkModal({
               分组
             </label>
             {creatingCollection ? (
-              <div className="flex gap-2">
-                <input
-                  autoFocus
-                  value={newColEmoji}
-                  onChange={(e) => setNewColEmoji(e.target.value)}
-                  maxLength={4}
-                  placeholder="emoji"
-                  className={`${inputCls} w-20 shrink-0 text-center`}
-                />
-                <input
-                  value={newColName}
-                  onChange={(e) => {
-                    setNewColName(e.target.value)
-                    setColError('')
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), createCollection())}
-                  placeholder="新分组名称"
-                  className={inputCls}
-                />
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <input
+                    autoFocus
+                    value={newColEmoji}
+                    onChange={(e) => setNewColEmoji(e.target.value)}
+                    maxLength={4}
+                    placeholder="emoji"
+                    className="h-10 w-14 shrink-0 rounded-[10px] border border-line bg-white px-2 text-center text-[15px] placeholder:text-[#b5b1a8] focus:border-accent focus:shadow-[0_0_0_3px_rgba(62,92,255,.12)]"
+                  />
+                  <input
+                    value={newColName}
+                    onChange={(e) => {
+                      setNewColName(e.target.value)
+                      setColError('')
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), createCollection())}
+                    placeholder="新分组名称"
+                    className={`${inputCls} min-w-0 flex-1`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCreatingCollection(false)
+                      setColError('')
+                    }}
+                    aria-label="取消新建分组"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-line2 text-ink3 hover:bg-surface-2"
+                  >
+                    <X size={15} />
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={createCollection}
-                  className="h-10 shrink-0 rounded-[10px] bg-accent px-3 text-[12.5px] font-semibold text-white hover:bg-accent-ink"
+                  className="h-9 w-full rounded-[10px] bg-accent text-[12.5px] font-semibold text-white hover:bg-accent-ink"
                 >
-                  创建
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCreatingCollection(false)
-                    setColError('')
-                  }}
-                  aria-label="取消新建分组"
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-line2 text-ink3 hover:bg-surface-2"
-                >
-                  <X size={15} />
+                  创建分组
                 </button>
               </div>
             ) : (

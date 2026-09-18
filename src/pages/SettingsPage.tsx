@@ -5,24 +5,25 @@ import {
   Download,
   FileUp,
   Folder,
-  GripVertical,
   HardDrive,
   Info,
   Pencil,
-  Plus,
+  Tag,
   Trash2,
   Upload,
+  X,
 } from 'lucide-react'
 import { useBookmarks } from '../store/BookmarksContext'
 import { useToast } from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
+import CollectionModal from '../components/CollectionModal'
 import Favicon from '../components/Favicon'
 import { parseImportFile, type ParsedImport } from '../lib/importFile'
 import { dedupeKey, extractDomain } from '../lib/url'
 import { bookmarkletHref } from '../lib/bookmarklet'
 import type { Collection, ParsedImportBookmark } from '../types'
 
-type Section = 'data' | 'collections' | 'bookmarklet' | 'about'
+type Section = 'data' | 'collections' | 'tags' | 'bookmarklet' | 'about'
 
 interface PreviewEntry extends ParsedImportBookmark {
   key: string
@@ -39,6 +40,8 @@ export default function SettingsPage() {
     addCollection,
     renameCollection,
     removeCollection,
+    renameTag,
+    removeTag,
     downloadJson,
     downloadNetscape,
     resetToSeed,
@@ -52,10 +55,20 @@ export default function SettingsPage() {
   const [preview, setPreview] = useState<PreviewEntry[] | null>(null)
   const [parsing, setParsing] = useState(false)
   const [dragging, setDragging] = useState(false)
-  const [confirm, setConfirm] = useState<null | 'reset' | 'clear' | { collection: Collection }>(null)
-  const [editingCol, setEditingCol] = useState<
-    null | { id: string | null; name: string; emoji: string }
+  const [confirm, setConfirm] = useState<
+    | null
+    | 'reset'
+    | 'clear'
+    | { collection: Collection }
+    | { tag: string; count: number }
   >(null)
+  const [collectionModal, setCollectionModal] = useState<
+    | { mode: 'create' }
+    | { mode: 'edit'; collection: Collection }
+    | null
+  >(null)
+  const [editingTag, setEditingTag] = useState<string | null>(null)
+  const [tagDraft, setTagDraft] = useState('')
 
   const existingKeys = useMemo(
     () => new Set(bookmarks.map((b) => dedupeKey(b.url))),
@@ -132,22 +145,38 @@ export default function SettingsPage() {
     setParsed(null)
   }
 
-  const saveCollection = () => {
-    if (!editingCol) return
-    const name = editingCol.name.trim()
-    if (!name) {
-      toast('请填写分组名称', 'err')
-      return
+  const tagStats = useMemo(() => {
+    const counter = new Map<string, number>()
+    for (const bm of bookmarks) for (const t of bm.tags) counter.set(t, (counter.get(t) ?? 0) + 1)
+    return [...counter.entries()].sort(
+      (a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh'),
+    )
+  }, [bookmarks])
+
+  const submitCollection = (name: string, emoji?: string) => {
+    if (collectionModal?.mode === 'edit') {
+      renameCollection(collectionModal.collection.id, name, emoji)
+      toast(`分组「${name}」已更新`)
+    } else {
+      addCollection(name, emoji)
+      toast(`分组「${name}」已创建`)
     }
-    const emoji = editingCol.emoji.trim() || undefined
-    if (editingCol.id) renameCollection(editingCol.id, name, emoji)
-    else addCollection(name, emoji)
-    setEditingCol(null)
+  }
+
+  const saveTag = (oldName: string) => {
+    const next = tagDraft.trim()
+    if (!next) return
+    if (next !== oldName && tagStats.some(([t]) => t === next)) {
+      toast('已存在同名标签，将自动合并', 'err')
+    }
+    renameTag(oldName, next)
+    setEditingTag(null)
   }
 
   const navItems: Array<{ key: Section; label: string; icon: ReactNode }> = [
     { key: 'data', label: '数据导入导出', icon: <HardDrive size={15} /> },
     { key: 'collections', label: '分组管理', icon: <Folder size={15} /> },
+    { key: 'tags', label: '标签管理', icon: <Tag size={15} /> },
     { key: 'bookmarklet', label: '书签小工具', icon: <Bookmark size={15} /> },
     { key: 'about', label: '关于', icon: <Info size={15} /> },
   ]
@@ -379,7 +408,6 @@ export default function SettingsPage() {
                       key={col.id}
                       className="flex items-center gap-3 rounded-xl border border-line bg-surface-2 px-3.5 py-2.5"
                     >
-                      <GripVertical size={14} className="text-ink3" />
                       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[15px]">
                         {col.emoji ?? '📁'}
                       </span>
@@ -387,16 +415,14 @@ export default function SettingsPage() {
                       <span className="text-[12px] text-ink3">{count} 条</span>
                       <div className="ml-auto flex gap-1">
                         <button
-                          aria-label={`编辑 ${col.name}`}
-                          onClick={() =>
-                            setEditingCol({ id: col.id, name: col.name, emoji: col.emoji ?? '' })
-                          }
+                          aria-label={`编辑分组 ${col.name}`}
+                          onClick={() => setCollectionModal({ mode: 'edit', collection: col })}
                           className="flex h-8 w-8 items-center justify-center rounded-lg text-ink3 hover:bg-white hover:text-ink"
                         >
                           <Pencil size={14} />
                         </button>
                         <button
-                          aria-label={`删除 ${col.name}`}
+                          aria-label={`删除分组 ${col.name}`}
                           onClick={() => setConfirm({ collection: col })}
                           className="flex h-8 w-8 items-center justify-center rounded-lg text-ink3 hover:bg-white hover:text-danger"
                         >
@@ -411,43 +437,87 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              {editingCol ? (
-                <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-accent/30 bg-accent-soft/50 p-3">
-                  <input
-                    value={editingCol.name}
-                    onChange={(e) => setEditingCol({ ...editingCol, name: e.target.value })}
-                    placeholder="分组名称"
-                    className="h-9 flex-1 rounded-lg border border-line bg-white px-3 text-[13px] outline-none focus:border-accent"
-                    autoFocus
-                  />
-                  <input
-                    value={editingCol.emoji}
-                    onChange={(e) => setEditingCol({ ...editingCol, emoji: e.target.value })}
-                    placeholder="emoji（可选）"
-                    maxLength={4}
-                    className="h-9 w-32 rounded-lg border border-line bg-white px-3 text-[13px] outline-none focus:border-accent"
-                  />
-                  <button
-                    onClick={saveCollection}
-                    className="h-9 rounded-lg bg-accent px-4 text-[13px] font-semibold text-white hover:bg-accent-ink"
-                  >
-                    保存
-                  </button>
-                  <button
-                    onClick={() => setEditingCol(null)}
-                    className="h-9 rounded-lg border border-line2 px-4 text-[13px] text-ink2 hover:bg-white"
-                  >
-                    取消
-                  </button>
-                </div>
+              <button
+                onClick={() => setCollectionModal({ mode: 'create' })}
+                className="mt-3 flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-line2 text-[13px] font-medium text-ink2 hover:border-accent/50 hover:text-accent"
+              >
+                ＋ 新建分组
+              </button>
+            </div>
+          </section>
+
+          {/* ============ 标签 ============ */}
+          <section id="sec-tags" className="scroll-mt-24">
+            <SectionTitle
+              title="标签管理"
+              desc="重命名会同步到所有书签；删除标签只移除标记，不删除书签。"
+            />
+            <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(28,27,25,.05)]">
+              {tagStats.length === 0 ? (
+                <p className="py-4 text-center text-[13px] text-ink3">还没有标签</p>
               ) : (
-                <button
-                  onClick={() => setEditingCol({ id: null, name: '', emoji: '' })}
-                  className="mt-3 flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-line2 text-[13px] font-medium text-ink2 hover:border-accent/50 hover:text-accent"
-                >
-                  <Plus size={15} />
-                  新建分组
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  {tagStats.map(([tag, count]) =>
+                    editingTag === tag ? (
+                      <span
+                        key={tag}
+                        className="flex items-center gap-1 rounded-lg border border-accent/40 bg-accent-soft py-1 pl-3 pr-1"
+                      >
+                        #
+                        <input
+                          autoFocus
+                          value={tagDraft}
+                          onChange={(e) => setTagDraft(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveTag(tag)
+                            if (e.key === 'Escape') setEditingTag(null)
+                          }}
+                          className="w-24 bg-transparent text-[12.5px] font-medium text-accent-ink"
+                        />
+                        <button
+                          aria-label="保存标签名"
+                          onClick={() => saveTag(tag)}
+                          className="flex h-6 w-6 items-center justify-center rounded bg-accent text-white"
+                        >
+                          ✓
+                        </button>
+                        <button
+                          aria-label="取消"
+                          onClick={() => setEditingTag(null)}
+                          className="flex h-6 w-6 items-center justify-center rounded text-ink3 hover:bg-white"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ) : (
+                      <span
+                        key={tag}
+                        className="group/tag flex items-center gap-1 rounded-lg border border-line bg-surface-2 py-1 pl-2.5 pr-1 text-[12.5px] text-ink2"
+                      >
+                        <Tag size={11} className="text-ink3" />
+                        {tag}
+                        <span className="text-[11px] text-ink3">{count}</span>
+                        <button
+                          aria-label={`重命名标签 ${tag}`}
+                          onClick={() => {
+                            setEditingTag(tag)
+                            setTagDraft(tag)
+                          }}
+                          className="flex h-6 w-6 items-center justify-center rounded text-ink3 hover:bg-white hover:text-ink"
+                        >
+                          <Pencil size={11} />
+                        </button>
+                        <button
+                          aria-label={`删除标签 ${tag}`}
+                          onClick={() => setConfirm({ tag, count })}
+                          className="flex h-6 w-6 items-center justify-center rounded text-ink3 hover:bg-white hover:text-danger"
+                        >
+                          <Trash2 size={11} />
+                        </button>
+                      </span>
+                    ),
+                  )}
+                </div>
               )}
             </div>
           </section>
@@ -559,6 +629,30 @@ export default function SettingsPage() {
             toast(`分组「${confirm.collection.name}」已删除`)
           }}
           onCancel={() => setConfirm(null)}
+        />
+      )}
+
+      {confirm && typeof confirm === 'object' && 'tag' in confirm && (
+        <ConfirmDialog
+          title={`删除标签「#${confirm.tag}」？`}
+          message={`该标签会从 ${confirm.count} 条书签上移除，书签本身不会被删除。`}
+          confirmText="删除标签"
+          danger
+          onConfirm={() => {
+            removeTag(confirm.tag)
+            setConfirm(null)
+            toast(`标签「#${confirm.tag}」已删除`)
+          }}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
+
+      {collectionModal && (
+        <CollectionModal
+          initial={collectionModal.mode === 'edit' ? collectionModal.collection : null}
+          existingNames={collections.map((c) => c.name)}
+          onSubmit={submitCollection}
+          onClose={() => setCollectionModal(null)}
         />
       )}
     </div>

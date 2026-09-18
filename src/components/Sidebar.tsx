@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Bookmark, Folder, Plus, Star, Tag, HardDriveDownload, X } from 'lucide-react'
+import { Bookmark, Folder, Pencil, Plus, Star, Tag, HardDriveDownload, Trash2, X } from 'lucide-react'
 import type { Collection } from '../types'
 import type { Scope } from '../types'
 
@@ -14,6 +14,8 @@ interface SidebarProps {
   onScope: (scope: Scope) => void
   onTag: (tag: string) => void
   onAddCollection: () => void
+  onEditCollection: (col: Collection) => void
+  onDeleteCollection: (col: Collection) => void
   mobileOpen: boolean
   onCloseMobile: () => void
 }
@@ -68,6 +70,8 @@ function SidebarBody(props: SidebarProps) {
     onScope,
     onTag,
     onAddCollection,
+    onEditCollection,
+    onDeleteCollection,
   } = props
 
   return (
@@ -107,16 +111,60 @@ function SidebarBody(props: SidebarProps) {
           <Plus size={14} />
         </button>
       </div>
-      {collections.map((col) => (
-        <NavRow
-          key={col.id}
-          active={scopeIsActive(scope, 'collection', col.id)}
-          icon={<Folder size={16} strokeWidth={1.7} className="fill-current opacity-80" />}
-          label={col.emoji ? `${col.emoji} ${col.name}` : col.name}
-          count={collectionCounts.get(col.id) ?? 0}
-          onClick={() => onScope({ type: 'collection', id: col.id })}
-        />
-      ))}
+      {collections.map((col) => {
+        const active = scopeIsActive(scope, 'collection', col.id)
+        return (
+          <div
+            key={col.id}
+            className={`group/col flex w-full items-center rounded-[10px] pl-2.5 pr-1 transition-colors ${
+              active ? 'bg-accent-soft' : 'hover:bg-surface-2'
+            }`}
+          >
+            <button
+              onClick={() => onScope({ type: 'collection', id: col.id })}
+              className="flex min-w-0 flex-1 items-center gap-2.5 py-[7px] text-left text-[13.5px] font-medium"
+            >
+              <Folder
+                size={16}
+                strokeWidth={1.7}
+                className={`shrink-0 fill-current opacity-80 ${active ? 'text-accent' : 'text-ink3'}`}
+              />
+              <span className={`truncate ${active ? 'font-semibold text-accent-ink' : 'text-ink2'}`}>
+                {col.emoji ? `${col.emoji} ${col.name}` : col.name}
+              </span>
+            </button>
+            <span
+              className={`shrink-0 text-[11.5px] tabular-nums transition-opacity group-hover/col:hidden ${
+                active ? 'text-accent' : 'text-ink3'
+              }`}
+            >
+              {collectionCounts.get(col.id) ?? 0}
+            </span>
+            <span className="flex w-0 shrink-0 items-center gap-0.5 overflow-hidden opacity-0 transition-all duration-150 group-hover/col:w-[52px] group-hover/col:opacity-100">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEditCollection(col)
+                }}
+                aria-label={`编辑分组 ${col.name}`}
+                className="flex h-6 w-6 items-center justify-center rounded-md text-ink3 hover:bg-canvas hover:text-ink"
+              >
+                <Pencil size={12} />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDeleteCollection(col)
+                }}
+                aria-label={`删除分组 ${col.name}`}
+                className="flex h-6 w-6 items-center justify-center rounded-md text-ink3 hover:bg-danger/10 hover:text-danger"
+              >
+                <Trash2 size={12} />
+              </button>
+            </span>
+          </div>
+        )
+      })}
       <NavRow
         active={scopeIsActive(scope, 'none')}
         icon={<Folder size={16} strokeWidth={1.7} className="opacity-60" />}
