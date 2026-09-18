@@ -59,8 +59,17 @@ function parseITab(data: { navConfig?: ITabNav[] }): Omit<ParsedImport, 'format'
   const bookmarks: ParsedImportBookmark[] = []
   const collectionNames: string[] = []
 
-  const titleOf = (item: ITabItem): string =>
-    item.name?.trim() || item.iconText?.trim() || extractDomain(item.url ?? '')
+  const titleOf = (item: ITabItem): string => {
+    const name = item.name?.trim()
+    if (name) return name
+    const iconText = item.iconText?.trim() ?? ''
+    if (iconText) {
+      // text 型磁贴的 iconText 就是名称；icon 型的中文缩写可识别，
+      // 纯拉丁缩写（如 Wei）多为自动生成，改用域名更清楚
+      if (item.type !== 'icon' || /[\u4e00-\u9fa5]/.test(iconText)) return iconText
+    }
+    return extractDomain(item.url ?? '')
+  }
 
   const walk = (items: ITabItem[], collectionName: string) => {
     for (const item of items) {
