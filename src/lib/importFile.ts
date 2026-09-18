@@ -2,6 +2,7 @@ import Papa from 'papaparse'
 import type { Collection, ParsedImportBookmark } from '../types'
 import { parseNetscape } from './netscape'
 import { parseTags } from './tags'
+import { extractDomain } from './url'
 
 export interface ParsedImport {
   bookmarks: ParsedImportBookmark[]
@@ -40,8 +41,58 @@ function normalizeEntry(raw: Record<string, unknown>): ParsedImportBookmark | nu
   return { url, title, description: description || undefined, tags, collectionName, createdAt }
 }
 
+interface ITabItem {
+  url?: string
+  name?: string
+  iconText?: string
+  type?: string
+  children?: ITabItem[]
+}
+interface ITabNav {
+  name?: string
+  children?: ITabItem[]
+}
+
+/** 解析 iTab 新标签页扩展导出的 .itabdata（JSON：navConfig 导航页 + children 图标） */
+function parseITab(data: { navConfig?: ITabNav[] }): Omit<ParsedImport, 'format'> {
+  const navs = Array.isArray(data.navConfig) ? data.navConfig : []
+  const bookmarks: ParsedImportBookmark[] = []
+  const collectionNames: string[] = []
+
+  const titleOf = (item: ITabItem): string =>
+    item.name?.trim() || item.iconText?.trim() || extractDomain(item.url ?? '')
+
+  const walk = (items: ITabItem[], collectionName: string) => {
+    for (const item of items) {
+      // 文件夹本身可能也带链接，先收录再拍平其子项
+      if (Array.isArray(item.children)) {
+        if (item.url && /^https?:\/\//i.test(item.url)) {
+          bookmarks.push({ url: item.url, title: titleOf(item), tags: [], collectionName })
+        }
+        walk(item.children, collectionName)
+        continue
+      }
+      if (item.url && /^https?:\/\//i.test(item.url)) {
+        bookmarks.push({ url: item.url, title: titleOf(item), tags: [], collectionName })
+      }
+    }
+  }
+
+  navs.forEach((nav, i) => {
+    const name = nav.name?.trim() || `其他导航`
+    collectionNames.push(name)
+    walk(nav.children ?? [], name || `分组 ${i + 1}`)
+  })
+
+  return { bookmarks, collectionNames }
+}
+
 function parseJson(text: string): Omit<ParsedImport, 'format'> {
   const data = JSON.parse(text) as unknown
+  // iTab 导出：{ navConfig: [...], notes: [...] }
+  if (data && typeof data === 'object' && Array.isArray((data as { navConfig?: unknown }).navConfig)) {
+    return parseITab(data as { navConfig: ITabNav[] })
+  }
   // 本站完整备份
   if (data && typeof data === 'object' && Array.isArray((data as { bookmarks?: unknown }).bookmarks)) {
     const shape = data as { bookmarks: unknown[]; collections?: Collection[] }
@@ -91,6 +142,9 @@ function parseCsv(text: string): Omit<ParsedImport, 'format'> {
 export async function parseImportFile(file: File): Promise<ParsedImport> {
   const text = await file.text()
   const name = file.name.toLowerCase()
+  if (name.endsWith('.itabdata')) {
+    return { ...parseJson(text), format: 'iTab 备份' }
+  }
   if (name.endsWith('.html') || name.endsWith('.htm') || text.trimStart().startsWith('<!')) {
     return { ...parseNetscape(text), format: 'Netscape HTML' }
   }

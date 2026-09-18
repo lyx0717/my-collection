@@ -230,12 +230,12 @@ export default function SettingsPage() {
                   )}
                 </p>
                 <p className="mt-1 text-[12px] text-ink3">
-                  支持 Chrome / Safari / Edge / Firefox 导出的 HTML，以及 Raindrop / Linkding / 本站的 JSON、CSV
+                  支持 Chrome / Safari / Edge / Firefox 导出的 HTML、iTab 备份（.itabdata），以及 Raindrop / Linkding / 本站的 JSON、CSV
                 </p>
                 <input
                   ref={fileRef}
                   type="file"
-                  accept=".html,.htm,.json,.csv,text/html,application/json"
+                  accept=".html,.htm,.json,.csv,.itabdata,text/html,application/json"
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0]
