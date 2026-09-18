@@ -115,13 +115,25 @@ export default function BookmarkModal({
       return
     }
 
+    // 输入了新分组名称但没点「创建」就直接保存：先建组再归属
+    let finalCollectionId = collectionId
+    if (creatingCollection) {
+      const name = newColName.trim()
+      if (name) {
+        const existing = collections.find((c) => c.name === name)
+        finalCollectionId = existing
+          ? existing.id
+          : addCollection(name, newColEmoji.trim() || undefined).id
+      }
+    }
+
     const payload = {
       url: finalUrl,
       title: title.trim() || domain,
       description: description.trim() || undefined,
       faviconUrl,
       cover,
-      collectionId: collectionId || undefined,
+      collectionId: finalCollectionId || undefined,
       tags: parseTags(tagsText),
       starred,
     }
