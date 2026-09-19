@@ -223,8 +223,13 @@ export default function HomePage() {
         />
 
         <main
-          className={`flex-1 overflow-y-auto px-4 pb-28 sm:px-6 lg:pb-10 ${isGlass ? 'pt-[62px]' : ''}`}
+          className={`flex-1 overflow-y-auto px-4 pb-28 sm:px-6 lg:pb-10 ${
+            isGlass ? 'pt-0' : ''
+          }`}
         >
+          {/* 玻璃模式：顶栏为绝对定位，用垫片把分组条放到其下方，避免与 sticky 叠出空隙 */}
+          {isGlass && <div aria-hidden className="h-[62px] shrink-0" />}
+
           {/* 手机分组 chips */}
           <div
             className={`flex gap-2 overflow-x-auto border-b border-line px-4 py-2.5 lg:hidden [mask-image:linear-gradient(to right,#000_calc(100%_-_18px),transparent)] ${
