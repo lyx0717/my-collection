@@ -2,12 +2,12 @@ import { useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   ArrowLeft,
   Bookmark,
-  Cloud,
   Download,
   FileUp,
   Folder,
   HardDrive,
   Info,
+  Palette,
   Pencil,
   Tag,
   Trash2,
@@ -15,17 +15,17 @@ import {
   X,
 } from 'lucide-react'
 import { useBookmarks } from '../store/BookmarksContext'
+import { useAppearance } from '../store/AppearanceContext'
 import { useToast } from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
 import CollectionModal from '../components/CollectionModal'
-import SyncPanel from '../components/settings/SyncPanel'
 import Favicon from '../components/Favicon'
 import { parseImportFile, type ParsedImport } from '../lib/importFile'
 import { dedupeKey, extractDomain } from '../lib/url'
 import { bookmarkletHref } from '../lib/bookmarklet'
 import type { Collection, ParsedImportBookmark } from '../types'
 
-type Section = 'sync' | 'data' | 'collections' | 'tags' | 'bookmarklet' | 'about'
+type Section = 'appearance' | 'data' | 'collections' | 'tags' | 'bookmarklet' | 'about'
 
 interface PreviewEntry extends ParsedImportBookmark {
   key: string
@@ -51,9 +51,10 @@ export default function SettingsPage() {
     clearAll,
     storageBytes,
   } = useBookmarks()
+  const { glassMode, setGlassMode } = useAppearance()
   const toast = useToast()
   const fileRef = useRef<HTMLInputElement>(null)
-  const [section, setSection] = useState<Section>('data')
+  const [section, setSection] = useState<Section>('appearance')
   const [parsed, setParsed] = useState<ParsedImport | null>(null)
   const [preview, setPreview] = useState<PreviewEntry[] | null>(null)
   const [parsing, setParsing] = useState(false)
@@ -197,7 +198,7 @@ export default function SettingsPage() {
   }
 
   const navItems: Array<{ key: Section; label: string; icon: ReactNode }> = [
-    { key: 'sync', label: '云端同步', icon: <Cloud size={15} /> },
+    { key: 'appearance', label: '外观', icon: <Palette size={15} /> },
     { key: 'data', label: '数据导入导出', icon: <HardDrive size={15} /> },
     { key: 'collections', label: '分组管理', icon: <Folder size={15} /> },
     { key: 'tags', label: '标签管理', icon: <Tag size={15} /> },
@@ -209,7 +210,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-dvh bg-canvas">
-      <header className="sticky top-0 z-40 flex h-[62px] items-center gap-3 border-b border-line bg-surface/95 px-4 backdrop-blur sm:px-6">
+      <header className="glass-topbar sticky top-0 z-40 flex h-[62px] items-center gap-3 border-b border-line bg-surface/95 px-4 backdrop-blur sm:px-6">
         <a
           href="#/"
           className="flex h-9 items-center gap-1.5 rounded-[10px] px-2 text-[13px] text-ink2 hover:bg-surface-2"
@@ -244,18 +245,47 @@ export default function SettingsPage() {
         </nav>
 
         <div className="min-w-0 flex-1 space-y-10 pb-20">
-          {/* ============ 云端同步 ============ */}
-          <section id="sec-sync" className="scroll-mt-24">
+          {/* ============ 外观 ============ */}
+          <section id="sec-appearance" className="scroll-mt-24">
             <SectionTitle
-              title="云端同步"
-              desc="配置 Cloudflare Worker 后，书签实时存到云端，多设备共享；断网时使用本地缓存。"
+              title="外观"
+              desc="切换书签库的界面风格，偏好保存在本浏览器。"
             />
-            <SyncPanel />
+            <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(28,27,25,.05)]">
+              <p className="mb-3 text-[13px] font-semibold text-ink2">界面风格</p>
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                {(
+                  [
+                    ['solid', '实心', '不透明卡片与顶栏，阅读对比度最高'],
+                    ['glass', '玻璃', '顶栏/侧栏半透明，紧凑卡片悬停磨砂'],
+                  ] as const
+                ).map(([value, title, hint]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setGlassMode(value)
+                      toast(value === 'glass' ? '已切换为玻璃模式' : '已切换为实心模式')
+                    }}
+                    className={`rounded-xl border p-4 text-left transition-colors ${
+                      glassMode === value
+                        ? 'border-accent bg-accent-soft'
+                        : 'border-line bg-white hover:border-line2'
+                    }`}
+                  >
+                    <p className={`text-[13.5px] font-semibold ${glassMode === value ? 'text-accent-ink' : 'text-ink'}`}>
+                      {title}
+                    </p>
+                    <p className="mt-1 text-[12px] leading-5 text-ink3">{hint}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
           </section>
 
           {/* ============ 数据 ============ */}
           <section id="sec-data" className="scroll-mt-24">
-            <SectionTitle title="数据导入导出" desc="所有书签保存在当前浏览器本地，建议每月导出一次 JSON 备份。" />
+            <SectionTitle title="数据导入导出" desc="书签保存在当前浏览器本地。清缓存、换电脑前请先导出 JSON 备份。" />
             <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(28,27,25,.05)]">
               <div
                 onDragOver={(e) => {
@@ -605,7 +635,7 @@ export default function SettingsPage() {
                   onClick={() => setConfirm('reset')}
                   className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-white px-3.5 text-[12.5px] font-medium text-ink2 hover:bg-surface-2"
                 >
-                  恢复示例数据
+                  恢复内置书签
                 </button>
                 <button
                   onClick={() => setConfirm('clear')}
@@ -615,7 +645,7 @@ export default function SettingsPage() {
                 </button>
               </div>
               <p className="mt-4 text-[11.5px] leading-5 text-ink3">
-                数据键名 mybookmarks:v2，仅存于当前浏览器。清除浏览器站点数据前，请先导出 JSON。
+                本地数据键名 mybookmarks:v2，仅存在于当前浏览器。清除站点数据前，请先导出 JSON；也可用导出文件替换 src/data/seed.ts 后重新部署，把数据固化进仓库。
               </p>
             </div>
           </section>
@@ -625,13 +655,13 @@ export default function SettingsPage() {
       {confirm === 'reset' && (
         <ConfirmDialog
           title="恢复为示例数据？"
-          message="当前浏览器里的全部书签与分组将被 22 条示例书签覆盖。建议先导出 JSON 备份。"
+          message="当前浏览器里的全部书签与分组将被内置书签数据覆盖（来自 seed.ts）。建议先导出 JSON 备份。"
           confirmText="恢复示例"
           danger
           onConfirm={() => {
-            resetToSeed()
+            void resetToSeed()
             setConfirm(null)
-            toast('已恢复为示例数据')
+            toast('已恢复为内置书签数据')
           }}
           onCancel={() => setConfirm(null)}
         />

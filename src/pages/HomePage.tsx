@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   ArrowDownWideNarrow,
@@ -7,6 +7,7 @@ import {
   LayoutGrid,
   List,
   LayoutDashboard,
+  Loader2,
   Plus,
   Settings,
   Bookmark as BookmarkIcon,
@@ -14,9 +15,12 @@ import {
   X,
 } from 'lucide-react'
 import { useBookmarks } from '../store/BookmarksContext'
+import { useAppearance } from '../store/AppearanceContext'
 import { useToast } from '../components/Toast'
-import type { Bookmark, Scope, SortMode, ViewMode } from '../types'
+import type { Bookmark, Scope, ViewMode } from '../types'
 import { dedupeKey } from '../lib/url'
+import { useBookmarkFilter } from '../hooks/useBookmarkFilter'
+import { useBatchSelection } from '../hooks/useBatchSelection'
 import Sidebar from '../components/Sidebar'
 import Topbar from '../components/Topbar'
 import BookmarkFilterInput from '../components/BookmarkFilterInput'
@@ -33,19 +37,11 @@ import type { Collection } from '../types'
 
 const VIEW_KEY = 'mybookmarks:view'
 
-function scopeFromParams(p: URLSearchParams): Scope {
-  const col = p.get('c')
-  if (col) return { type: 'collection', id: col }
-  if (p.get('star') === '1') return { type: 'starred' }
-  if (p.get('none') === '1') return { type: 'none' }
-  return { type: 'all' }
-}
-
 export default function HomePage() {
   const {
     bookmarks,
     collections,
-    status,
+    seedLoading,
     toggleStar,
     removeBookmark,
     addCollection,
@@ -56,11 +52,11 @@ export default function HomePage() {
     bulkRemove,
     removeTag,
   } = useBookmarks()
+  const { glassMode } = useAppearance()
+  const isGlass = glassMode === 'glass'
   const toast = useToast()
   const [params, setParams] = useSearchParams()
   const [deleting, setDeleting] = useState<Bookmark | null>(null)
-  const [batchMode, setBatchMode] = useState(false)
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false)
   const [deletingTag, setDeletingTag] = useState<string | null>(null)
   const [collectionModal, setCollectionModal] = useState<
@@ -78,62 +74,37 @@ export default function HomePage() {
   >(null)
   const [mobileMenu, setMobileMenu] = useState(false)
 
-  const initialView = (): ViewMode =>
-    localStorage.getItem(VIEW_KEY) === 'grid' ? 'grid' : 'list'
+  const initialView = (): ViewMode => {
+    const saved = localStorage.getItem(VIEW_KEY)
+    return saved === 'grid' || saved === 'tile' ? saved : 'list'
+  }
   const [view, setView] = useState<ViewMode>(initialView)
 
-  const query = params.get('q') ?? ''
-  const scope = scopeFromParams(params)
-  const activeTags = params.getAll('tag')
-  const domainFilter = params.get('d') ?? ''
-  const sort = (params.get('sort') as SortMode) ?? 'desc'
+  const {
+    query,
+    scope,
+    activeTags,
+    domainFilter,
+    sort,
+    visible,
+    collectionMap,
+    collectionCounts,
+    allTags,
+    contextTitle,
+    hasActiveFilter,
+    starredCount,
+  } = useBookmarkFilter(bookmarks, collections, params)
 
-  const collectionMap = useMemo(
-    () => new Map(collections.map((c) => [c.id, c])),
-    [collections],
-  )
-
-  const collectionCounts = useMemo(() => {
-    const map = new Map<string, number>()
-    for (const bm of bookmarks) {
-      const key = bm.collectionId ?? '__none__'
-      map.set(key, (map.get(key) ?? 0) + 1)
-    }
-    return map
-  }, [bookmarks])
-
-  const allTags = useMemo(() => {
-    const counter = new Map<string, number>()
-    for (const bm of bookmarks) for (const t of bm.tags) counter.set(t, (counter.get(t) ?? 0) + 1)
-    return [...counter.entries()].sort(
-      (a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh'),
-    )
-  }, [bookmarks])
-
-  const visible = useMemo(() => {
-    const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
-    const result = bookmarks.filter((bm) => {
-      if (scope.type === 'starred' && !bm.starred) return false
-      if (scope.type === 'none' && bm.collectionId) return false
-      if (scope.type === 'collection' && bm.collectionId !== scope.id) return false
-      if (domainFilter && bm.domain !== domainFilter) return false
-      if (activeTags.length && !activeTags.every((t) => bm.tags.includes(t))) return false
-      if (words.length) {
-        const hay = [bm.title, bm.domain, bm.description ?? '', bm.tags.join(' '), bm.url]
-          .join('\n')
-          .toLowerCase()
-        if (!words.every((w) => hay.includes(w))) return false
-      }
-      return true
-    })
-    result.sort((a, b) => {
-      if (sort === 'az') return a.title.localeCompare(b.title, 'zh')
-      return sort === 'asc'
-        ? a.createdAt.localeCompare(b.createdAt)
-        : b.createdAt.localeCompare(a.createdAt)
-    })
-    return result
-  }, [bookmarks, scope, activeTags, query, domainFilter, sort])
+  const visibleIds = visible.map((b) => b.id)
+  const {
+    batchMode,
+    selectedIds,
+    allVisibleSelected,
+    toggleSelect,
+    toggleSelectAll,
+    enterBatch,
+    exitBatch,
+  } = useBatchSelection(visibleIds)
 
   const updateParams = (mutate: (p: URLSearchParams) => void) => {
     const next = new URLSearchParams(params)
@@ -158,14 +129,6 @@ export default function HomePage() {
       const next = current.includes(tag) ? current.filter((t) => t !== tag) : [...current, tag]
       next.forEach((t) => p.append('tag', t))
     })
-
-  const contextTitle = useMemo(() => {
-    if (scope.type === 'starred') return '星标书签'
-    if (scope.type === 'none') return '未分组'
-    if (scope.type === 'collection')
-      return collectionMap.get(scope.id)?.name ?? '未知分组'
-    return '全部书签'
-  }, [scope, collectionMap])
 
   useEffect(() => {
     localStorage.setItem(VIEW_KEY, view)
@@ -212,41 +175,20 @@ export default function HomePage() {
     }
   }
 
-  const hasActiveFilter = Boolean(query || activeTags.length || domainFilter) || scope.type !== 'all'
-
-  // —— 批量操作 ——
-  const visibleIds = visible.map((b) => b.id)
-  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
-
-  const toggleSelect = (id: string) =>
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-
-  const exitBatch = () => {
-    setBatchMode(false)
-    setSelectedIds(new Set())
+  if (seedLoading) {
+    return (
+      <div className="flex h-dvh flex-col items-center justify-center gap-3 bg-canvas text-ink3">
+        <Loader2 size={26} className="animate-spin text-accent" />
+        <p className="text-[13px]">正在加载书签…</p>
+      </div>
+    )
   }
-
-  // 切换筛选/视图时，已选项中不在当前结果里的剔除
-  useEffect(() => {
-    if (!batchMode) return
-    const visibleSet = new Set(visibleIds)
-    setSelectedIds((prev) => {
-      const next = new Set([...prev].filter((id) => visibleSet.has(id)))
-      return next.size === prev.size ? prev : next
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params, view, batchMode])
 
   return (
     <div className="flex h-dvh overflow-hidden bg-canvas">
       <Sidebar
         total={bookmarks.length}
-        starredCount={bookmarks.filter((b) => b.starred).length}
+        starredCount={starredCount}
         collections={collections}
         collectionCounts={collectionCounts}
         tags={allTags}
@@ -264,45 +206,56 @@ export default function HomePage() {
         onAddCollection={() => setCollectionModal({ mode: 'create' })}
         onEditCollection={(col) => setCollectionModal({ mode: 'edit', collection: col })}
         onDeleteCollection={(col) => setDeletingCollection(col)}
-        cloudOn={status !== 'local' && status !== 'loading'}
-        syncing={status === 'syncing'}
-        offline={status === 'offline'}
         mobileOpen={mobileMenu}
         onCloseMobile={() => setMobileMenu(false)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div
+        className={
+          isGlass
+            ? 'relative flex min-w-0 flex-1 flex-col overflow-hidden'
+            : 'flex min-w-0 flex-1 flex-col'
+        }
+      >
         <Topbar
           onAdd={() => setModal({ mode: 'add' })}
           onOpenMenu={() => setMobileMenu(true)}
         />
 
-        {/* 手机分组 chips */}
-        <div className="scrollbar-none flex shrink-0 gap-2 overflow-x-auto border-b border-line bg-surface px-4 py-2.5 lg:hidden [mask-image:linear-gradient(to right,#000_calc(100%_-_18px),transparent)]">
-          {[
-            { label: `全部 ${bookmarks.length}`, active: scope.type === 'all', onClick: () => setScope({ type: 'all' }) },
-            { label: `★ 星标 ${bookmarks.filter((b) => b.starred).length}`, active: scope.type === 'starred', onClick: () => setScope({ type: 'starred' }) },
-            ...collections.map((c) => ({
-              label: `${c.emoji ?? ''} ${c.name} ${collectionCounts.get(c.id) ?? 0}`,
-              active: scope.type === 'collection' && scope.id === c.id,
-              onClick: () => setScope({ type: 'collection', id: c.id }),
-            })),
-          ].map((chip) => (
-            <button
-              key={chip.label}
-              onClick={chip.onClick}
-              className={`shrink-0 rounded-full border px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
-                chip.active
-                  ? 'border-ink bg-ink text-white'
-                  : 'border-line bg-white text-ink2'
-              }`}
-            >
-              {chip.label}
-            </button>
-          ))}
-        </div>
+        <main
+          className={`flex-1 overflow-y-auto px-4 pb-28 sm:px-6 lg:pb-10 ${isGlass ? 'pt-[62px]' : ''}`}
+        >
+          {/* 手机分组 chips */}
+          <div
+            className={`flex gap-2 overflow-x-auto border-b border-line px-4 py-2.5 lg:hidden [mask-image:linear-gradient(to right,#000_calc(100%_-_18px),transparent)] ${
+              isGlass
+                ? 'glass-topbar-chips sticky top-[62px] z-30 -mx-4 bg-surface'
+                : 'sticky top-0 z-30 -mx-4 bg-surface'
+            }`}
+          >
+            {[
+              { label: `全部 ${bookmarks.length}`, active: scope.type === 'all', onClick: () => setScope({ type: 'all' }) },
+              { label: `★ 星标 ${starredCount}`, active: scope.type === 'starred', onClick: () => setScope({ type: 'starred' }) },
+              ...collections.map((c) => ({
+                label: `${c.emoji ?? ''} ${c.name} ${collectionCounts.get(c.id) ?? 0}`,
+                active: scope.type === 'collection' && scope.id === c.id,
+                onClick: () => setScope({ type: 'collection', id: c.id }),
+              })),
+            ].map((chip) => (
+              <button
+                key={chip.label}
+                onClick={chip.onClick}
+                className={`shrink-0 rounded-full border px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
+                  chip.active
+                    ? 'border-ink bg-ink text-white'
+                    : 'border-line bg-white/80 text-ink2'
+                }`}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
 
-        <main className="flex-1 overflow-y-auto px-4 pb-28 sm:px-6 lg:pb-10">
           <div className="mx-auto max-w-5xl py-5">
             <div className="mb-4 flex flex-wrap items-center gap-3">
               <h1 className="text-[20px] font-bold">{contextTitle}</h1>
@@ -318,9 +271,11 @@ export default function HomePage() {
                 {view !== 'tile' && (
                 <button
                   onClick={() => {
-                    setBatchMode((v) => !v)
-                    setSelectedIds(new Set())
-                    if (!batchMode) setView('list')
+                    if (batchMode) exitBatch()
+                    else {
+                      enterBatch()
+                      setView('list')
+                    }
                   }}
                   className={`flex h-[34px] items-center gap-1.5 rounded-[10px] border px-2.5 text-[12.5px] font-medium transition-colors ${
                     batchMode
@@ -330,6 +285,7 @@ export default function HomePage() {
                 >
                   <CheckSquare size={13} />
                   <span className="hidden sm:inline">{batchMode ? '退出多选' : '多选'}</span>
+                  <span className="sm:hidden">{batchMode ? '退出' : '多选'}</span>
                 </button>
                 )}
                 <div className="flex rounded-[10px] bg-[#efeeea] p-[3px]">
@@ -439,9 +395,7 @@ export default function HomePage() {
                 totalCount={visible.length}
                 collections={collections}
                 allSelected={allVisibleSelected}
-                onSelectAll={() =>
-                  setSelectedIds(allVisibleSelected ? new Set() : new Set(visibleIds))
-                }
+                onSelectAll={toggleSelectAll}
                 onClear={exitBatch}
                 onMove={(collectionId) => {
                   bulkUpdate([...selectedIds], { collectionId })
@@ -539,7 +493,7 @@ export default function HomePage() {
                 ))}
               </div>
             ) : view === 'tile' ? (
-              <div className="grid grid-cols-3 gap-1 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-10">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
                 {visible.map((bm) => (
                   <BookmarkTile
                     key={bm.id}
@@ -632,7 +586,7 @@ export default function HomePage() {
       {batchDeleteOpen && (
         <ConfirmDialog
           title={`删除 ${selectedIds.size} 条书签？`}
-          message="这些书签将从书库和云端删除，此操作无法撤销。"
+          message="这些书签将从书库中删除，此操作无法撤销。"
           confirmText={`删除 ${selectedIds.size} 条`}
           danger
           onConfirm={() => {

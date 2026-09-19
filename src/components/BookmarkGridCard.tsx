@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
 import { Pencil, Star, Trash2 } from 'lucide-react'
 import type { Bookmark } from '../types'
 import { coverGradient } from '../lib/color'
 import { badgeText } from '../lib/badge'
-import { isInternalDomain, probeIcon } from '../lib/favicon'
+import { useFaviconSrc } from '../hooks/useFavicon'
 
 interface BookmarkGridCardProps {
   bookmark: Bookmark
@@ -24,38 +23,7 @@ export default function BookmarkGridCard({
   onEdit,
   onDelete,
 }: BookmarkGridCardProps) {
-  const imSource = `https://favicon.im/${bookmark.domain}?larger=true`
-  const directSource = `https://${bookmark.domain}/favicon.ico`
-  const [src, setSrc] = useState('')
-  const [logoFailed, setLogoFailed] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    setLogoFailed(false)
-    if (bookmark.faviconUrl) {
-      setSrc(bookmark.faviconUrl)
-    } else if (isInternalDomain(bookmark.domain)) {
-      setLogoFailed(true)
-    } else {
-      setSrc('')
-      probeIcon(imSource).then((ok) => {
-        if (!cancelled) setSrc(ok ? imSource : directSource)
-      })
-    }
-    return () => {
-      cancelled = true
-    }
-  }, [bookmark.domain, bookmark.faviconUrl, imSource, directSource])
-
-  const handleLogoError = () => {
-    if (src === bookmark.faviconUrl) {
-      probeIcon(imSource).then((ok) => setSrc(ok ? imSource : directSource))
-    } else if (src === imSource) {
-      setSrc(directSource)
-    } else {
-      setLogoFailed(true)
-    }
-  }
+  const { src, failed, handleError } = useFaviconSrc(bookmark.domain, bookmark.faviconUrl)
 
   const coverH = compact ? 'h-[92px]' : 'h-[128px]'
   const logoBox = compact ? 'h-11 w-11 rounded-[13px]' : 'h-16 w-16 rounded-[18px]'
@@ -70,7 +38,7 @@ export default function BookmarkGridCard({
 
   return (
     <article
-      className={`group relative flex flex-col overflow-hidden border border-line bg-surface shadow-[0_1px_2px_rgba(28,27,25,.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(28,27,25,.18),0_2px_6px_rgba(28,27,25,.05)] ${cardR}`}
+      className={`glass-card group relative flex flex-col overflow-hidden border border-line bg-surface shadow-[0_1px_2px_rgba(28,27,25,.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(28,27,25,.18),0_2px_6px_rgba(28,27,25,.05)] ${cardR}`}
     >
       <button
         onClick={() => onOpen(bookmark)}
@@ -91,15 +59,15 @@ export default function BookmarkGridCard({
             <span
               className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden bg-white/15 backdrop-blur-sm ${logoBox}`}
             >
-              {!logoFailed && src ? (
+              {!failed && src ? (
                 <img
                   src={src}
                   alt=""
                   loading="lazy"
-                  onError={handleLogoError}
+                  onError={handleError}
                   className={logoImg}
                 />
-              ) : logoFailed ? (
+              ) : failed ? (
                 <span className={`font-bold text-white ${letter}`}>
                   {badgeText(bookmark.domain, bookmark.title)}
                 </span>

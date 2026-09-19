@@ -14,16 +14,16 @@ const LETTER_PALETTES: Array<{ bg: string; fg: string }> = [
   { bg: '#F3EFE6', fg: '#8A6D3B' },
 ]
 
-/** 网格封面的品牌渐变（无 og:image 时） */
+/** 网格封面渐变：低饱和柔和色，避免与玻璃/极简风抢视觉 */
 const GRADIENTS = [
-  'linear-gradient(135deg,#24292F,#4B5563)',
-  'linear-gradient(135deg,#EA4C89,#C2266B)',
-  'linear-gradient(135deg,#38BDF8,#0EA5E9)',
-  'linear-gradient(135deg,#06B6D4,#0E7490)',
-  'linear-gradient(135deg,#FF6600,#C2410C)',
-  'linear-gradient(135deg,#5C6AC4,#3247AE)',
-  'linear-gradient(135deg,#22C55E,#15803D)',
-  'linear-gradient(135deg,#0057A4,#0C3E75)',
+  'linear-gradient(135deg,#5B6470,#8A929C)',
+  'linear-gradient(135deg,#D4899F,#C46B88)',
+  'linear-gradient(135deg,#7EB8D8,#5A9BB8)',
+  'linear-gradient(135deg,#6BB5A8,#4A9488)',
+  'linear-gradient(135deg,#D4A574,#C4894A)',
+  'linear-gradient(135deg,#8B92C4,#6B72A8)',
+  'linear-gradient(135deg,#7BC492,#5AA874)',
+  'linear-gradient(135deg,#6A9BC0,#4A7BA0)',
 ]
 
 function hashString(s: string): number {

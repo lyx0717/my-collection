@@ -18,6 +18,16 @@
 
   --font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', 'Inter', 'Helvetica Neue', sans-serif;
+
+  /* 玻璃模式 token（外观规则 A：chrome 玻璃 + 紧凑卡片 hover） */
+  --glass-bg: rgba(255, 255, 255, 0.48);
+  --glass-bg-soft: rgba(255, 255, 255, 0.42);
+  --glass-bg-hover: rgba(255, 255, 255, 0.52);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --glass-border-hover: rgba(255, 255, 255, 0.7);
+  --glass-blur: blur(28px) saturate(180%);
+  --glass-blur-tile: blur(20px) saturate(180%);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 :root {
@@ -131,4 +141,63 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* —— 外观：实心 / 玻璃（html[data-glass="on"]）—— */
+/* 规则 A：chrome 玻璃；紧凑卡片/磁贴默认实心，仅 hover 磨砂 */
+
+html[data-glass='on'] .glass-card {
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    backdrop-filter 0.2s ease;
+}
+
+html[data-glass='on'] .glass-card:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow:
+    var(--glass-highlight),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.4),
+    0 16px 40px -20px rgba(28, 27, 25, 0.2);
+}
+
+html[data-glass='on'] .tile-shell {
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    backdrop-filter 0.2s ease;
+}
+
+html[data-glass='on'] .tile-shell:hover {
+  background: var(--glass-bg-soft);
+  border-color: var(--glass-border-hover);
+  backdrop-filter: var(--glass-blur-tile);
+  -webkit-backdrop-filter: var(--glass-blur-tile);
+}
+
+html[data-glass='on'] .glass-chrome,
+html[data-glass='on'] .glass-topbar {
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-highlight);
+}
+
+html[data-glass='on'] .glass-topbar-chips {
+  background: var(--glass-bg-soft);
+  border-bottom-color: var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+/* 玻璃模式：主内容区极淡提亮（无彩色） */
+html[data-glass='on'] body {
+  background:
+    radial-gradient(1200px 600px at 20% 0%, rgba(255, 255, 255, 0.85), transparent 55%),
+    var(--color-canvas);
 }

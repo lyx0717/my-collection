@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
 import { letterColor } from '../lib/color'
 import { badgeText } from '../lib/badge'
-import { isInternalDomain, probeIcon } from '../lib/favicon'
+import { useFaviconSrc } from '../hooks/useFavicon'
 
 interface FaviconProps {
   domain: string
@@ -25,68 +24,17 @@ const LETTER_SIZES = {
   md: 'text-[15px]',
 }
 
-/** favicon：内网直接文字徽章；外网探测 favicon.im 有效性，失败直取站点 /favicon.ico，再失败用徽章 */
+/** favicon：自定义图标 → 站点 /favicon.ico → 文字徽章 */
 export default function Favicon({ domain, title, faviconUrl, size = 'md', className = '' }: FaviconProps) {
-  const imSource = useMemo(
-    () => (domain ? `https://favicon.im/${domain}?larger=true` : ''),
-    [domain],
-  )
-  const directSource = useMemo(
-    () => (domain ? `https://${domain}/favicon.ico` : ''),
-    [domain],
-  )
-
-  const [src, setSrc] = useState<string>('')
-  const [badge, setBadge] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    setBadge(false)
-
-    // 自定义图标直接尝试
-    if (faviconUrl) {
-      setSrc(faviconUrl)
-      return () => {
-        cancelled = true
-      }
-    }
-    // 内网地址：favicon.im 只会给占位图，直接徽章
-    if (isInternalDomain(domain) || !imSource) {
-      setBadge(true)
-      return () => {
-        cancelled = true
-      }
-    }
-    // 外网：先探测 favicon.im 是否真有图
-    setSrc('')
-    probeIcon(imSource).then((ok) => {
-      if (cancelled) return
-      setSrc(ok ? imSource : directSource)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [domain, faviconUrl, imSource, directSource])
-
-  const handleError = () => {
-    if (src === faviconUrl) {
-      // 自定义图标失败 → 探测 favicon.im
-      probeIcon(imSource).then((ok) => setSrc(ok ? imSource : directSource))
-    } else if (src === imSource) {
-      setSrc(directSource)
-    } else {
-      setBadge(true)
-    }
-  }
-
+  const { src, failed, handleError } = useFaviconSrc(domain, faviconUrl)
   const color = letterColor(domain || '?')
 
   return (
     <span
       className={`relative flex shrink-0 items-center justify-center overflow-hidden font-bold ${SIZES[size]} ${className}`}
-      style={{ background: badge ? color.bg : '#F4F3EF' }}
+      style={{ background: failed ? color.bg : '#F4F3EF' }}
     >
-      {badge ? (
+      {failed ? (
         <span
           className={`${LETTER_SIZES[size]} flex h-full w-full items-center justify-center`}
           style={{ color: color.fg }}

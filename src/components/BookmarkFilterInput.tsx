@@ -15,7 +15,7 @@ export default function BookmarkFilterInput({ value, onChange, count }: Bookmark
         id="bookmark-filter-input"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="筛选书签、标签或域名…"
+        placeholder="筛选书签库（标题/标签/域名）…"
         className="w-full min-w-0 bg-transparent text-[13px] outline-none placeholder:text-[#aca89f]"
       />
       {value ? (

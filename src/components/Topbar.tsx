@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Menu, Plus, Settings } from 'lucide-react'
 import EngineSearchBox from './EngineSearchBox'
+import { useAppearance } from '../store/AppearanceContext'
 
 interface TopbarProps {
   onAdd: () => void
@@ -8,8 +9,17 @@ interface TopbarProps {
 }
 
 export default function Topbar({ onAdd, onOpenMenu }: TopbarProps) {
+  const { glassMode } = useAppearance()
+  // 实心：文档流 sticky；玻璃：绝对定位叠层，便于内容从底下滚过
+  const positionCls =
+    glassMode === 'glass'
+      ? 'glass-topbar absolute inset-x-0 top-0 z-40'
+      : 'sticky top-0 z-40 shrink-0'
+
   return (
-    <header className="sticky top-0 z-40 flex h-[62px] shrink-0 items-center gap-2.5 border-b border-line bg-surface/95 px-4 backdrop-blur sm:gap-3.5 sm:px-6">
+    <header
+      className={`${positionCls} flex h-[62px] items-center gap-2.5 border-b border-line bg-surface/95 px-4 backdrop-blur sm:gap-3.5 sm:px-6`}
+    >
       <button
         onClick={onOpenMenu}
         aria-label="打开分组菜单"

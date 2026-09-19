@@ -1,65 +1,90 @@
 import type { Bookmark, Collection, ParsedImportBookmark } from '../types'
 
 /**
- * 解析浏览器导出的 Netscape Bookmark HTML：
- * <DT><H3>文件夹</H3><DL><DT><A HREF ADD_DATE>标题</A><DD>描述</DL>
- * 深层文件夹拍平，书签归入其最近的顶层分组。
+ * 解析浏览器导出的 Netscape Bookmark HTML。
+ * 兼容 DT 内嵌 DL，以及 H3 与后续 DL 相邻的常见结构；深层文件夹拍平到顶层分组。
  */
 export function parseNetscape(html: string): {
   bookmarks: ParsedImportBookmark[]
   collectionNames: string[]
 } {
   const doc = new DOMParser().parseFromString(html, 'text/html')
-  const rootDl = doc.querySelector('dl') ?? doc.body
   const bookmarks: ParsedImportBookmark[] = []
   const collectionNames: string[] = []
 
-  const walk = (dl: Element, topFolder?: string, depth = 0) => {
-    for (const child of Array.from(dl.children)) {
-      if (child.tagName !== 'DT') {
-        // DD（描述）或孤立 <p>，跳过；部分浏览器把 A 直接放在 DL 下
-        if (child.tagName === 'A') consumeAnchor(child as HTMLAnchorElement, topFolder)
-        continue
-      }
-      const h3 = child.querySelector('h3')
-      const anchor = child.querySelector('a')
-      const subDl = child.querySelector('dl')
-
-      if (h3 && subDl) {
-        const name = h3.textContent?.trim()
-        const folder = depth === 0 && name ? name : topFolder
-        if (depth === 0 && name) collectionNames.push(name)
-        walk(subDl, folder, depth + 1)
-      } else if (anchor) {
-        consumeAnchor(anchor, topFolder)
-      }
-    }
-  }
-
-  const consumeAnchor = (a: HTMLAnchorElement, collectionName?: string) => {
-    const url = a.getAttribute('href')?.trim() ?? ''
+  const consumeAnchor = (a: Element, collectionName?: string) => {
+    const url = (a.getAttribute('href') ?? '').trim()
     if (!/^https?:\/\//i.test(url)) return
     const addDate = a.getAttribute('add_date')
     bookmarks.push({
       url,
-      title: a.textContent?.trim() || url,
+      title: (a.textContent ?? '').trim() || url,
       tags: (a.getAttribute('tags') ?? '')
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean),
       collectionName,
-      createdAt: addDate && /^\d+$/.test(addDate)
-        ? new Date(Number(addDate) * 1000).toISOString()
-        : undefined,
+      createdAt:
+        addDate && /^\d+$/.test(addDate)
+          ? new Date(Number(addDate) * 1000).toISOString()
+          : undefined,
     })
   }
 
-  if (rootDl) walk(rootDl)
+  const walk = (parent: Element, folder: string | undefined, depth: number) => {
+    let current = folder
+    for (const child of Array.from(parent.children)) {
+      const tag = child.tagName.toUpperCase()
+
+      if (tag === 'H3') {
+        const name = (child.textContent ?? '').trim()
+        if (depth === 0 && name) {
+          collectionNames.push(name)
+          current = name
+        }
+        continue
+      }
+
+      if (tag === 'A') {
+        consumeAnchor(child, current)
+        continue
+      }
+
+      if (tag === 'DT') {
+        const h3 = Array.from(child.children).find((c) => c.tagName.toUpperCase() === 'H3')
+        if (h3) {
+          const name = (h3.textContent ?? '').trim()
+          if (depth === 0 && name) {
+            collectionNames.push(name)
+            current = name
+          }
+        }
+        walk(child, current, depth)
+        continue
+      }
+
+      if (tag === 'DL') {
+        walk(child, current, depth + 1)
+        continue
+      }
+
+      // <p> 等包装元素内可能直接放 A
+      walk(child, current, depth)
+    }
+  }
+
+  const root = doc.querySelector('dl') ?? doc.body ?? doc.documentElement
+  if (root) walk(root, undefined, 0)
+
   return { bookmarks, collectionNames: [...new Set(collectionNames)] }
 }
 
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 }
 
 /** 导出为可被 Chrome/Safari/Edge/Firefox 导回的 Netscape HTML */
@@ -89,7 +114,9 @@ export function exportNetscape(bookmarks: Bookmark[], collections: Collection[])
   for (const col of collections) {
     const list = groups.get(col.id)
     if (!list?.length) continue
-    blocks.push(`  <DT><H3>${escapeHtml(col.name)}</H3>\n  <DL><p>\n${renderLinks(list)}\n  </DL><p>`)
+    blocks.push(
+      `  <DT><H3>${escapeHtml(col.name)}</H3>\n  <DL><p>\n${renderLinks(list)}\n  </DL><p>`,
+    )
   }
   const loose = groups.get('__none__')
   if (loose?.length) blocks.push(renderLinks(loose))

@@ -20,9 +20,6 @@ interface SidebarProps {
   onDeleteCollection: (col: Collection) => void
   mobileOpen: boolean
   onCloseMobile: () => void
-  cloudOn?: boolean
-  syncing?: boolean
-  offline?: boolean
 }
 
 function scopeIsActive(scope: Scope, target: Scope['type'], id?: string): boolean {
@@ -79,9 +76,6 @@ function SidebarBody(props: SidebarProps) {
     onAddCollection,
     onEditCollection,
     onDeleteCollection,
-    cloudOn,
-    syncing,
-    offline,
   } = props
 
   return (
@@ -248,13 +242,7 @@ function SidebarBody(props: SidebarProps) {
         className="mt-2 flex gap-2 rounded-[10px] bg-surface-2 p-2.5 text-[11px] leading-[1.55] text-ink3 transition-colors hover:text-ink2"
       >
         <HardDriveDownload size={14} className="mt-0.5 shrink-0" />
-        {cloudOn
-          ? syncing
-            ? '正在同步到云端…'
-            : offline
-              ? '当前离线，改动暂存本地，联网后自动同步'
-              : '云端实时同步已开启，多设备数据一致'
-          : '数据仅保存在本浏览器，设置页可开启云端同步'}
+        数据仅保存在本浏览器，清缓存前请到设置页导出备份
       </a>
     </div>
   )
@@ -264,7 +252,7 @@ export default function Sidebar(props: SidebarProps) {
   return (
     <>
       {/* 桌面常驻 */}
-      <aside className="hidden w-[236px] shrink-0 border-r border-line bg-surface lg:block">
+      <aside className="glass-chrome hidden w-[236px] shrink-0 border-r border-line bg-surface lg:block">
         <SidebarBody {...props} />
       </aside>
 
@@ -275,7 +263,7 @@ export default function Sidebar(props: SidebarProps) {
             className="animate-fade-in absolute inset-0 bg-ink/35"
             onClick={props.onCloseMobile}
           />
-          <aside className="animate-drawer absolute inset-y-0 left-0 w-[270px] border-r border-line bg-surface shadow-2xl">
+          <aside className="glass-chrome animate-drawer absolute inset-y-0 left-0 w-[270px] border-r border-line bg-surface shadow-2xl">
             <button
               onClick={props.onCloseMobile}
               aria-label="关闭菜单"

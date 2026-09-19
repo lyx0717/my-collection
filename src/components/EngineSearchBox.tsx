@@ -141,7 +141,7 @@ export default function EngineSearchBox() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && submit()}
-        placeholder={`用${active.name}搜索，回车打开结果`}
+        placeholder={`搜网页：${active.name}（回车打开）`}
         className="h-full w-full min-w-0 flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-[#aca89f]"
       />
       {query ? (

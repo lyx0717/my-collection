@@ -9,23 +9,14 @@ import {
   type ReactNode,
 } from 'react'
 import type { Bookmark, BookmarkInput, Collection, StoreShape } from '../types'
-import { SEED_DATA } from '../data/seed'
 import { uid } from '../lib/id'
 import { dedupeKey, extractDomain } from '../lib/url'
 import { exportNetscape } from '../lib/netscape'
-import {
-  checkHealth,
-  clearSyncConfig,
-  fetchCloud,
-  loadSyncConfig,
-  saveCloud,
-  saveSyncConfig,
-  type SyncConfig,
-} from '../lib/sync'
 
 const STORAGE_KEY = 'mybookmarks:v2'
+const LEGACY_SYNC_KEY = 'mybookmarks:sync-config'
 
-export type SyncStatus = 'loading' | 'cloud' | 'syncing' | 'offline' | 'local'
+const EMPTY_STORE: StoreShape = { version: 2, bookmarks: [], collections: [] }
 
 function isBookmark(v: unknown): v is Bookmark {
   if (typeof v !== 'object' || v === null) return false
@@ -53,7 +44,7 @@ function isStore(v: unknown): v is StoreShape {
   )
 }
 
-function loadLocal(): StoreShape {
+function loadLocal(): StoreShape | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
@@ -61,9 +52,15 @@ function loadLocal(): StoreShape {
       if (isStore(parsed)) return parsed
     }
   } catch {
-    // 损坏回落示例
+    // 损坏时回落内置数据
   }
-  return structuredClone(SEED_DATA)
+  return null
+}
+
+function persistLocal(data: StoreShape) {
+  const text = JSON.stringify(data)
+  localStorage.setItem(STORAGE_KEY, text)
+  return new Blob([text]).size
 }
 
 export interface NewBookmarkDraft {
@@ -80,11 +77,7 @@ export interface NewBookmarkDraft {
 interface BookmarksContextValue {
   bookmarks: Bookmark[]
   collections: Collection[]
-  status: SyncStatus
-  lastSyncedAt: string | null
-  syncError: string | null
-  hasSyncConfig: boolean
-  pendingCount: number
+  seedLoading: boolean
   addBookmark: (input: BookmarkInput) => Bookmark
   updateBookmark: (id: string, patch: Partial<BookmarkInput>) => void
   removeBookmark: (id: string) => void
@@ -101,148 +94,56 @@ interface BookmarksContextValue {
   bulkAddTags: (ids: string[], tags: string[]) => void
   bulkRemove: (ids: string[]) => void
   replaceAll: (data: StoreShape) => void
-  resetToSeed: () => void
+  resetToSeed: () => Promise<void>
   clearAll: () => void
   downloadJson: () => void
   downloadNetscape: () => void
   storageBytes: number
-  configureSync: (cfg: SyncConfig, mode: 'merge' | 'cloud' | 'local') => Promise<void>
-  disconnectSync: () => void
-  retrySync: () => void
 }
 
 const BookmarksContext = createContext<BookmarksContextValue | null>(null)
 
 export function BookmarksProvider({ children }: { children: ReactNode }) {
-  const [store, setStore] = useState<StoreShape>(() => loadLocal())
-  const [status, setStatus] = useState<SyncStatus>('loading')
-  const [syncError, setSyncError] = useState<string | null>(null)
-  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null)
-  const [pendingCount, setPendingCount] = useState(0)
-  const [cfg, setCfg] = useState<SyncConfig | null>(() => loadSyncConfig())
+  const initial = useRef(loadLocal())
+  const [store, setStore] = useState<StoreShape>(() => initial.current ?? EMPTY_STORE)
+  const [seedLoading, setSeedLoading] = useState(() => initial.current === null)
   const [storageBytes, setStorageBytes] = useState(0)
-
-  const hydrated = useRef(false)
-  const initDone = useRef(false)
-  const saveTimer = useRef<number | undefined>(undefined)
   const storeRef = useRef(store)
-  const cfgRef = useRef(cfg)
-  const cloudMode = status === 'cloud' || status === 'syncing' || status === 'offline'
-  const cloudModeRef = useRef(cloudMode)
   storeRef.current = store
-  cfgRef.current = cfg
-  cloudModeRef.current = cloudMode
 
-  // 初始化：有同步配置则拉云端，决定迁移/缓存/离线
+  // 清理已下线的云同步残留配置
   useEffect(() => {
-    if (initDone.current) return
-    initDone.current = true
-    const config = loadSyncConfig()
-    const local = loadLocal()
-    setStorageBytes(new Blob([localStorage.getItem(STORAGE_KEY) ?? '']).size)
-    if (!config) {
-      setStore(local)
-      setStatus('local')
-      return
+    try {
+      localStorage.removeItem(LEGACY_SYNC_KEY)
+    } catch {
+      // ignore
     }
-    setCfg(config)
-    ;(async () => {
-      try {
-        const cloud = await fetchCloud(config)
-        if (cloud && isStore(cloud)) {
-          setStore(cloud)
-          persistLocal(cloud)
-        } else {
-          // 云端为空：本地有数据则首次迁移上传
-          await saveCloud(config, local)
-          setStore(local)
-          persistLocal(local)
-          setLastSyncedAt(new Date().toISOString())
-        }
-        setStatus('cloud')
-        setSyncError(null)
-      } catch (err) {
-        setStore(local)
-        setStatus('offline')
-        setSyncError(err instanceof Error ? err.message : '无法连接云端，当前显示本地缓存')
-      }
-    })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function persistLocal(data: StoreShape) {
-    const text = JSON.stringify(data)
-    localStorage.setItem(STORAGE_KEY, text)
-    setStorageBytes(new Blob([text]).size)
-  }
-
-  // 统一变更入口：立即更新 UI，本地缓存；云端模式防抖上传
-  const commit = useCallback((updater: (s: StoreShape) => StoreShape) => {
-    setStore((prev) => {
-      const next = updater(prev)
-      persistLocal(next)
-      if (cloudModeRef.current && cfgRef.current) {
-        scheduleCloudSave(next)
-      }
-      return next
+  // 首次使用 / 本地数据损坏时，懒加载内置书签
+  useEffect(() => {
+    if (!seedLoading) return
+    let cancelled = false
+    void import('../data/seed').then(({ SEED_DATA }) => {
+      if (cancelled) return
+      const seeded = structuredClone(SEED_DATA)
+      setStore(seeded)
+      setStorageBytes(persistLocal(seeded))
+      setSeedLoading(false)
     })
-  }, [])
-
-  const scheduleCloudSave = useCallback((data: StoreShape) => {
-    setStatus('syncing')
-    setPendingCount((n) => n + 1)
-    window.clearTimeout(saveTimer.current)
-    saveTimer.current = window.setTimeout(async () => {
-      const config = cfgRef.current
-      if (!config) return
-      try {
-        await saveCloud(config, data)
-        setLastSyncedAt(new Date().toISOString())
-        setSyncError(null)
-        setPendingCount(0)
-        setStatus('cloud')
-      } catch (err) {
-        setStatus('offline')
-        setSyncError(err instanceof Error ? err.message : '同步失败，改动已保存在本地')
-      }
-    }, 700)
-  }, [])
-
-  const retrySync = useCallback(() => {
-    const config = cfgRef.current
-    if (!config) return
-    setStatus('syncing')
-    saveCloud(config, storeRef.current)
-      .then(() => {
-        setLastSyncedAt(new Date().toISOString())
-        setSyncError(null)
-        setPendingCount(0)
-        setStatus('cloud')
-      })
-      .catch((err) => {
-        setStatus('offline')
-        setSyncError(err instanceof Error ? err.message : '同步失败')
-      })
-  }, [])
-
-  // 网络恢复后自动补传
-  useEffect(() => {
-    const onOnline = () => {
-      if (cloudModeRef.current && cfgRef.current) retrySync()
+    return () => {
+      cancelled = true
     }
-    window.addEventListener('online', onOnline)
-    return () => window.removeEventListener('online', onOnline)
-  }, [retrySync])
+  }, [seedLoading])
 
-  // 非云端模式保持直接写 localStorage（开发期与未配置时）
   useEffect(() => {
-    if (!hydrated.current) {
-      hydrated.current = true
-      return
-    }
-    if (status === 'local') persistLocal(store)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [store, status])
+    if (seedLoading) return
+    setStorageBytes(persistLocal(store))
+  }, [store, seedLoading])
+
+  const commit = useCallback((updater: (s: StoreShape) => StoreShape) => {
+    setStore((prev) => updater(prev))
+  }, [])
 
   const addBookmark = useCallback(
     (input: BookmarkInput): Bookmark => {
@@ -336,12 +237,12 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
         id: uid('col'),
         name,
         emoji,
-        order: store.collections.length,
+        order: storeRef.current.collections.length,
       }
       commit((s) => ({ ...s, collections: [...s.collections, created] }))
       return created
     },
-    [commit, store.collections.length],
+    [commit],
   )
 
   const renameCollection = useCallback(
@@ -460,7 +361,12 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
   )
 
   const replaceAll = useCallback((data: StoreShape) => commit(() => data), [commit])
-  const resetToSeed = useCallback(() => commit(() => structuredClone(SEED_DATA)), [commit])
+
+  const resetToSeed = useCallback(async () => {
+    const { SEED_DATA } = await import('../data/seed')
+    commit(() => structuredClone(SEED_DATA))
+  }, [commit])
+
   const clearAll = useCallback(
     () => commit(() => ({ version: 2, bookmarks: [], collections: [] })),
     [commit],
@@ -486,73 +392,11 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
     URL.revokeObjectURL(a.href)
   }, [store])
 
-  // 设置页配置云同步
-  const configureSync = useCallback(
-    async (newCfg: SyncConfig, mode: 'merge' | 'cloud' | 'local') => {
-      await checkHealth(newCfg)
-      const cloud = await fetchCloud(newCfg)
-      const local = storeRef.current
-      if (mode === 'cloud' && cloud && isStore(cloud)) {
-        setStore(cloud)
-        persistLocal(cloud)
-      } else if (mode === 'local' || !cloud) {
-        await saveCloud(newCfg, local)
-        setStore(local)
-        persistLocal(local)
-      } else {
-        // merge：云端为主，本地独有书签并入，同名分组复用
-        const merged: StoreShape = {
-          version: 2,
-          collections: [...cloud.collections],
-          bookmarks: [...cloud.bookmarks],
-        }
-        const colIdByName = new Map(cloud.collections.map((c) => [c.name, c.id]))
-        for (const col of local.collections) {
-          if (colIdByName.has(col.name)) continue
-          merged.collections.push(col)
-          colIdByName.set(col.name, col.id)
-        }
-        const have = new Set(cloud.bookmarks.map((b) => dedupeKey(b.url)))
-        for (const bm of local.bookmarks) {
-          if (have.has(dedupeKey(bm.url))) continue
-          const localCol = local.collections.find((c) => c.id === bm.collectionId)
-          merged.bookmarks.push({
-            ...bm,
-            id: uid(),
-            collectionId: localCol ? colIdByName.get(localCol.name) : undefined,
-          })
-          have.add(dedupeKey(bm.url))
-        }
-        await saveCloud(newCfg, merged)
-        setStore(merged)
-        persistLocal(merged)
-      }
-      saveSyncConfig(newCfg)
-      setCfg(newCfg)
-      cfgRef.current = newCfg
-      setLastSyncedAt(new Date().toISOString())
-      setStatus('cloud')
-      setSyncError(null)
-    },
-    [],
-  )
-
-  const disconnectSync = useCallback(() => {
-    clearSyncConfig()
-    setCfg(null)
-    cfgRef.current = null
-    setStatus('local')
-  }, [])
-
   const value = useMemo<BookmarksContextValue>(
     () => ({
       bookmarks: store.bookmarks,
       collections: store.collections,
-      status,
-      lastSyncedAt,
-      syncError,
-      hasSyncConfig: Boolean(cfg),
-      pendingCount,
+      seedLoading,
       addBookmark,
       updateBookmark,
       removeBookmark,
@@ -574,17 +418,10 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
       downloadJson,
       downloadNetscape,
       storageBytes,
-      configureSync,
-      disconnectSync,
-      retrySync,
     }),
     [
       store,
-      status,
-      lastSyncedAt,
-      syncError,
-      cfg,
-      pendingCount,
+      seedLoading,
       addBookmark,
       updateBookmark,
       removeBookmark,
@@ -606,9 +443,6 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
       downloadJson,
       downloadNetscape,
       storageBytes,
-      configureSync,
-      disconnectSync,
-      retrySync,
     ],
   )
 

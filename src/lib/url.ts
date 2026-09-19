@@ -6,9 +6,7 @@ export function normalizeUrl(raw: string): string {
   try {
     const u = new URL(v)
     u.hash = ''
-    // 去掉仅作结尾斜杠的 path（保留带 query 的情况）
-    if (u.pathname === '/') u.pathname = '/'
-    u.hostname = u.hostname.toLowerCase()
+    u.hostname = u.hostname.toLowerCase().replace(/^www\./, '')
     return u.toString().replace(/\/$/, (m) => (u.search ? m : ''))
   } catch {
     return v
