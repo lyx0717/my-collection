@@ -6,6 +6,7 @@ import {
   Globe,
   LayoutGrid,
   List,
+  LayoutDashboard,
   Plus,
   Settings,
   Bookmark as BookmarkIcon,
@@ -21,6 +22,7 @@ import Topbar from '../components/Topbar'
 import BookmarkFilterInput from '../components/BookmarkFilterInput'
 import BookmarkRow from '../components/BookmarkRow'
 import BookmarkGridCard from '../components/BookmarkGridCard'
+import BookmarkTile from '../components/BookmarkTile'
 import BookmarkModal from '../components/BookmarkModal'
 import BatchToolbar from '../components/BatchToolbar'
 import DomainBatchBar from '../components/DomainBatchBar'
@@ -52,6 +54,7 @@ export default function HomePage() {
     bulkUpdate,
     bulkAddTags,
     bulkRemove,
+    removeTag,
   } = useBookmarks()
   const toast = useToast()
   const [params, setParams] = useSearchParams()
@@ -59,6 +62,7 @@ export default function HomePage() {
   const [batchMode, setBatchMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false)
+  const [deletingTag, setDeletingTag] = useState<string | null>(null)
   const [collectionModal, setCollectionModal] = useState<
     | { mode: 'create' }
     | { mode: 'edit'; collection: Collection }
@@ -256,6 +260,7 @@ export default function HomePage() {
           toggleTag(t)
         }}
         onClearTags={() => updateParams((p) => p.delete('tag'))}
+        onDeleteTag={(tag) => setDeletingTag(tag)}
         onAddCollection={() => setCollectionModal({ mode: 'create' })}
         onEditCollection={(col) => setCollectionModal({ mode: 'edit', collection: col })}
         onDeleteCollection={(col) => setDeletingCollection(col)}
@@ -310,6 +315,7 @@ export default function HomePage() {
                 onChange={(q) => updateParams((p) => (q ? p.set('q', q) : p.delete('q')))}
               />
               <div className="ml-auto flex items-center gap-2.5">
+                {view !== 'tile' && (
                 <button
                   onClick={() => {
                     setBatchMode((v) => !v)
@@ -325,25 +331,29 @@ export default function HomePage() {
                   <CheckSquare size={13} />
                   <span className="hidden sm:inline">{batchMode ? '退出多选' : '多选'}</span>
                 </button>
+                )}
                 <div className="flex rounded-[10px] bg-[#efeeea] p-[3px]">
-                  <button
-                    aria-label="列表视图"
-                    onClick={() => setView('list')}
-                    className={`flex h-7 w-[30px] items-center justify-center rounded-[7px] transition-all ${
-                      view === 'list' ? 'bg-white text-ink shadow-[0_1px_3px_rgba(28,27,25,.12)]' : 'text-[#8f8b82]'
-                    }`}
-                  >
-                    <List size={15} />
-                  </button>
-                  <button
-                    aria-label="网格视图"
-                    onClick={() => setView('grid')}
-                    className={`flex h-7 w-[30px] items-center justify-center rounded-[7px] transition-all ${
-                      view === 'grid' ? 'bg-white text-ink shadow-[0_1px_3px_rgba(28,27,25,.12)]' : 'text-[#8f8b82]'
-                    }`}
-                  >
-                    <LayoutGrid size={15} />
-                  </button>
+                  {(
+                    [
+                      ['list', List, '列表视图'],
+                      ['grid', LayoutGrid, '网格视图'],
+                      ['tile', LayoutDashboard, '磁贴视图'],
+                    ] as const
+                  ).map(([mode, Icon, label]) => (
+                    <button
+                      key={mode}
+                      aria-label={label}
+                      title={label}
+                      onClick={() => setView(mode)}
+                      className={`flex h-7 w-[30px] items-center justify-center rounded-[7px] transition-all ${
+                        view === mode
+                          ? 'bg-white text-ink shadow-[0_1px_3px_rgba(28,27,25,.12)]'
+                          : 'text-[#8f8b82]'
+                      }`}
+                    >
+                      <Icon size={15} />
+                    </button>
+                  ))}
                 </div>
                 <div className="relative">
                   <select
@@ -528,12 +538,23 @@ export default function HomePage() {
                   />
                 ))}
               </div>
+            ) : view === 'tile' ? (
+              <div className="grid grid-cols-3 gap-1 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-10">
+                {visible.map((bm) => (
+                  <BookmarkTile
+                    key={bm.id}
+                    bookmark={bm}
+                    onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
+                  />
+                ))}
+              </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {visible.map((bm) => (
                   <BookmarkGridCard
                     key={bm.id}
                     bookmark={bm}
+                    compact
                     onToggleStar={toggleStar}
                     onTagClick={toggleTag}
                     onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
@@ -621,6 +642,22 @@ export default function HomePage() {
             toast(`已删除 ${selectedIds.size} 条书签`)
           }}
           onCancel={() => setBatchDeleteOpen(false)}
+        />
+      )}
+
+      {deletingTag && (
+        <ConfirmDialog
+          title={`删除标签「#${deletingTag}」？`}
+          message={`该标签会从相关书签上移除（书签不会被删除）。当前共有 ${bookmarks.filter((b) => b.tags.includes(deletingTag)).length} 条书签使用它。`}
+          confirmText="删除标签"
+          danger
+          onConfirm={() => {
+            removeTag(deletingTag)
+            if (activeTags.includes(deletingTag)) toggleTag(deletingTag)
+            toast(`标签「#${deletingTag}」已删除`)
+            setDeletingTag(null)
+          }}
+          onCancel={() => setDeletingTag(null)}
         />
       )}
 

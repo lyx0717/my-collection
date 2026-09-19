@@ -14,6 +14,7 @@ interface SidebarProps {
   onScope: (scope: Scope) => void
   onTag: (tag: string) => void
   onClearTags: () => void
+  onDeleteTag?: (tag: string) => void
   onAddCollection: () => void
   onEditCollection: (col: Collection) => void
   onDeleteCollection: (col: Collection) => void
@@ -74,6 +75,7 @@ function SidebarBody(props: SidebarProps) {
     onScope,
     onTag,
     onClearTags,
+    onDeleteTag,
     onAddCollection,
     onEditCollection,
     onDeleteCollection,
@@ -210,15 +212,34 @@ function SidebarBody(props: SidebarProps) {
         {tags
           .filter(([tag]) => !activeTags.includes(tag))
           .map(([tag, count]) => (
-            <button
+            <div
               key={tag}
-              onClick={() => onTag(tag)}
-              className="flex w-full items-center gap-2 rounded-[10px] px-2.5 py-[6px] text-left text-[13px] text-ink2 transition-colors hover:bg-surface-2"
+              className="group/tag flex w-full items-center rounded-[10px] text-ink2 hover:bg-surface-2"
             >
-              <Tag size={13} strokeWidth={1.8} className="text-ink3" />
-              <span className="truncate">{tag}</span>
-              <span className="ml-auto text-[11px] tabular-nums text-ink3">{count}</span>
-            </button>
+              <button
+                onClick={() => onTag(tag)}
+                className="flex min-w-0 flex-1 items-center gap-2 px-2.5 py-[6px] text-left text-[13px]"
+              >
+                <Tag size={13} strokeWidth={1.8} className="shrink-0 text-ink3" />
+                <span className="truncate">{tag}</span>
+                <span className="ml-auto shrink-0 text-[11px] tabular-nums text-ink3 group-hover/tag:hidden">
+                  {count}
+                </span>
+              </button>
+              {onDeleteTag && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDeleteTag(tag)
+                  }}
+                  aria-label={`删除标签 ${tag}`}
+                  title="删除标签（书签不会被删）"
+                  className="mr-1 hidden h-6 w-6 shrink-0 items-center justify-center rounded-md text-ink3 hover:bg-danger/10 hover:text-danger group-hover/tag:flex"
+                >
+                  <Trash2 size={11.5} />
+                </button>
+              )}
+            </div>
           ))}
       </div>
 

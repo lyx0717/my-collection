@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Pencil, Star, Trash2 } from 'lucide-react'
 import type { Bookmark } from '../types'
-import { coverGradient, domainLetter } from '../lib/color'
+import { coverGradient } from '../lib/color'
+import { badgeText } from '../lib/badge'
+import { isInternalDomain, probeIcon } from '../lib/favicon'
 
 interface BookmarkGridCardProps {
   bookmark: Bookmark
+  compact?: boolean
   onToggleStar: (id: string) => void
   onTagClick?: (tag: string) => void
   onOpen: (bm: Bookmark) => void
@@ -14,19 +17,64 @@ interface BookmarkGridCardProps {
 
 export default function BookmarkGridCard({
   bookmark,
+  compact = false,
   onToggleStar,
   onTagClick,
   onOpen,
   onEdit,
   onDelete,
 }: BookmarkGridCardProps) {
+  const imSource = `https://favicon.im/${bookmark.domain}?larger=true`
+  const directSource = `https://${bookmark.domain}/favicon.ico`
+  const [src, setSrc] = useState('')
   const [logoFailed, setLogoFailed] = useState(false)
 
+  useEffect(() => {
+    let cancelled = false
+    setLogoFailed(false)
+    if (bookmark.faviconUrl) {
+      setSrc(bookmark.faviconUrl)
+    } else if (isInternalDomain(bookmark.domain)) {
+      setLogoFailed(true)
+    } else {
+      setSrc('')
+      probeIcon(imSource).then((ok) => {
+        if (!cancelled) setSrc(ok ? imSource : directSource)
+      })
+    }
+    return () => {
+      cancelled = true
+    }
+  }, [bookmark.domain, bookmark.faviconUrl, imSource, directSource])
+
+  const handleLogoError = () => {
+    if (src === bookmark.faviconUrl) {
+      probeIcon(imSource).then((ok) => setSrc(ok ? imSource : directSource))
+    } else if (src === imSource) {
+      setSrc(directSource)
+    } else {
+      setLogoFailed(true)
+    }
+  }
+
+  const coverH = compact ? 'h-[92px]' : 'h-[128px]'
+  const logoBox = compact ? 'h-11 w-11 rounded-[13px]' : 'h-16 w-16 rounded-[18px]'
+  const logoImg = compact ? 'h-6 w-6 rounded-md' : 'h-9 w-9 rounded-lg'
+  const letter = compact ? 'text-[20px]' : 'text-[26px]'
+  const cardR = compact ? 'rounded-[14px]' : 'rounded-2xl'
+  const bodyP = compact ? 'px-3 py-2.5' : 'px-3.5 py-3'
+  const titleCls = compact
+    ? 'line-clamp-2 min-h-[34px] text-[12.5px] font-semibold leading-[1.36]'
+    : 'line-clamp-2 min-h-[38px] text-[13.5px] font-semibold leading-[1.4]'
+  const starBtn = compact ? 'h-6 w-6 rounded-md' : 'h-7 w-7 rounded-lg'
+
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_1px_2px_rgba(28,27,25,.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(28,27,25,.18),0_2px_6px_rgba(28,27,25,.05)]">
+    <article
+      className={`group relative flex flex-col overflow-hidden border border-line bg-surface shadow-[0_1px_2px_rgba(28,27,25,.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(28,27,25,.18),0_2px_6px_rgba(28,27,25,.05)] ${cardR}`}
+    >
       <button
         onClick={() => onOpen(bookmark)}
-        className="relative block h-[128px] w-full cursor-pointer"
+        className={`relative block w-full cursor-pointer ${coverH}`}
         style={{ background: coverGradient(bookmark.domain) }}
         aria-label={`打开 ${bookmark.title}`}
       >
@@ -40,19 +88,23 @@ export default function BookmarkGridCard({
         ) : (
           <>
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,.14),transparent_70%)]" />
-            <span className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden rounded-[18px] bg-white/15 backdrop-blur-sm">
-              {!logoFailed ? (
+            <span
+              className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden bg-white/15 backdrop-blur-sm ${logoBox}`}
+            >
+              {!logoFailed && src ? (
                 <img
-                  src={`https://favicon.im/${bookmark.domain}?larger=true`}
+                  src={src}
                   alt=""
                   loading="lazy"
-                  onError={() => setLogoFailed(true)}
-                  className="h-9 w-9 rounded-lg"
+                  onError={handleLogoError}
+                  className={logoImg}
                 />
-              ) : (
-                <span className="text-[26px] font-bold text-white">
-                  {domainLetter(bookmark.domain)}
+              ) : logoFailed ? (
+                <span className={`font-bold text-white ${letter}`}>
+                  {badgeText(bookmark.domain, bookmark.title)}
                 </span>
+              ) : (
+                <span className="h-4 w-4 animate-pulse rounded-full bg-white/40" />
               )}
             </span>
           </>
@@ -64,24 +116,28 @@ export default function BookmarkGridCard({
         role="switch"
         aria-checked={bookmark.starred}
         aria-label={bookmark.starred ? '取消星标' : '加星标'}
-        className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-lg bg-white/85 backdrop-blur-sm transition-transform hover:scale-105"
+        className={`absolute right-2 top-2 flex items-center justify-center bg-white/85 backdrop-blur-sm transition-all duration-150 hover:scale-105 ${starBtn} ${
+          bookmark.starred
+            ? 'opacity-100'
+            : 'opacity-0 group-hover:opacity-100 focus:opacity-100'
+        }`}
       >
         <Star
-          size={14}
+          size={compact ? 12 : 14}
           className={bookmark.starred ? 'fill-star text-star' : 'text-[#7c786f]'}
         />
       </button>
 
-      <div className="flex flex-1 flex-col px-3.5 py-3">
+      <div className={`flex flex-1 flex-col ${bodyP}`}>
         <button
           onClick={() => onOpen(bookmark)}
-          className="line-clamp-2 min-h-[38px] text-left text-[13.5px] font-semibold leading-[1.4] hover:text-accent"
+          className={`text-left hover:text-accent ${titleCls}`}
           title={bookmark.title}
         >
           {bookmark.title}
         </button>
-        <div className="mt-1.5 flex items-center gap-1">
-          <span className="min-w-0 flex-1 truncate text-[11.5px] text-ink3">
+        <div className={`flex items-center gap-1 ${compact ? 'mt-1' : 'mt-1.5'}`}>
+          <span className="min-w-0 flex-1 truncate text-[11px] text-ink3">
             {bookmark.domain}
           </span>
           <span className="flex shrink-0 items-center gap-0.5 opacity-100 transition-opacity lg:opacity-0 lg:group-hover:opacity-100">
@@ -90,19 +146,19 @@ export default function BookmarkGridCard({
               aria-label={`编辑 ${bookmark.title}`}
               className="flex h-6 w-6 items-center justify-center rounded-md text-ink3 hover:bg-canvas hover:text-ink"
             >
-              <Pencil size={12.5} />
+              <Pencil size={compact ? 11.5 : 12.5} />
             </button>
             <button
               onClick={() => onDelete(bookmark)}
               aria-label={`删除 ${bookmark.title}`}
               className="flex h-6 w-6 items-center justify-center rounded-md text-ink3 hover:bg-danger/10 hover:text-danger"
             >
-              <Trash2 size={12.5} />
+              <Trash2 size={compact ? 11.5 : 12.5} />
             </button>
           </span>
         </div>
         {bookmark.tags.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
+          <div className={`mt-2 flex flex-wrap gap-1 ${compact ? 'mt-1.5' : ''}`}>
             {bookmark.tags.slice(0, 3).map((tag) => (
               <button
                 key={tag}

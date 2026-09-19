@@ -834,7 +834,7 @@ export const SEED_DATA: StoreShape = {
       "domain": "mp.weixin.qq.com",
       "createdAt": "2026-09-18T00:02:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_work"
+      "collectionId": "col_dev"
     },
     {
       "id": "bm_6f520a72-9181-4d90-ae98-beaa4e6704e9",

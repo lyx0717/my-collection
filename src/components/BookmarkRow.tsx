@@ -1,4 +1,4 @@
-import { ArrowUpRight, Pencil, Star, Trash2 } from 'lucide-react'
+import { Pencil, Star, Trash2 } from 'lucide-react'
 import type { Bookmark } from '../types'
 import { shortDate } from '../lib/date'
 import Favicon from './Favicon'
@@ -43,7 +43,7 @@ export default function BookmarkRow({
           onChange={() => onToggleSelect?.(bookmark.id)}
           className="h-4 w-4 shrink-0 accent-accent"
         />
-        <Favicon domain={bookmark.domain} faviconUrl={bookmark.faviconUrl} />
+        <Favicon domain={bookmark.domain} title={bookmark.title} faviconUrl={bookmark.faviconUrl} />
         <div className="min-w-0 flex-1">
           <div className="truncate text-[14px] font-semibold text-ink">{bookmark.title}</div>
           <div className="mt-0.5 truncate text-[12px] text-ink3">
@@ -57,7 +57,7 @@ export default function BookmarkRow({
   }
   return (
     <div className="group flex items-center gap-3 rounded-[14px] border border-line bg-surface px-3.5 py-2.5 shadow-[0_1px_2px_rgba(28,27,25,.05)] transition-all duration-200 hover:-translate-y-px hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(28,27,25,.18),0_2px_6px_rgba(28,27,25,.05)]">
-      <Favicon domain={bookmark.domain} faviconUrl={bookmark.faviconUrl} />
+      <Favicon domain={bookmark.domain} title={bookmark.title} faviconUrl={bookmark.faviconUrl} />
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
@@ -133,15 +133,6 @@ export default function BookmarkRow({
         >
           <Trash2 size={14} />
         </button>
-        <a
-          href={bookmark.url}
-          target="_blank"
-          rel="noreferrer noopener"
-          aria-label={`访问 ${bookmark.title}`}
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[#a39f95] hover:bg-canvas hover:text-accent"
-        >
-          <ArrowUpRight size={15} />
-        </a>
       </div>
     </div>
   )

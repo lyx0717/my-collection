@@ -33,7 +33,7 @@ export type BookmarkInput = Omit<Bookmark, 'id' | 'createdAt' | 'updatedAt' | 'd
   starred?: boolean
 }
 
-export type ViewMode = 'list' | 'grid'
+export type ViewMode = 'list' | 'grid' | 'tile'
 export type SortMode = 'desc' | 'asc' | 'az'
 
 /** 侧栏作用域 */
