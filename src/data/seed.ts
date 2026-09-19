@@ -57,7 +57,7 @@ export const SEED_DATA: StoreShape = {
     {
       "id": "bm_87abac22-75ba-40f6-bf61-42bb40d20837",
       "url": "https://weibo.com/mygroups",
-      "title": "微博（我的分组）",
+      "title": "微博",
       "tags": [
         "社交",
         "微博"
@@ -1280,62 +1280,6 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:30:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_life"
-    },
-    {
-      "id": "bm_e22c67fb-adfc-4eac-a3cf-f2d0ea336cd9",
-      "url": "https://www.weiq.com",
-      "title": "WEIQ 微任务",
-      "tags": [
-        "营销平台",
-        "自媒体"
-      ],
-      "starred": false,
-      "domain": "weiq.com",
-      "createdAt": "2026-09-17T23:29:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_work"
-    },
-    {
-      "id": "bm_05c0f154-ce22-47c3-97cd-eb3571e47364",
-      "url": "http://web.weiq.com",
-      "title": "WEIQ 微任务",
-      "tags": [
-        "营销平台",
-        "自媒体"
-      ],
-      "starred": false,
-      "domain": "web.weiq.com",
-      "createdAt": "2026-09-17T23:28:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_work"
-    },
-    {
-      "id": "bm_19509ea8-6e9b-4060-bb9f-9efd23176637",
-      "url": "https://www.xiaohongshu.com/explore?m_source=itab",
-      "title": "小红书蒲公英",
-      "tags": [
-        "自媒体",
-        "营销"
-      ],
-      "starred": false,
-      "domain": "xiaohongshu.com",
-      "createdAt": "2026-09-17T23:27:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_work"
-    },
-    {
-      "id": "bm_5d016ded-bdcf-47f3-aa42-0fdccf5696a1",
-      "url": "https://www.xingtu.cn/",
-      "title": "巨量星图",
-      "tags": [
-        "营销平台",
-        "自媒体"
-      ],
-      "starred": false,
-      "domain": "xingtu.cn",
-      "createdAt": "2026-09-17T23:26:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_work"
     },
     {
       "id": "bm_ebc535cf-fcfe-44cc-b2bc-85ac51ae5e9e",

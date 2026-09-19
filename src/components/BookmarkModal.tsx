@@ -90,6 +90,21 @@ export default function BookmarkModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // 粘贴/输入 URL 后防抖自动抓取（无需失焦）；编辑时仅当 URL 改变才抓
+  const fetchDebounce = useRef<number | undefined>(undefined)
+  const initialUrl = editing?.url ?? preset?.url ?? ''
+  const onUrlChange = (raw: string) => {
+    setUrl(raw)
+    setUrlError('')
+    setForceSave(false)
+    window.clearTimeout(fetchDebounce.current)
+    if (editing && normalizeUrl(raw) === normalizeUrl(initialUrl)) return
+    const target = normalizeUrl(raw)
+    if (!isValidUrl(target)) return
+    fetchDebounce.current = window.setTimeout(() => void runFetch(target), 650)
+  }
+  useEffect(() => () => window.clearTimeout(fetchDebounce.current), [])
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -238,15 +253,10 @@ export default function BookmarkModal({
                 id="bm-url"
                 className={`${inputCls} ${domain ? 'pl-10' : ''} ${urlError ? 'border-danger' : ''}`}
                 value={url}
-                onChange={(e) => {
-                  setUrl(e.target.value)
-                  setUrlError('')
-                  setForceSave(false)
-                }}
+                onChange={(e) => onUrlChange(e.target.value)}
                 onBlur={(e) => {
                   const n = normalizeUrl(e.target.value)
                   if (n !== e.target.value) setUrl(n)
-                  if (!editing && isValidUrl(n)) void runFetch(n)
                 }}
                 placeholder="https://example.com"
                 inputMode="url"

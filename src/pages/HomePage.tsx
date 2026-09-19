@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   ArrowDownWideNarrow,
+  CheckSquare,
+  Globe,
   LayoutGrid,
   List,
   Plus,
@@ -20,6 +22,8 @@ import BookmarkFilterInput from '../components/BookmarkFilterInput'
 import BookmarkRow from '../components/BookmarkRow'
 import BookmarkGridCard from '../components/BookmarkGridCard'
 import BookmarkModal from '../components/BookmarkModal'
+import BatchToolbar from '../components/BatchToolbar'
+import DomainBatchBar from '../components/DomainBatchBar'
 import CollectionModal from '../components/CollectionModal'
 import ConfirmDialog from '../components/ConfirmDialog'
 import EmptyState from '../components/EmptyState'
@@ -45,10 +49,16 @@ export default function HomePage() {
     addCollection,
     renameCollection,
     removeCollection,
+    bulkUpdate,
+    bulkAddTags,
+    bulkRemove,
   } = useBookmarks()
   const toast = useToast()
   const [params, setParams] = useSearchParams()
   const [deleting, setDeleting] = useState<Bookmark | null>(null)
+  const [batchMode, setBatchMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [batchDeleteOpen, setBatchDeleteOpen] = useState(false)
   const [collectionModal, setCollectionModal] = useState<
     | { mode: 'create' }
     | { mode: 'edit'; collection: Collection }
@@ -200,6 +210,34 @@ export default function HomePage() {
 
   const hasActiveFilter = Boolean(query || activeTags.length || domainFilter) || scope.type !== 'all'
 
+  // —— 批量操作 ——
+  const visibleIds = visible.map((b) => b.id)
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
+
+  const toggleSelect = (id: string) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+
+  const exitBatch = () => {
+    setBatchMode(false)
+    setSelectedIds(new Set())
+  }
+
+  // 切换筛选/视图时，已选项中不在当前结果里的剔除
+  useEffect(() => {
+    if (!batchMode) return
+    const visibleSet = new Set(visibleIds)
+    setSelectedIds((prev) => {
+      const next = new Set([...prev].filter((id) => visibleSet.has(id)))
+      return next.size === prev.size ? prev : next
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params, view, batchMode])
+
   return (
     <div className="flex h-dvh overflow-hidden bg-canvas">
       <Sidebar
@@ -217,6 +255,7 @@ export default function HomePage() {
         onTag={(t) => {
           toggleTag(t)
         }}
+        onClearTags={() => updateParams((p) => p.delete('tag'))}
         onAddCollection={() => setCollectionModal({ mode: 'create' })}
         onEditCollection={(col) => setCollectionModal({ mode: 'edit', collection: col })}
         onDeleteCollection={(col) => setDeletingCollection(col)}
@@ -271,6 +310,21 @@ export default function HomePage() {
                 onChange={(q) => updateParams((p) => (q ? p.set('q', q) : p.delete('q')))}
               />
               <div className="ml-auto flex items-center gap-2.5">
+                <button
+                  onClick={() => {
+                    setBatchMode((v) => !v)
+                    setSelectedIds(new Set())
+                    if (!batchMode) setView('list')
+                  }}
+                  className={`flex h-[34px] items-center gap-1.5 rounded-[10px] border px-2.5 text-[12.5px] font-medium transition-colors ${
+                    batchMode
+                      ? 'border-accent bg-accent-soft text-accent-ink'
+                      : 'border-line bg-white text-ink2 hover:border-line2'
+                  }`}
+                >
+                  <CheckSquare size={13} />
+                  <span className="hidden sm:inline">{batchMode ? '退出多选' : '多选'}</span>
+                </button>
                 <div className="flex rounded-[10px] bg-[#efeeea] p-[3px]">
                   <button
                     aria-label="列表视图"
@@ -326,15 +380,73 @@ export default function HomePage() {
                   </button>
                 ))}
                 {domainFilter && (
-                  <button
-                    onClick={() => updateParams((p) => p.delete('d'))}
-                    className="flex items-center gap-1 rounded-md bg-accent-soft px-2 py-1 text-[12px] font-medium text-accent-ink hover:bg-accent/15"
-                  >
+                  <span className="flex items-center gap-1 rounded-md bg-accent-soft px-2 py-1 text-[12px] font-medium text-accent-ink">
+                    <Globe size={11} />
                     {domainFilter}
-                    <X size={11} />
-                  </button>
+                    <button
+                      onClick={() => updateParams((p) => p.delete('d'))}
+                      aria-label="移除域名筛选"
+                      className="hover:text-danger"
+                    >
+                      <X size={11} />
+                    </button>
+                  </span>
                 )}
+                <button
+                  onClick={() =>
+                    updateParams((p) => {
+                      p.delete('tag')
+                      p.delete('d')
+                    })
+                  }
+                  className="text-[12px] text-ink3 underline-offset-2 hover:text-accent hover:underline"
+                >
+                  清除筛选
+                </button>
               </div>
+            )}
+
+            {/* 域名批量归类横幅 */}
+            {domainFilter && visible.length > 1 && !batchMode && (
+              <DomainBatchBar
+                domain={domainFilter}
+                count={visible.length}
+                collections={collections}
+                onMove={(collectionId) => {
+                  bulkUpdate(
+                    visible.map((b) => b.id),
+                    { collectionId },
+                  )
+                  toast(`已将 ${visible.length} 个 ${domainFilter} 书签移动分组`)
+                }}
+              />
+            )}
+
+            {/* 批量操作栏 */}
+            {batchMode && (
+              <BatchToolbar
+                selectedCount={selectedIds.size}
+                totalCount={visible.length}
+                collections={collections}
+                allSelected={allVisibleSelected}
+                onSelectAll={() =>
+                  setSelectedIds(allVisibleSelected ? new Set() : new Set(visibleIds))
+                }
+                onClear={exitBatch}
+                onMove={(collectionId) => {
+                  bulkUpdate([...selectedIds], { collectionId })
+                  exitBatch()
+                }}
+                onAddTags={(tags) => {
+                  bulkAddTags([...selectedIds], tags)
+                  exitBatch()
+                }}
+                onStar={() => {
+                  bulkUpdate([...selectedIds], { starred: true })
+                  exitBatch()
+                }}
+                onDelete={() => setBatchDeleteOpen(true)}
+              />
             )}
 
             {visible.length === 0 ? (
@@ -367,12 +479,31 @@ export default function HomePage() {
                   hint="换个关键词，或清空当前的分组与标签筛选。"
                   action={
                     hasActiveFilter ? (
-                      <a
-                        href="#/"
-                        className="inline-flex h-10 items-center rounded-lg border border-accent/40 px-4 text-[13px] font-medium text-accent hover:bg-accent-soft"
-                      >
-                        清空全部筛选
-                      </a>
+                      <div className="flex flex-wrap items-center justify-center gap-3">
+                        <button
+                          onClick={() =>
+                            updateParams((p) => {
+                              p.delete('q')
+                              p.delete('tag')
+                              p.delete('d')
+                              p.delete('c')
+                              p.delete('star')
+                              p.delete('none')
+                            })
+                          }
+                          className="inline-flex h-10 items-center rounded-lg bg-accent px-4 text-[13px] font-semibold text-white hover:bg-accent-ink"
+                        >
+                          清除筛选
+                        </button>
+                        <button
+                          onClick={() => updateParams((p) => {
+                            p.delete('q'); p.delete('tag'); p.delete('d'); p.delete('c'); p.delete('star'); p.delete('none')
+                          })}
+                          className="inline-flex h-10 items-center rounded-lg border border-line2 bg-white px-4 text-[13px] font-medium text-ink2 hover:bg-surface-2"
+                        >
+                          查看全部书签
+                        </button>
+                      </div>
                     ) : undefined
                   }
                 />
@@ -386,6 +517,9 @@ export default function HomePage() {
                     collectionName={
                       bm.collectionId ? collectionMap.get(bm.collectionId)?.name : undefined
                     }
+                    selectMode={batchMode}
+                    selected={selectedIds.has(bm.id)}
+                    onToggleSelect={toggleSelect}
                     onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
                     onDelete={(b) => setDeleting(b)}
                     onToggleStar={toggleStar}
@@ -471,6 +605,22 @@ export default function HomePage() {
           existingNames={collections.map((c) => c.name)}
           onSubmit={handleSubmitCollection}
           onClose={() => setCollectionModal(null)}
+        />
+      )}
+
+      {batchDeleteOpen && (
+        <ConfirmDialog
+          title={`删除 ${selectedIds.size} 条书签？`}
+          message="这些书签将从书库和云端删除，此操作无法撤销。"
+          confirmText={`删除 ${selectedIds.size} 条`}
+          danger
+          onConfirm={() => {
+            bulkRemove([...selectedIds])
+            setBatchDeleteOpen(false)
+            exitBatch()
+            toast(`已删除 ${selectedIds.size} 条书签`)
+          }}
+          onCancel={() => setBatchDeleteOpen(false)}
         />
       )}
 

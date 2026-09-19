@@ -13,6 +13,7 @@ interface SidebarProps {
   activeTags: string[]
   onScope: (scope: Scope) => void
   onTag: (tag: string) => void
+  onClearTags: () => void
   onAddCollection: () => void
   onEditCollection: (col: Collection) => void
   onDeleteCollection: (col: Collection) => void
@@ -72,6 +73,7 @@ function SidebarBody(props: SidebarProps) {
     activeTags,
     onScope,
     onTag,
+    onClearTags,
     onAddCollection,
     onEditCollection,
     onDeleteCollection,
@@ -179,31 +181,45 @@ function SidebarBody(props: SidebarProps) {
         onClick={() => onScope({ type: 'none' })}
       />
 
-      <div className="px-2.5 pb-1.5 pt-4 text-[10.5px] font-semibold tracking-[0.14em] text-ink3">
+      <div className="flex items-center justify-between px-2.5 pb-1.5 pt-4 text-[10.5px] font-semibold tracking-[0.14em] text-ink3">
         标签
+        {activeTags.length > 0 && (
+          <button
+            onClick={onClearTags}
+            className="normal-case tracking-normal text-accent hover:underline"
+            style={{ letterSpacing: 0 }}
+          >
+            清除
+          </button>
+        )}
       </div>
       <div className="flex-1 overflow-y-auto">
         {tags.length === 0 && <p className="px-2.5 text-[12px] text-ink3">还没有标签</p>}
-        {tags.map(([tag, count]) => {
-          const active = activeTags.includes(tag)
-          return (
+        {/* 已选标签置顶 */}
+        {activeTags.map((tag) => (
+          <button
+            key={`active-${tag}`}
+            onClick={() => onTag(tag)}
+            className="flex w-full items-center gap-2 rounded-[10px] bg-accent-soft px-2.5 py-[6px] text-left text-[13px] font-semibold text-accent-ink"
+          >
+            <Tag size={13} strokeWidth={1.8} className="text-accent" />
+            <span className="truncate">{tag}</span>
+            <X size={12} className="ml-auto text-accent" />
+          </button>
+        ))}
+        {tags
+          .filter(([tag]) => !activeTags.includes(tag))
+          .map(([tag, count]) => (
             <button
               key={tag}
               onClick={() => onTag(tag)}
-              className={`flex w-full items-center gap-2 rounded-[10px] px-2.5 py-[6px] text-left text-[13px] transition-colors ${
-                active
-                  ? 'bg-accent-soft font-semibold text-accent-ink'
-                  : 'text-ink2 hover:bg-surface-2'
-              }`}
+              className="flex w-full items-center gap-2 rounded-[10px] px-2.5 py-[6px] text-left text-[13px] text-ink2 transition-colors hover:bg-surface-2"
             >
-              <Tag size={13} strokeWidth={1.8} className={active ? 'text-accent' : 'text-ink3'} />
+              <Tag size={13} strokeWidth={1.8} className="text-ink3" />
               <span className="truncate">{tag}</span>
-              <span className={`ml-auto text-[11px] tabular-nums ${active ? 'text-accent' : 'text-ink3'}`}>
-                {count}
-              </span>
+              <span className="ml-auto text-[11px] tabular-nums text-ink3">{count}</span>
             </button>
-          )
-        })}
+          ))}
       </div>
 
       <a

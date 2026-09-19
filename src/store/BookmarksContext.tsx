@@ -97,6 +97,9 @@ interface BookmarksContextValue {
   renameTag: (oldName: string, newName: string) => void
   removeTag: (name: string) => void
   mergeCollections: (incoming: Collection[]) => void
+  bulkUpdate: (ids: string[], patch: Partial<BookmarkInput>) => void
+  bulkAddTags: (ids: string[], tags: string[]) => void
+  bulkRemove: (ids: string[]) => void
   replaceAll: (data: StoreShape) => void
   resetToSeed: () => void
   clearAll: () => void
@@ -412,6 +415,50 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
     [commit],
   )
 
+  const bulkUpdate = useCallback(
+    (ids: string[], patch: Partial<BookmarkInput>) => {
+      const idSet = new Set(ids)
+      commit((s) => ({
+        ...s,
+        bookmarks: s.bookmarks.map((bm) =>
+          idSet.has(bm.id)
+            ? {
+                ...bm,
+                ...patch,
+                domain: patch.url ? extractDomain(patch.url) : bm.domain,
+                updatedAt: new Date().toISOString(),
+              }
+            : bm,
+        ),
+      }))
+    },
+    [commit],
+  )
+
+  const bulkAddTags = useCallback(
+    (ids: string[], newTags: string[]) => {
+      if (!newTags.length) return
+      const idSet = new Set(ids)
+      commit((s) => ({
+        ...s,
+        bookmarks: s.bookmarks.map((bm) =>
+          idSet.has(bm.id)
+            ? { ...bm, tags: [...new Set([...bm.tags, ...newTags])] }
+            : bm,
+        ),
+      }))
+    },
+    [commit],
+  )
+
+  const bulkRemove = useCallback(
+    (ids: string[]) => {
+      const idSet = new Set(ids)
+      commit((s) => ({ ...s, bookmarks: s.bookmarks.filter((bm) => !idSet.has(bm.id)) }))
+    },
+    [commit],
+  )
+
   const replaceAll = useCallback((data: StoreShape) => commit(() => data), [commit])
   const resetToSeed = useCallback(() => commit(() => structuredClone(SEED_DATA)), [commit])
   const clearAll = useCallback(
@@ -518,6 +565,9 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
       renameTag,
       removeTag,
       mergeCollections,
+      bulkUpdate,
+      bulkAddTags,
+      bulkRemove,
       replaceAll,
       resetToSeed,
       clearAll,
@@ -547,6 +597,9 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
       renameTag,
       removeTag,
       mergeCollections,
+      bulkUpdate,
+      bulkAddTags,
+      bulkRemove,
       replaceAll,
       resetToSeed,
       clearAll,

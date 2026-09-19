@@ -11,6 +11,9 @@ interface BookmarkRowProps {
   onToggleStar: (id: string) => void
   onTagClick?: (tag: string) => void
   onDomainClick?: (domain: string) => void
+  selectMode?: boolean
+  selected?: boolean
+  onToggleSelect?: (id: string) => void
 }
 
 export default function BookmarkRow({
@@ -21,7 +24,37 @@ export default function BookmarkRow({
   onToggleStar,
   onTagClick,
   onDomainClick,
+  selectMode = false,
+  selected = false,
+  onToggleSelect,
 }: BookmarkRowProps) {
+  if (selectMode) {
+    return (
+      <label
+        className={`flex cursor-pointer items-center gap-3 rounded-[14px] border px-3.5 py-2.5 transition-colors ${
+          selected
+            ? 'border-accent/50 bg-accent-soft/50'
+            : 'border-line bg-surface hover:border-line2 hover:bg-surface-2'
+        }`}
+      >
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={() => onToggleSelect?.(bookmark.id)}
+          className="h-4 w-4 shrink-0 accent-accent"
+        />
+        <Favicon domain={bookmark.domain} faviconUrl={bookmark.faviconUrl} />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-[14px] font-semibold text-ink">{bookmark.title}</div>
+          <div className="mt-0.5 truncate text-[12px] text-ink3">
+            {bookmark.domain}
+            {collectionName ? ` · ${collectionName}` : ''}
+          </div>
+        </div>
+        {bookmark.starred && <Star size={13} className="shrink-0 fill-star text-star" />}
+      </label>
+    )
+  }
   return (
     <div className="group flex items-center gap-3 rounded-[14px] border border-line bg-surface px-3.5 py-2.5 shadow-[0_1px_2px_rgba(28,27,25,.05)] transition-all duration-200 hover:-translate-y-px hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(28,27,25,.18),0_2px_6px_rgba(28,27,25,.05)]">
       <Favicon domain={bookmark.domain} faviconUrl={bookmark.faviconUrl} />
