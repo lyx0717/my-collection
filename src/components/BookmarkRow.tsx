@@ -2,6 +2,7 @@ import { Pencil, Star, Trash2 } from 'lucide-react'
 import type { Bookmark } from '../types'
 import { shortDate } from '../lib/date'
 import Favicon from './Favicon'
+import StarButton from './StarButton'
 
 interface BookmarkRowProps {
   bookmark: Bookmark
@@ -61,9 +62,6 @@ export default function BookmarkRow({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          {bookmark.starred && (
-            <Star size={13} className="shrink-0 fill-star text-star" aria-label="已星标" />
-          )}
           <a
             href={bookmark.url}
             target="_blank"
@@ -109,27 +107,23 @@ export default function BookmarkRow({
         {shortDate(bookmark.createdAt)}
       </span>
 
-      <div className="flex shrink-0 items-center gap-0.5 opacity-100 transition-opacity lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100">
-        <button
-          onClick={() => onToggleStar(bookmark.id)}
-          aria-label={bookmark.starred ? '取消星标' : '加星标'}
-          className={`flex h-[30px] w-[30px] items-center justify-center rounded-lg hover:bg-canvas ${
-            bookmark.starred ? 'text-star opacity-100' : 'text-[#a39f95] hover:text-ink2'
-          }`}
-        >
-          <Star size={15} className={bookmark.starred ? 'fill-star' : undefined} />
-        </button>
+      <div className="flex shrink-0 items-center gap-0.5">
+        <StarButton
+          starred={bookmark.starred}
+          onToggle={() => onToggleStar(bookmark.id)}
+          revealOnHover={!bookmark.starred}
+        />
         <button
           onClick={() => onEdit(bookmark)}
           aria-label={`编辑 ${bookmark.title}`}
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[#a39f95] hover:bg-canvas hover:text-ink2"
+          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[#a39f95] opacity-100 transition-opacity hover:bg-canvas hover:text-ink2 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
         >
           <Pencil size={14} />
         </button>
         <button
           onClick={() => onDelete(bookmark)}
           aria-label={`删除 ${bookmark.title}`}
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[#a39f95] hover:bg-danger/10 hover:text-danger"
+          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[#a39f95] opacity-100 transition-opacity hover:bg-danger/10 hover:text-danger lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
         >
           <Trash2 size={14} />
         </button>

@@ -1,8 +1,9 @@
-import { Pencil, Star, Trash2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import type { Bookmark } from '../types'
 import { coverGradient } from '../lib/color'
 import { badgeText } from '../lib/badge'
 import { useFaviconSrc } from '../hooks/useFavicon'
+import StarButton from './StarButton'
 
 interface BookmarkGridCardProps {
   bookmark: Bookmark
@@ -34,7 +35,6 @@ export default function BookmarkGridCard({
   const titleCls = compact
     ? 'line-clamp-2 min-h-[34px] text-[12.5px] font-semibold leading-[1.36]'
     : 'line-clamp-2 min-h-[38px] text-[13.5px] font-semibold leading-[1.4]'
-  const starBtn = compact ? 'h-6 w-6 rounded-md' : 'h-7 w-7 rounded-lg'
 
   return (
     <article
@@ -79,22 +79,13 @@ export default function BookmarkGridCard({
         )}
       </button>
 
-      <button
-        onClick={() => onToggleStar(bookmark.id)}
-        role="switch"
-        aria-checked={bookmark.starred}
-        aria-label={bookmark.starred ? '取消星标' : '加星标'}
-        className={`absolute right-2 top-2 flex items-center justify-center bg-white/85 backdrop-blur-sm transition-all duration-150 hover:scale-105 ${starBtn} ${
-          bookmark.starred
-            ? 'opacity-100'
-            : 'opacity-0 group-hover:opacity-100 focus:opacity-100'
-        }`}
-      >
-        <Star
-          size={compact ? 12 : 14}
-          className={bookmark.starred ? 'fill-star text-star' : 'text-[#7c786f]'}
-        />
-      </button>
+      <StarButton
+        starred={bookmark.starred}
+        onToggle={() => onToggleStar(bookmark.id)}
+        size={compact ? 'sm' : 'md'}
+        revealOnHover={!bookmark.starred}
+        className="absolute right-2 top-2 bg-white/85 backdrop-blur-sm"
+      />
 
       <div className={`flex flex-1 flex-col ${bodyP}`}>
         <button

@@ -1,3 +1,4 @@
+import { Star } from 'lucide-react'
 import type { Bookmark } from '../types'
 import { letterColor } from '../lib/color'
 import { badgeText } from '../lib/badge'
@@ -42,7 +43,12 @@ export default function BookmarkTile({ bookmark, onOpen }: BookmarkTileProps) {
           <span className="h-3 w-3 animate-pulse rounded-full bg-line2" />
         )}
         {bookmark.starred && (
-          <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border-2 border-surface bg-star" />
+          <span
+            className="absolute -right-1.5 -top-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full border border-line bg-surface shadow-sm"
+            aria-label="已星标"
+          >
+            <Star size={11} className="fill-star text-star" />
+          </span>
         )}
       </span>
       <span className="line-clamp-2 w-full break-words text-[12px] leading-[1.35] text-ink2 group-hover:text-ink">
