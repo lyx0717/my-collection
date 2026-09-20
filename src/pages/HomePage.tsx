@@ -8,8 +8,6 @@ import {
   LayoutDashboard,
   Loader2,
   Plus,
-  Settings,
-  Bookmark as BookmarkIcon,
   Upload,
   X,
 } from 'lucide-react'
@@ -232,7 +230,7 @@ export default function HomePage() {
         />
 
         <main
-          className={`flex-1 overflow-y-auto px-4 pb-28 sm:px-6 lg:pb-10 ${
+          className={`flex-1 overflow-y-auto px-4 pb-10 sm:px-6 ${
             isGlass ? 'pt-0' : ''
           }`}
         >
@@ -528,24 +526,6 @@ export default function HomePage() {
             )}
           </div>
         </main>
-
-        {/* 手机底栏 */}
-        <nav className="flex h-[64px] shrink-0 border-t border-line bg-surface/95 pb-2 backdrop-blur lg:hidden">
-          <a
-            href="#/"
-            className="flex flex-1 flex-col items-center justify-center gap-0.5 text-[10.5px] font-medium text-accent"
-          >
-            <BookmarkIcon size={20} strokeWidth={1.8} />
-            书签
-          </a>
-          <a
-            href="#/settings"
-            className="flex flex-1 flex-col items-center justify-center gap-0.5 text-[10.5px] font-medium text-ink3"
-          >
-            <Settings size={20} strokeWidth={1.8} />
-            设置
-          </a>
-        </nav>
       </div>
 
       {modal?.mode === 'add' && (

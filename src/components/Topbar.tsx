@@ -30,14 +30,6 @@ export default function Topbar({ onAdd, onOpenMenu }: TopbarProps) {
 
       <EngineSearchBox />
 
-      <Link
-        to="/settings"
-        aria-label="设置"
-        className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[11px] border border-line bg-white text-ink2 transition-colors hover:border-line2 hover:bg-surface-2 hover:text-accent"
-      >
-        <Settings size={17} />
-      </Link>
-
       <button
         onClick={onAdd}
         className="flex h-[38px] shrink-0 items-center gap-1.5 rounded-[11px] bg-accent px-3 text-[13px] font-semibold text-white shadow-[0_6px_14px_-6px_rgba(62,92,255,.55)] transition-colors hover:bg-accent-ink sm:px-4"
@@ -45,6 +37,15 @@ export default function Topbar({ onAdd, onOpenMenu }: TopbarProps) {
         <Plus size={15} strokeWidth={2.4} />
         <span className="hidden sm:inline">添加书签</span>
       </button>
+
+      <Link
+        to="/settings"
+        aria-label="设置"
+        className="ml-auto flex h-[38px] shrink-0 items-center gap-1.5 rounded-[11px] border border-line bg-white px-2.5 text-[13px] font-medium text-ink2 transition-colors hover:border-line2 hover:bg-surface-2 hover:text-accent sm:px-3"
+      >
+        <Settings size={16} />
+        <span className="hidden sm:inline">设置</span>
+      </Link>
     </header>
   )
 }
