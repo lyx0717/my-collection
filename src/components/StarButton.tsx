@@ -19,7 +19,11 @@ export default function StarButton({
 }: StarButtonProps) {
   const box = size === 'sm' ? 'h-6 w-6 rounded-md' : 'h-7 w-7 rounded-lg'
   const icon = size === 'sm' ? 12 : 14
-  const hidden = revealOnHover && !starred ? 'opacity-0 group-hover:opacity-100 focus:opacity-100' : 'opacity-100'
+  // 移动端不提供星标操作；桌面端未星标项 hover 行/卡片时显示
+  const hidden =
+    revealOnHover && !starred
+      ? 'hidden lg:flex lg:opacity-0 lg:group-hover:opacity-100 lg:focus:opacity-100'
+      : 'opacity-100'
 
   return (
     <button

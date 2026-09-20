@@ -2,6 +2,8 @@ export interface Bookmark {
   id: string
   url: string
   title: string
+  /** 手动排序序号（全局顺序，0 开始；缺省按数组位置补齐） */
+  order?: number
   description?: string
   /** 规范化域名，去 www，用于图标/筛选/去重 */
   domain: string

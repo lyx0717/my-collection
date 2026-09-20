@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { Bookmark, Collection, Scope, SortMode } from '../types'
+import type { Bookmark, Collection, Scope } from '../types'
 
 export function scopeFromParams(p: URLSearchParams): Scope {
   const col = p.get('c')
@@ -14,13 +14,13 @@ export interface BookmarkFilterResult {
   scope: Scope
   activeTags: string[]
   domainFilter: string
-  sort: SortMode
   visible: Bookmark[]
   collectionMap: Map<string, Collection>
   collectionCounts: Map<string, number>
   allTags: Array<[string, number]>
   contextTitle: string
   hasActiveFilter: boolean
+  searchFiltered: boolean
   starredCount: number
 }
 
@@ -34,7 +34,6 @@ export function useBookmarkFilter(
   const scope = scopeFromParams(params)
   const activeTags = params.getAll('tag')
   const domainFilter = params.get('d') ?? ''
-  const sort = (params.get('sort') as SortMode) ?? 'desc'
 
   return useMemo(() => {
     const collectionMap = new Map(collections.map((c) => [c.id, c]))
@@ -69,12 +68,8 @@ export function useBookmarkFilter(
       return true
     })
 
-    result.sort((a, b) => {
-      if (sort === 'az') return a.title.localeCompare(b.title, 'zh')
-      return sort === 'asc'
-        ? a.createdAt.localeCompare(b.createdAt)
-        : b.createdAt.localeCompare(a.createdAt)
-    })
+    // 手动排序：按 order；搜索结果仍保持全局顺序，便于拖拽回主列表后位置可预期
+    result.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 
     let contextTitle = '全部书签'
     if (scope.type === 'starred') contextTitle = '星标书签'
@@ -87,7 +82,6 @@ export function useBookmarkFilter(
       scope,
       activeTags,
       domainFilter,
-      sort,
       visible: result,
       collectionMap,
       collectionCounts,
@@ -95,7 +89,9 @@ export function useBookmarkFilter(
       contextTitle,
       hasActiveFilter:
         Boolean(query || activeTags.length || domainFilter) || scope.type !== 'all',
+      /** 搜索/标签/域名筛选：临时视图，禁用拖拽排序 */
+      searchFiltered: Boolean(query || activeTags.length || domainFilter),
       starredCount,
     }
-  }, [bookmarks, collections, query, scope, activeTags, domainFilter, sort])
+  }, [bookmarks, collections, query, scope, activeTags, domainFilter])
 }

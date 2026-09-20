@@ -69,17 +69,27 @@ export default function BookmarkModal({
     if (!isValidUrl(target) || fetchedFor.current === target) return
     fetchedFor.current = target
     const seq = ++requestSeq.current
+    const urlChanged = Boolean(editing) && normalizeUrl(target) !== normalizeUrl(editing?.url ?? '')
     setFetchStatus('fetching')
     try {
       const meta = await fetchMetadata(target)
       if (seq !== requestSeq.current) return
       if (meta.title && !titleTouched.current) setTitle(meta.title)
       if (meta.description && !descTouched.current) setDescription(meta.description)
-      if (meta.cover) setCover(meta.cover)
-      if (meta.favicon) setFaviconUrl(meta.favicon)
+      // logo 不走 Microlink：展示时按域名解析；封面仍可选用抓取结果
+      if (!editing || urlChanged) {
+        setCover(meta.cover)
+        setFaviconUrl(undefined)
+      } else if (meta.cover) {
+        setCover(meta.cover)
+      }
       setFetchStatus(meta.title || meta.description ? 'fetched' : 'degraded')
     } catch {
       if (seq !== requestSeq.current) return
+      if (urlChanged && editing) {
+        setFaviconUrl(undefined)
+        setCover(undefined)
+      }
       setFetchStatus('degraded')
     }
   }
@@ -98,8 +108,13 @@ export default function BookmarkModal({
     setUrlError('')
     setForceSave(false)
     window.clearTimeout(fetchDebounce.current)
-    if (editing && normalizeUrl(raw) === normalizeUrl(initialUrl)) return
     const target = normalizeUrl(raw)
+    const prev = normalizeUrl(initialUrl)
+    if (isValidUrl(target) && extractDomain(target) !== extractDomain(prev)) {
+      setFaviconUrl(undefined)
+      setCover(undefined)
+    }
+    if (editing && target === prev) return
     if (!isValidUrl(target)) return
     fetchDebounce.current = window.setTimeout(() => void runFetch(target), 650)
   }

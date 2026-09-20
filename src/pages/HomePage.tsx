@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
-  ArrowDownWideNarrow,
   CheckSquare,
   Globe,
   LayoutGrid,
@@ -30,6 +29,7 @@ import BookmarkTile from '../components/BookmarkTile'
 import BookmarkModal from '../components/BookmarkModal'
 import BatchToolbar from '../components/BatchToolbar'
 import DomainBatchBar from '../components/DomainBatchBar'
+import SortableBookmarks from '../components/SortableBookmarks'
 import CollectionModal from '../components/CollectionModal'
 import ConfirmDialog from '../components/ConfirmDialog'
 import EmptyState from '../components/EmptyState'
@@ -51,6 +51,8 @@ export default function HomePage() {
     bulkAddTags,
     bulkRemove,
     removeTag,
+    reorderBookmarks,
+    reorderCollections,
   } = useBookmarks()
   const { glassMode } = useAppearance()
   const isGlass = glassMode === 'glass'
@@ -85,13 +87,13 @@ export default function HomePage() {
     scope,
     activeTags,
     domainFilter,
-    sort,
     visible,
     collectionMap,
     collectionCounts,
     allTags,
     contextTitle,
     hasActiveFilter,
+    searchFiltered,
     starredCount,
   } = useBookmarkFilter(bookmarks, collections, params)
 
@@ -105,6 +107,9 @@ export default function HomePage() {
     enterBatch,
     exitBatch,
   } = useBatchSelection(visibleIds)
+
+  // 拖拽：全部/分组/星标/未分组可用；搜索与标签域名筛选、批量多选时禁用
+  const dragEnabled = !batchMode && !searchFiltered
 
   const updateParams = (mutate: (p: URLSearchParams) => void) => {
     const next = new URLSearchParams(params)
@@ -206,6 +211,10 @@ export default function HomePage() {
         onAddCollection={() => setCollectionModal({ mode: 'create' })}
         onEditCollection={(col) => setCollectionModal({ mode: 'edit', collection: col })}
         onDeleteCollection={(col) => setDeletingCollection(col)}
+        onReorderCollections={(orderedIds) => {
+          reorderCollections(orderedIds)
+          toast('分组顺序已更新')
+        }}
         mobileOpen={mobileMenu}
         onCloseMobile={() => setMobileMenu(false)}
       />
@@ -315,24 +324,6 @@ export default function HomePage() {
                       <Icon size={15} />
                     </button>
                   ))}
-                </div>
-                <div className="relative">
-                  <select
-                    value={sort}
-                    onChange={(e) =>
-                      updateParams((p) => p.set('sort', e.target.value))
-                    }
-                    aria-label="排序方式"
-                    className="h-[34px] appearance-none rounded-[10px] border border-line bg-white pl-3 pr-8 text-[12.5px] text-ink2 outline-none"
-                  >
-                    <option value="desc">最新收录</option>
-                    <option value="asc">最早收录</option>
-                    <option value="az">标题 A→Z</option>
-                  </select>
-                  <ArrowDownWideNarrow
-                    size={13}
-                    className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-ink3"
-                  />
                 </div>
               </div>
             </div>
@@ -477,51 +468,63 @@ export default function HomePage() {
                   }
                 />
               )
-            ) : view === 'list' ? (
-              <div className="flex flex-col gap-2">
-                {visible.map((bm) => (
-                  <BookmarkRow
-                    key={bm.id}
-                    bookmark={bm}
-                    collectionName={
-                      bm.collectionId ? collectionMap.get(bm.collectionId)?.name : undefined
-                    }
-                    selectMode={batchMode}
-                    selected={selectedIds.has(bm.id)}
-                    onToggleSelect={toggleSelect}
-                    onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
-                    onDelete={(b) => setDeleting(b)}
-                    onToggleStar={toggleStar}
-                    onTagClick={toggleTag}
-                    onDomainClick={(d) => updateParams((p) => p.set('d', d))}
-                  />
-                ))}
-              </div>
-            ) : view === 'tile' ? (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
-                {visible.map((bm) => (
-                  <BookmarkTile
-                    key={bm.id}
-                    bookmark={bm}
-                    onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
-                  />
-                ))}
-              </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {visible.map((bm) => (
-                  <BookmarkGridCard
-                    key={bm.id}
-                    bookmark={bm}
-                    compact
-                    onToggleStar={toggleStar}
-                    onTagClick={toggleTag}
-                    onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
-                    onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
-                    onDelete={(b) => setDeleting(b)}
-                  />
-                ))}
-              </div>
+              <SortableBookmarks
+                ids={visibleIds}
+                view={view}
+                disabled={!dragEnabled}
+                onReorder={(orderedIds) => reorderBookmarks(orderedIds)}
+              >
+                {view === 'list' ? (
+                  <div className="flex flex-col gap-2">
+                    {visible.map((bm) => (
+                      <BookmarkRow
+                        key={bm.id}
+                        bookmark={bm}
+                        sortable={dragEnabled}
+                        collectionName={
+                          bm.collectionId ? collectionMap.get(bm.collectionId)?.name : undefined
+                        }
+                        selectMode={batchMode}
+                        selected={selectedIds.has(bm.id)}
+                        onToggleSelect={toggleSelect}
+                        onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
+                        onDelete={(b) => setDeleting(b)}
+                        onToggleStar={toggleStar}
+                        onTagClick={toggleTag}
+                        onDomainClick={(d) => updateParams((p) => p.set('d', d))}
+                      />
+                    ))}
+                  </div>
+                ) : view === 'tile' ? (
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+                    {visible.map((bm) => (
+                      <BookmarkTile
+                        key={bm.id}
+                        bookmark={bm}
+                        sortable={dragEnabled}
+                        onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    {visible.map((bm) => (
+                      <BookmarkGridCard
+                        key={bm.id}
+                        bookmark={bm}
+                        compact
+                        sortable={dragEnabled}
+                        onToggleStar={toggleStar}
+                        onTagClick={toggleTag}
+                        onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
+                        onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
+                        onDelete={(b) => setDeleting(b)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </SortableBookmarks>
             )}
           </div>
         </main>

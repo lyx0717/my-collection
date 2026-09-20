@@ -16,14 +16,18 @@ describe('faviconSources', () => {
     expect(faviconSources('192.168.1.1')).toEqual([])
   })
 
-  it('外网优先站点 ico', () => {
-    expect(faviconSources('example.com')).toEqual(['https://example.com/favicon.ico'])
+  it('外网：站点 ico → DuckDuckGo', () => {
+    expect(faviconSources('example.com')).toEqual([
+      'https://example.com/favicon.ico',
+      'https://icons.duckduckgo.com/ip3/example.com.ico',
+    ])
   })
 
-  it('自定义图标排在前面', () => {
+  it('历史 faviconUrl 排在最前', () => {
     expect(faviconSources('example.com', 'https://cdn/logo.png')).toEqual([
       'https://cdn/logo.png',
       'https://example.com/favicon.ico',
+      'https://icons.duckduckgo.com/ip3/example.com.ico',
     ])
   })
 })

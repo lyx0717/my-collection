@@ -1,3 +1,5 @@
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { Pencil, Trash2 } from 'lucide-react'
 import type { Bookmark } from '../types'
 import { coverGradient } from '../lib/color'
@@ -8,6 +10,7 @@ import StarButton from './StarButton'
 interface BookmarkGridCardProps {
   bookmark: Bookmark
   compact?: boolean
+  sortable?: boolean
   onToggleStar: (id: string) => void
   onTagClick?: (tag: string) => void
   onOpen: (bm: Bookmark) => void
@@ -18,6 +21,7 @@ interface BookmarkGridCardProps {
 export default function BookmarkGridCard({
   bookmark,
   compact = false,
+  sortable = false,
   onToggleStar,
   onTagClick,
   onOpen,
@@ -25,6 +29,10 @@ export default function BookmarkGridCard({
   onDelete,
 }: BookmarkGridCardProps) {
   const { src, failed, handleError } = useFaviconSrc(bookmark.domain, bookmark.faviconUrl)
+  const { setNodeRef, transform, transition, isDragging, attributes, listeners } = useSortable({
+    id: bookmark.id,
+    disabled: !sortable,
+  })
 
   const coverH = compact ? 'h-[92px]' : 'h-[128px]'
   const logoBox = compact ? 'h-11 w-11 rounded-[13px]' : 'h-16 w-16 rounded-[18px]'
@@ -38,10 +46,16 @@ export default function BookmarkGridCard({
 
   return (
     <article
-      className={`glass-card group relative flex flex-col overflow-hidden border border-line bg-surface shadow-[0_1px_2px_rgba(28,27,25,.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(28,27,25,.18),0_2px_6px_rgba(28,27,25,.05)] ${cardR}`}
+      ref={setNodeRef}
+      style={sortable ? { transform: CSS.Transform.toString(transform), transition } : undefined}
+      className={`glass-card group relative flex touch-none flex-col overflow-hidden border border-line bg-surface shadow-[0_1px_2px_rgba(28,27,25,.05)] transition-shadow duration-200 hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(28,27,25,.18),0_2px_6px_rgba(28,27,25,.05)] ${cardR} ${
+        isDragging ? 'z-10 opacity-70 ring-2 ring-accent/50' : ''
+      }`}
+      {...(sortable ? { ...attributes, ...listeners } : {})}
     >
       <button
         onClick={() => onOpen(bookmark)}
+        onPointerDown={(e) => e.stopPropagation()}
         className={`relative block w-full cursor-pointer ${coverH}`}
         style={{ background: coverGradient(bookmark.domain) }}
         aria-label={`打开 ${bookmark.title}`}
@@ -79,13 +93,15 @@ export default function BookmarkGridCard({
         )}
       </button>
 
-      <StarButton
-        starred={bookmark.starred}
-        onToggle={() => onToggleStar(bookmark.id)}
-        size={compact ? 'sm' : 'md'}
-        revealOnHover={!bookmark.starred}
-        className="absolute right-2 top-2 bg-white/85 backdrop-blur-sm"
-      />
+      <div className="absolute right-2 top-2" onPointerDown={(e) => e.stopPropagation()}>
+        <StarButton
+          starred={bookmark.starred}
+          onToggle={() => onToggleStar(bookmark.id)}
+          size={compact ? 'sm' : 'md'}
+          revealOnHover={!bookmark.starred}
+          className="bg-white/85 backdrop-blur-sm"
+        />
+      </div>
 
       <div className={`flex flex-1 flex-col ${bodyP}`}>
         <button
@@ -95,7 +111,10 @@ export default function BookmarkGridCard({
         >
           {bookmark.title}
         </button>
-        <div className={`flex items-center gap-1 ${compact ? 'mt-1' : 'mt-1.5'}`}>
+        <div
+          className={`flex items-center gap-1 ${compact ? 'mt-1' : 'mt-1.5'}`}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           <span className="min-w-0 flex-1 truncate text-[11px] text-ink3">
             {bookmark.domain}
           </span>
@@ -116,6 +135,16 @@ export default function BookmarkGridCard({
             </button>
           </span>
         </div>
+        {bookmark.description && (
+          <p
+            className={`mt-1 text-[11px] leading-[1.45] text-ink3 ${
+              compact ? 'line-clamp-2' : 'line-clamp-2'
+            }`}
+            title={bookmark.description}
+          >
+            {bookmark.description}
+          </p>
+        )}
         {bookmark.tags.length > 0 && (
           <div className={`mt-2 flex flex-wrap gap-1 ${compact ? 'mt-1.5' : ''}`}>
             {bookmark.tags.slice(0, 3).map((tag) => (

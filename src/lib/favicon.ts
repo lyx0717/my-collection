@@ -17,15 +17,16 @@ export function isInternalDomain(domain: string): boolean {
 }
 
 /**
- * 图标候选链：自定义图标 → 站点 /favicon.ico → 文字徽章。
- * 不再走 favicon.im：它对取不到图的域名会返回占位图，onerror 不触发。
+ * 图标候选链（展示时解析，不依赖 Microlink 抓取）：
+ * 历史/自定义 faviconUrl → 站点 /favicon.ico → DuckDuckGo ip3 → 文字徽章
  */
 export function faviconSources(domain: string, faviconUrl?: string): string[] {
   const list: string[] = []
   if (faviconUrl) list.push(faviconUrl)
-  if (domain && !isInternalDomain(domain)) {
-    const ico = `https://${domain}/favicon.ico`
-    if (!list.includes(ico)) list.push(ico)
-  }
+  if (!domain || isInternalDomain(domain)) return list
+  const ico = `https://${domain}/favicon.ico`
+  const ddg = `https://icons.duckduckgo.com/ip3/${domain}.ico`
+  if (!list.includes(ico)) list.push(ico)
+  if (!list.includes(ddg)) list.push(ddg)
   return list
 }
