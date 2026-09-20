@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Pencil, Trash2 } from 'lucide-react'
 import type { Bookmark } from '../types'
-import { coverGradient } from '../lib/color'
+import { coverGradient, letterColor } from '../lib/color'
 import { badgeText } from '../lib/badge'
 import { useFaviconSrc } from '../hooks/useFavicon'
 import StarButton from './StarButton'
@@ -36,8 +36,9 @@ export default function BookmarkGridCard({
 
   const coverH = compact ? 'h-[92px]' : 'h-[128px]'
   const logoBox = compact ? 'h-11 w-11 rounded-[13px]' : 'h-16 w-16 rounded-[18px]'
-  const logoImg = compact ? 'h-6 w-6 rounded-md' : 'h-9 w-9 rounded-lg'
-  const letter = compact ? 'text-[20px]' : 'text-[26px]'
+  // 仅放大 logo（相对改版前约 1.5×），容器与卡片高度保持原样
+  const logoImg = compact ? 'h-9 w-9 rounded-lg' : 'h-[54px] w-[54px] rounded-xl'
+  const letter = compact ? 'text-[22px]' : 'text-[28px]'
   const cardR = compact ? 'rounded-[14px]' : 'rounded-2xl'
   const bodyP = compact ? 'px-3 py-2.5' : 'px-3.5 py-3'
   const titleCls = compact
@@ -57,7 +58,9 @@ export default function BookmarkGridCard({
         onClick={() => onOpen(bookmark)}
         onPointerDown={(e) => e.stopPropagation()}
         className={`relative block w-full cursor-pointer ${coverH}`}
-        style={{ background: coverGradient(bookmark.domain) }}
+        style={{
+          background: bookmark.cover ? undefined : coverGradient(bookmark.domain),
+        }}
         aria-label={`打开 ${bookmark.title}`}
       >
         {bookmark.cover ? (
@@ -68,28 +71,33 @@ export default function BookmarkGridCard({
             className="absolute inset-0 h-full w-full object-cover"
           />
         ) : (
-          <>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,.14),transparent_70%)]" />
-            <span
-              className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden bg-white/15 backdrop-blur-sm ${logoBox}`}
-            >
-              {!failed && src ? (
-                <img
-                  src={src}
-                  alt=""
-                  loading="lazy"
-                  onError={handleError}
-                  className={logoImg}
-                />
-              ) : failed ? (
-                <span className={`font-bold text-white ${letter}`}>
-                  {badgeText(bookmark.domain, bookmark.title)}
-                </span>
-              ) : (
-                <span className="h-4 w-4 animate-pulse rounded-full bg-white/40" />
-              )}
-            </span>
-          </>
+          <span
+            className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden border border-white/40 bg-white/50 shadow-[0_1px_2px_rgba(28,27,25,.06)] backdrop-blur-sm ${logoBox}`}
+          >
+            {!failed && src ? (
+              <img
+                src={src}
+                alt=""
+                loading="lazy"
+                onError={handleError}
+                className={logoImg}
+              />
+            ) : failed ? (
+              (() => {
+                const c = letterColor(bookmark.domain)
+                return (
+                  <span
+                    className={`flex h-full w-full items-center justify-center font-bold ${letter}`}
+                    style={{ background: c.bg, color: c.fg }}
+                  >
+                    {badgeText(bookmark.domain, bookmark.title)}
+                  </span>
+                )
+              })()
+            ) : (
+              <span className="h-4 w-4 animate-pulse rounded-full bg-line2" />
+            )}
+          </span>
         )}
       </button>
 

@@ -14,16 +14,16 @@ const LETTER_PALETTES: Array<{ bg: string; fg: string }> = [
   { bg: '#F3EFE6', fg: '#8A6D3B' },
 ]
 
-/** 网格封面渐变：低饱和柔和色，避免与玻璃/极简风抢视觉 */
-const GRADIENTS = [
-  'linear-gradient(135deg,#5B6470,#8A929C)',
-  'linear-gradient(135deg,#D4899F,#C46B88)',
-  'linear-gradient(135deg,#7EB8D8,#5A9BB8)',
-  'linear-gradient(135deg,#6BB5A8,#4A9488)',
-  'linear-gradient(135deg,#D4A574,#C4894A)',
-  'linear-gradient(135deg,#8B92C4,#6B72A8)',
-  'linear-gradient(135deg,#7BC492,#5AA874)',
-  'linear-gradient(135deg,#6A9BC0,#4A7BA0)',
+/** 网格封面：极浅色渐变，不抢 logo */
+const COVER_GRADIENTS = [
+  'linear-gradient(135deg,#EEF2F7,#E4EAF2)',
+  'linear-gradient(135deg,#F7F0F3,#EFE6EC)',
+  'linear-gradient(135deg,#EDF4F8,#E3EEF4)',
+  'linear-gradient(135deg,#EDF6F3,#E3F0EB)',
+  'linear-gradient(135deg,#F8F3EA,#F0E9DC)',
+  'linear-gradient(135deg,#F0F0F8,#E8E8F3)',
+  'linear-gradient(135deg,#EEF6EE,#E5F0E5)',
+  'linear-gradient(135deg,#EEF3F8,#E4ECF3)',
 ]
 
 function hashString(s: string): number {
@@ -40,7 +40,7 @@ export function letterColor(domain: string): { bg: string; fg: string } {
 }
 
 export function coverGradient(domain: string): string {
-  return GRADIENTS[hashString(domain) % GRADIENTS.length]
+  return COVER_GRADIENTS[hashString(domain) % COVER_GRADIENTS.length]
 }
 
 /** 字母兜底：域名首字符（优先英文首字母） */
