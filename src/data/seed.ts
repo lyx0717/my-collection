@@ -217,8 +217,8 @@ export const SEED_DATA: StoreShape = {
     },
     {
       "id": "bm_cbe9a6dc-0183-4265-a151-f7e5742766ff",
-      "url": "https://www.12306.cn/",
-      "title": "12306 铁路购票",
+      "url": "https://12306.cn",
+      "title": "铁路12306",
       "tags": [
         "出行",
         "购票"
@@ -226,7 +226,7 @@ export const SEED_DATA: StoreShape = {
       "starred": false,
       "domain": "12306.cn",
       "createdAt": "2026-09-18T00:46:00.000Z",
-      "updatedAt": "2026-09-20T02:31:05.008Z",
+      "updatedAt": "2026-09-22T01:49:15.060Z",
       "collectionId": "col_social",
       "order": 12
     },
@@ -1995,21 +1995,6 @@ export const SEED_DATA: StoreShape = {
       "order": 133
     },
     {
-      "id": "bm_52f8995b-7c41-4f91-a525-156cfcccf4c2",
-      "url": "https://ygpy.net",
-      "title": "机场收集",
-      "tags": [
-        "机场",
-        "梯子"
-      ],
-      "starred": false,
-      "domain": "ygpy.net",
-      "createdAt": "2026-09-17T22:36:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_life",
-      "order": 134
-    },
-    {
       "id": "bm_e15ab312-1c9c-4ec3-83d7-56ccee0ecdc5",
       "url": "https://mag.96533.com:8243/personService/index.html#/login/UserLogin",
       "title": "粤卡通",
@@ -2022,7 +2007,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:34:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_shop",
-      "order": 135
+      "order": 134
     },
     {
       "id": "bm_f73d4920-860e-403a-8045-d822fe11fdb7",
@@ -2036,7 +2021,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:33:00.000Z",
       "updatedAt": "2026-09-20T02:34:29.313Z",
       "collectionId": "col_shop",
-      "order": 136
+      "order": 135
     },
     {
       "id": "bm_bb78abb1-6794-4285-a2fe-9c70566863af",
@@ -2050,7 +2035,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:32:00.000Z",
       "updatedAt": "2026-09-20T02:34:29.313Z",
       "collectionId": "col_shop",
-      "order": 137
+      "order": 136
     },
     {
       "id": "bm_f9b0ff0e-3650-447b-8b73-4c7b144caa0a",
@@ -2065,7 +2050,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:31:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_life",
-      "order": 138
+      "order": 137
     },
     {
       "id": "bm_38ee1950-723b-4ac4-8a68-7bc0090acf89",
@@ -2080,7 +2065,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:30:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_life",
-      "order": 139
+      "order": 138
     },
     {
       "id": "bm_47a94c25-b19d-4ec0-9335-44745e8298b8",
@@ -2095,7 +2080,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:29:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_life",
-      "order": 140
+      "order": 139
     },
     {
       "id": "bm_acbded71-1169-4ad9-93f3-c23951229b91",
@@ -2110,7 +2095,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:28:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_life",
-      "order": 141
+      "order": 140
     },
     {
       "id": "bm_0a382101-b639-45b2-9dc7-7b40ef4acb02",
@@ -2125,7 +2110,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:27:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_life",
-      "order": 142
+      "order": 141
     },
     {
       "id": "bm_71cddd61-efb9-45a1-a728-3150f1699eac",
@@ -2140,7 +2125,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:26:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_life",
-      "order": 143
+      "order": 142
     },
     {
       "id": "bm_e07fc300-18de-4d20-acd2-8f350bb8f757",
@@ -2154,7 +2139,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:25:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 144
+      "order": 143
     },
     {
       "id": "bm_8f91939d-2bc3-4d06-9c95-dfed77860c40",
@@ -2168,7 +2153,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:24:00.000Z",
       "updatedAt": "2026-09-20T02:34:45.563Z",
       "collectionId": "col_life",
-      "order": 145
+      "order": 144
     },
     {
       "id": "bm_bcd049f4-7e4f-4862-aee3-83728f185fd2",
@@ -2182,7 +2167,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:23:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 146
+      "order": 145
     },
     {
       "id": "bm_3d8a3f2f-b9aa-48f2-868c-e81662461b70",
@@ -2196,7 +2181,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:22:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_life",
-      "order": 147
+      "order": 146
     },
     {
       "id": "bm_f77fced0-fba0-49ab-a400-8d7e77a2542a",
@@ -2211,7 +2196,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:21:00.000Z",
       "updatedAt": "2026-09-20T02:34:45.563Z",
       "collectionId": "col_life",
-      "order": 148
+      "order": 147
     },
     {
       "id": "bm_002e87ef-eaff-4386-9215-beeacf2c094d",
@@ -2225,7 +2210,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:20:00.000Z",
       "updatedAt": "2026-09-20T02:34:45.563Z",
       "collectionId": "col_life",
-      "order": 149
+      "order": 148
     },
     {
       "id": "bm_1b721fec-4607-477b-9135-875f4a5e31cb",
@@ -2239,7 +2224,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:19:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 150
+      "order": 149
     },
     {
       "id": "bm_dbf75dcb-fda7-4e56-8d53-04cba9d1e544",
@@ -2254,7 +2239,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:18:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 151
+      "order": 150
     },
     {
       "id": "bm_9ea42536-b270-4e0b-a6f8-c76fd5c68eff",
@@ -2268,7 +2253,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:17:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_life",
-      "order": 152
+      "order": 151
     },
     {
       "id": "bm_fd926000-5e26-42b3-8b4f-338f84b30f45",
@@ -2282,7 +2267,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:16:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_life",
-      "order": 153
+      "order": 152
     }
   ]
 }
