@@ -19,15 +19,15 @@
   --font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', 'Inter', 'Helvetica Neue', sans-serif;
 
-  /* 玻璃模式 token（外观规则 A：chrome 玻璃 + 紧凑卡片 hover） */
-  --glass-bg: rgba(255, 255, 255, 0.48);
-  --glass-bg-soft: rgba(255, 255, 255, 0.42);
-  --glass-bg-hover: rgba(255, 255, 255, 0.52);
+  /* 玻璃模式 token：更透 chrome + 强折射，配合底部冷色光晕 */
+  --glass-bg: rgba(255, 255, 255, 0.36);
+  --glass-bg-soft: rgba(255, 255, 255, 0.32);
+  --glass-bg-hover: rgba(255, 255, 255, 0.5);
   --glass-border: rgba(255, 255, 255, 0.55);
-  --glass-border-hover: rgba(255, 255, 255, 0.7);
-  --glass-blur: blur(28px) saturate(180%);
-  --glass-blur-tile: blur(20px) saturate(180%);
-  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --glass-border-hover: rgba(255, 255, 255, 0.75);
+  --glass-blur: blur(32px) saturate(200%);
+  --glass-blur-tile: blur(24px) saturate(200%);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 :root {
@@ -203,10 +203,13 @@ html[data-glass='on'] .glass-topbar-chips {
 
 /* 玻璃模式：顶部提亮 + 保留冷调微光 */
 html[data-glass='on'] body {
+  /* 冷色氛围层：给 blur 可折射的色彩，玻璃才看得出来 */
   background-color: var(--color-canvas);
   background-image:
-    radial-gradient(1200px 600px at 18% -6%, rgba(255, 255, 255, 0.9), transparent 55%),
-    radial-gradient(1100px 560px at 12% -8%, rgba(66, 99, 235, 0.07), transparent 60%),
-    radial-gradient(1000px 600px at 92% 108%, rgba(139, 92, 246, 0.06), transparent 60%);
+    radial-gradient(900px 520px at 8% -10%, rgba(66, 99, 235, 0.22), transparent 55%),
+    radial-gradient(820px 480px at 96% 12%, rgba(139, 92, 246, 0.18), transparent 52%),
+    radial-gradient(1000px 620px at 78% 108%, rgba(34, 211, 238, 0.16), transparent 55%),
+    radial-gradient(700px 420px at 20% 88%, rgba(66, 99, 235, 0.12), transparent 58%);
   background-attachment: fixed;
 }
+
