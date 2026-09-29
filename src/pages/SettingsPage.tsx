@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import {
   ArrowLeft,
-  Bookmark,
   Folder,
   HardDrive,
   Info,
@@ -16,11 +15,10 @@ import AppearanceSection from '../components/settings/AppearanceSection'
 import DataSection from '../components/settings/DataSection'
 import CollectionsSection from '../components/settings/CollectionsSection'
 import TagsSection from '../components/settings/TagsSection'
-import BookmarkletSection from '../components/settings/BookmarkletSection'
 import AboutSection from '../components/settings/AboutSection'
 import type { Collection } from '../types'
 
-type Section = 'appearance' | 'data' | 'collections' | 'tags' | 'bookmarklet' | 'about'
+type Section = 'appearance' | 'data' | 'collections' | 'tags' | 'about'
 
 type ConfirmState =
   | null
@@ -44,7 +42,6 @@ export default function SettingsPage() {
     { key: 'data', label: '数据导入导出', icon: <HardDrive size={15} /> },
     { key: 'collections', label: '分组管理', icon: <Folder size={15} /> },
     { key: 'tags', label: '标签管理', icon: <Tag size={15} /> },
-    { key: 'bookmarklet', label: '书签小工具', icon: <Bookmark size={15} /> },
     { key: 'about', label: '关于', icon: <Info size={15} /> },
   ]
 
@@ -103,7 +100,6 @@ export default function SettingsPage() {
             onDelete={(col) => setConfirm({ collection: col })}
           />
           <TagsSection onDeleteTag={(tag, count) => setConfirm({ tag, count })} />
-          <BookmarkletSection />
           <AboutSection
             onReset={() => setConfirm('reset')}
             onClear={() => setConfirm('clear')}

@@ -38,7 +38,7 @@ export default function StarButton({
       className={`flex items-center justify-center transition-all duration-150 hover:scale-105 ${box} ${hidden} ${
         starred
           ? 'text-star'
-          : 'text-[#7c786f] hover:bg-canvas hover:text-ink2'
+          : 'text-[#8a9099] hover:bg-canvas hover:text-ink2'
       } ${className}`}
     >
       <Star size={icon} className={starred ? 'fill-star text-star' : undefined} />

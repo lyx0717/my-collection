@@ -128,7 +128,7 @@ export default function DataSection() {
         title="数据导入导出"
         desc="书签保存在当前浏览器本地。清缓存、换电脑前请先导出 JSON 备份。"
       />
-      <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(28,27,25,.05)]">
+      <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(30,40,60,.05)]">
         <div
           onDragOver={(e) => {
             e.preventDefault()

@@ -9,14 +9,14 @@ interface BookmarkFilterInputProps {
 /** 书签库内的筛选搜索（区别于顶栏的互联网搜索引擎） */
 export default function BookmarkFilterInput({ value, onChange, count }: BookmarkFilterInputProps) {
   return (
-    <div className="flex h-9 w-full items-center gap-2 rounded-[10px] border border-line bg-surface px-3 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_3px_rgba(62,92,255,.12)] sm:w-72">
+    <div className="flex h-9 w-full items-center gap-2 rounded-[10px] border border-line bg-surface px-3 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_3px_rgba(66,99,235,.12)] sm:w-72">
       <Search size={14} className="shrink-0 text-ink3" />
       <input
         id="bookmark-filter-input"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="筛选书签库（标题/标签/域名）…"
-        className="w-full min-w-0 bg-transparent text-[13px] outline-none placeholder:text-[#aca89f]"
+        className="w-full min-w-0 bg-transparent text-[13px] outline-none placeholder:text-[#9aa1ab]"
       />
       {value ? (
         <>

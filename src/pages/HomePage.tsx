@@ -300,7 +300,7 @@ export default function HomePage() {
                   <span className="sm:hidden">{batchMode ? '退出' : '多选'}</span>
                 </button>
                 )}
-                <div className="flex rounded-[10px] bg-[#efeeea] p-[3px]">
+                <div className="flex rounded-[10px] bg-[#eceef2] p-[3px]">
                   {(
                     [
                       ['list', List, '列表视图'],
@@ -315,8 +315,8 @@ export default function HomePage() {
                       onClick={() => setView(mode)}
                       className={`flex h-7 w-[30px] items-center justify-center rounded-[7px] transition-all ${
                         view === mode
-                          ? 'bg-white text-ink shadow-[0_1px_3px_rgba(28,27,25,.12)]'
-                          : 'text-[#8f8b82]'
+                          ? 'bg-white text-ink shadow-[0_1px_3px_rgba(30,40,60,.12)]'
+                          : 'text-[#9aa1ab]'
                       }`}
                     >
                       <Icon size={15} />

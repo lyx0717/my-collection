@@ -213,7 +213,7 @@ export default function BookmarkModal({
   }
 
   const inputCls =
-    'h-10 w-full rounded-[10px] border border-line bg-white px-3 text-[13.5px] text-ink outline-none transition-shadow placeholder:text-[#b5b1a8] focus:border-accent focus:shadow-[0_0_0_3px_rgba(62,92,255,.12)]'
+    'h-10 w-full rounded-[10px] border border-line bg-white px-3 text-[13.5px] text-ink outline-none transition-shadow placeholder:text-[#a8adb7] focus:border-accent focus:shadow-[0_0_0_3px_rgba(66,99,235,.12)]'
   const labelCls = 'mb-1.5 block text-[12px] font-semibold text-ink2'
 
   return (
@@ -227,7 +227,7 @@ export default function BookmarkModal({
       <form
         onSubmit={submit}
         onClick={(e) => e.stopPropagation()}
-        className="animate-pop flex max-h-[94dvh] w-full max-w-[440px] flex-col overflow-y-auto rounded-t-[18px] bg-white shadow-[0_24px_60px_-20px_rgba(28,27,25,.35)] sm:rounded-[18px]"
+        className="animate-pop flex max-h-[94dvh] w-full max-w-[440px] flex-col overflow-y-auto rounded-t-[18px] bg-white shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)] sm:rounded-[18px]"
       >
         <div className="flex items-start justify-between px-[22px] pt-5">
           <div>
@@ -344,7 +344,7 @@ export default function BookmarkModal({
             <textarea
               id="bm-desc"
               rows={2}
-              className="w-full resize-y rounded-[10px] border border-line bg-white px-3 py-2.5 text-[13px] leading-6 outline-none transition-shadow placeholder:text-[#b5b1a8] focus:border-accent focus:shadow-[0_0_0_3px_rgba(62,92,255,.12)]"
+              className="w-full resize-y rounded-[10px] border border-line bg-white px-3 py-2.5 text-[13px] leading-6 outline-none transition-shadow placeholder:text-[#a8adb7] focus:border-accent focus:shadow-[0_0_0_3px_rgba(66,99,235,.12)]"
               value={description}
               onChange={(e) => {
                 setDescription(e.target.value)
@@ -367,7 +367,7 @@ export default function BookmarkModal({
                     onChange={(e) => setNewColEmoji(e.target.value)}
                     maxLength={4}
                     placeholder="emoji"
-                    className="h-10 w-14 shrink-0 rounded-[10px] border border-line bg-white px-2 text-center text-[15px] placeholder:text-[#b5b1a8] focus:border-accent focus:shadow-[0_0_0_3px_rgba(62,92,255,.12)]"
+                    className="h-10 w-14 shrink-0 rounded-[10px] border border-line bg-white px-2 text-center text-[15px] placeholder:text-[#a8adb7] focus:border-accent focus:shadow-[0_0_0_3px_rgba(66,99,235,.12)]"
                   />
                   <input
                     value={newColName}

@@ -38,7 +38,7 @@ export default function BookmarkTile({ bookmark, sortable = false, onOpen }: Boo
         className="relative flex h-14 w-14 items-center justify-center transition-transform group-hover:scale-105"
       >
         <span
-          className="absolute inset-0 overflow-hidden rounded-2xl border shadow-[0_2px_8px_-2px_rgba(28,27,25,.12)]"
+          className="absolute inset-0 overflow-hidden rounded-2xl border shadow-[0_2px_8px_-2px_rgba(30,40,60,.12)]"
           style={{
             background: failed ? color.bg : '#fff',
             borderColor: failed ? color.bg : 'var(--color-line)',

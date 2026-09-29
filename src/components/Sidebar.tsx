@@ -206,7 +206,7 @@ function SidebarBody(props: SidebarProps) {
   return (
     <div className="flex h-full flex-col gap-0.5 p-3">
       <div className="flex items-center gap-2.5 px-2 pb-3 pt-1.5">
-        <span className="flex h-[30px] w-[30px] items-center justify-center rounded-[9px] bg-accent shadow-[0_4px_10px_-3px_rgba(62,92,255,.5)]">
+        <span className="flex h-[30px] w-[30px] items-center justify-center rounded-[9px] bg-accent shadow-[0_4px_10px_-3px_rgba(66,99,235,.5)]">
           <Bookmark size={15} className="text-white" fill="white" />
         </span>
         <div>
@@ -282,18 +282,22 @@ function SidebarBody(props: SidebarProps) {
       </div>
       <div className="flex-1 overflow-y-auto">
         {tags.length === 0 && <p className="px-2.5 text-[12px] text-ink3">还没有标签</p>}
-        {/* 已选标签置顶 */}
-        {activeTags.map((tag) => (
-          <button
-            key={`active-${tag}`}
-            onClick={() => onTag(tag)}
-            className="flex w-full items-center gap-2 rounded-[10px] bg-accent-soft px-2.5 py-[6px] text-left text-[13px] font-semibold text-accent-ink"
-          >
-            <Tag size={13} strokeWidth={1.8} className="text-accent" />
-            <span className="truncate">{tag}</span>
-            <X size={12} className="ml-auto text-accent" />
-          </button>
-        ))}
+        {/* 已选标签：加间距与细描边，多选时不连成一片 */}
+        {activeTags.length > 0 && (
+          <div className="mb-1 flex flex-col gap-1">
+            {activeTags.map((tag) => (
+              <button
+                key={`active-${tag}`}
+                onClick={() => onTag(tag)}
+                className="flex w-full items-center gap-2 rounded-[10px] bg-accent-soft px-2.5 py-[6px] text-left text-[13px] font-semibold text-accent-ink ring-1 ring-accent/15"
+              >
+                <Tag size={13} strokeWidth={1.8} className="text-accent" />
+                <span className="truncate">{tag}</span>
+                <X size={12} className="ml-auto text-accent" />
+              </button>
+            ))}
+          </div>
+        )}
         {tags
           .filter(([tag]) => !activeTags.includes(tag))
           .map(([tag, count]) => (

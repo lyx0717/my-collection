@@ -32,7 +32,7 @@ export default function Topbar({ onAdd, onOpenMenu }: TopbarProps) {
 
       <button
         onClick={onAdd}
-        className="flex h-[38px] shrink-0 items-center gap-1.5 rounded-[11px] bg-accent px-3 text-[13px] font-semibold text-white shadow-[0_6px_14px_-6px_rgba(62,92,255,.55)] transition-colors hover:bg-accent-ink sm:px-4"
+        className="flex h-[38px] shrink-0 items-center gap-1.5 rounded-[11px] bg-accent px-3 text-[13px] font-semibold text-white shadow-[0_6px_14px_-6px_rgba(66,99,235,.55)] transition-colors hover:bg-accent-ink sm:px-4"
       >
         <Plus size={15} strokeWidth={2.4} />
         <span className="hidden sm:inline">添加书签</span>

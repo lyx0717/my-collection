@@ -49,7 +49,7 @@ export default function BookmarkGridCard({
     <article
       ref={setNodeRef}
       style={sortable ? { transform: CSS.Transform.toString(transform), transition } : undefined}
-      className={`glass-card group relative flex touch-none flex-col overflow-hidden border border-line bg-surface shadow-[0_1px_2px_rgba(28,27,25,.05)] transition-shadow duration-200 hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(28,27,25,.18),0_2px_6px_rgba(28,27,25,.05)] ${cardR} ${
+      className={`glass-card group relative flex touch-none flex-col overflow-hidden border border-line bg-surface shadow-[0_1px_2px_rgba(30,40,60,.05)] transition-shadow duration-200 hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(30,40,60,.18),0_2px_6px_rgba(30,40,60,.05)] ${cardR} ${
         isDragging ? 'z-10 opacity-70 ring-2 ring-accent/50' : ''
       }`}
       {...(sortable ? { ...attributes, ...listeners } : {})}
@@ -72,7 +72,7 @@ export default function BookmarkGridCard({
           />
         ) : (
           <span
-            className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden border border-white/40 bg-white/50 shadow-[0_1px_2px_rgba(28,27,25,.06)] backdrop-blur-sm ${logoBox}`}
+            className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden border border-white/40 bg-white/50 shadow-[0_1px_2px_rgba(30,40,60,.06)] backdrop-blur-sm ${logoBox}`}
           >
             {!failed && src ? (
               <img

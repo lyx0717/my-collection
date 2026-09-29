@@ -36,7 +36,7 @@ function RowBody({
 }) {
   return (
     <div
-      className={`group flex items-center gap-3 rounded-[14px] border border-line bg-surface px-3.5 py-2.5 shadow-[0_1px_2px_rgba(28,27,25,.05)] transition-shadow duration-200 hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(28,27,25,.18),0_2px_6px_rgba(28,27,25,.05)] ${
+      className={`group flex items-center gap-3 rounded-[14px] border border-line bg-surface px-3.5 py-2.5 shadow-[0_1px_2px_rgba(30,40,60,.05)] transition-shadow duration-200 hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(30,40,60,.18),0_2px_6px_rgba(30,40,60,.05)] ${
         isDragging ? 'z-10 opacity-60 shadow-xl ring-2 ring-accent/40' : ''
       }`}
     >
@@ -73,7 +73,7 @@ function RowBody({
           </button>
           {collectionName && (
             <>
-              <span className="h-[3px] w-[3px] shrink-0 rounded-full bg-[#c9c5bc]" />
+              <span className="h-[3px] w-[3px] shrink-0 rounded-full bg-[#c4cad3]" />
               <span className="shrink-0">{collectionName}</span>
             </>
           )}
@@ -115,14 +115,14 @@ function RowBody({
         <button
           onClick={() => onEdit(bookmark)}
           aria-label={`编辑 ${bookmark.title}`}
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[#a39f95] opacity-100 transition-opacity hover:bg-canvas hover:text-ink2 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
+          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[#9aa1ab] opacity-100 transition-opacity hover:bg-canvas hover:text-ink2 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
         >
           <Pencil size={14} />
         </button>
         <button
           onClick={() => onDelete(bookmark)}
           aria-label={`删除 ${bookmark.title}`}
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[#a39f95] opacity-100 transition-opacity hover:bg-danger/10 hover:text-danger lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
+          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[#9aa1ab] opacity-100 transition-opacity hover:bg-danger/10 hover:text-danger lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
         >
           <Trash2 size={14} />
         </button>

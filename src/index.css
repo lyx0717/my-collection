@@ -1,17 +1,17 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-canvas: #f7f6f3;
+  --color-canvas: #f7f8fa;
   --color-surface: #ffffff;
-  --color-surface-2: #fafaf8;
-  --color-ink: #1c1b19;
-  --color-ink2: #57544e;
-  --color-ink3: #928e86;
-  --color-line: #eceae4;
-  --color-line2: #e2dfd8;
-  --color-accent: #3e5cff;
-  --color-accent-ink: #2c47e0;
-  --color-accent-soft: #eef0ff;
+  --color-surface-2: #f4f6f8;
+  --color-ink: #1a1d21;
+  --color-ink2: #555b66;
+  --color-ink3: #9aa0a8;
+  --color-line: #e8eaed;
+  --color-line2: #dde1e6;
+  --color-accent: #4263eb;
+  --color-accent-ink: #3b5bdb;
+  --color-accent-soft: #edf2ff;
   --color-star: #f5a524;
   --color-danger: #e5484d;
   --color-success: #2b9e58;
@@ -47,7 +47,12 @@ select:focus-visible {
 }
 
 body {
+  /* 净白底 + 左上淡靛蓝、右下淡紫的极微弱光晕：只在大留白处隐约可见 */
   background-color: var(--color-canvas);
+  background-image:
+    radial-gradient(1100px 560px at 12% -8%, rgba(66, 99, 235, 0.07), transparent 60%),
+    radial-gradient(1000px 600px at 92% 108%, rgba(139, 92, 246, 0.06), transparent 60%);
+  background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -55,7 +60,7 @@ body {
 }
 
 ::selection {
-  background: rgba(62, 92, 255, 0.18);
+  background: rgba(66, 99, 235, 0.18);
 }
 
 :focus-visible {
@@ -69,12 +74,12 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d9d6ce;
+  background: #d4d8de;
   border-radius: 8px;
   border: 2px solid var(--color-canvas);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #c2bfb6;
+  background: #c2c8d0;
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;
@@ -162,7 +167,7 @@ html[data-glass='on'] .glass-card:hover {
   box-shadow:
     var(--glass-highlight),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.4),
-    0 16px 40px -20px rgba(28, 27, 25, 0.2);
+    0 16px 40px -20px rgba(30, 40, 60, 0.2);
 }
 
 html[data-glass='on'] .tile-shell {
@@ -179,10 +184,11 @@ html[data-glass='on'] .tile-shell:hover {
   -webkit-backdrop-filter: var(--glass-blur-tile);
 }
 
+/* 玻璃态 chrome：强制覆盖 Tailwind 的实色 border-line，避免残留发黄边线 */
 html[data-glass='on'] .glass-chrome,
 html[data-glass='on'] .glass-topbar {
   background: var(--glass-bg);
-  border-color: var(--glass-border);
+  border-color: var(--glass-border) !important;
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-highlight);
@@ -190,14 +196,17 @@ html[data-glass='on'] .glass-topbar {
 
 html[data-glass='on'] .glass-topbar-chips {
   background: var(--glass-bg-soft);
-  border-bottom-color: var(--glass-border);
+  border-bottom-color: var(--glass-border) !important;
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
 }
 
-/* 玻璃模式：主内容区极淡提亮（无彩色） */
+/* 玻璃模式：顶部提亮 + 保留冷调微光 */
 html[data-glass='on'] body {
-  background:
-    radial-gradient(1200px 600px at 20% 0%, rgba(255, 255, 255, 0.85), transparent 55%),
-    var(--color-canvas);
+  background-color: var(--color-canvas);
+  background-image:
+    radial-gradient(1200px 600px at 18% -6%, rgba(255, 255, 255, 0.9), transparent 55%),
+    radial-gradient(1100px 560px at 12% -8%, rgba(66, 99, 235, 0.07), transparent 60%),
+    radial-gradient(1000px 600px at 92% 108%, rgba(139, 92, 246, 0.06), transparent 60%);
+  background-attachment: fixed;
 }

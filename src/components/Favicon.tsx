@@ -32,7 +32,7 @@ export default function Favicon({ domain, title, faviconUrl, size = 'md', classN
   return (
     <span
       className={`relative flex shrink-0 items-center justify-center overflow-hidden font-bold ${SIZES[size]} ${className}`}
-      style={{ background: failed ? color.bg : '#F4F3EF' }}
+      style={{ background: failed ? color.bg : '#eef1f5' }}
     >
       {failed ? (
         <span

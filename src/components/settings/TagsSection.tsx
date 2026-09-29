@@ -36,7 +36,7 @@ export default function TagsSection({ onDeleteTag }: Props) {
         title="标签管理"
         desc="重命名会同步到所有书签；删除标签只移除标记，不删除书签。"
       />
-      <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(28,27,25,.05)]">
+      <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(30,40,60,.05)]">
         {tagStats.length === 0 ? (
           <p className="py-4 text-center text-[13px] text-ink3">还没有标签</p>
         ) : (

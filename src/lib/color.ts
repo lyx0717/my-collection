@@ -1,29 +1,29 @@
-/** 域名 → 稳定的柔和底色/深色文字对（favicon 兜底） */
+/** 域名 → 稳定的冷调柔和底色/深色文字对（favicon 兜底） */
 const LETTER_PALETTES: Array<{ bg: string; fg: string }> = [
-  { bg: '#F4F3EF', fg: '#1F2328' },
-  { bg: '#E7F0FF', fg: '#0057A4' },
-  { bg: '#E2F3FF', fg: '#4E5BD6' },
-  { bg: '#DFF8F0', fg: '#0E9F8E' },
-  { bg: '#FCE7F0', fg: '#D13D7A' },
-  { bg: '#FFF6E2', fg: '#B8860B' },
-  { bg: '#E0F0FF', fg: '#0086B8' },
-  { bg: '#FFEEE5', fg: '#E8741E' },
-  { bg: '#EEEAFB', fg: '#6B4FE0' },
-  { bg: '#EEF9EC', fg: '#5BA829' },
-  { bg: '#FDECEA', fg: '#C0392B' },
-  { bg: '#F3EFE6', fg: '#8A6D3B' },
+  { bg: '#eef1f5', fg: '#3a4150' },
+  { bg: '#e7f0ff', fg: '#0057a4' },
+  { bg: '#e8f0ff', fg: '#4263eb' },
+  { bg: '#e3f7f1', fg: '#0c9d8c' },
+  { bg: '#fce8f1', fg: '#cf3d7a' },
+  { bg: '#eef2ff', fg: '#4a5fd8' },
+  { bg: '#e2f3fb', fg: '#0285b6' },
+  { bg: '#ffede6', fg: '#e8741e' },
+  { bg: '#efecfc', fg: '#6b4fe0' },
+  { bg: '#eef9ec', fg: '#5ba829' },
+  { bg: '#fdecea', fg: '#c0392b' },
+  { bg: '#e9f0f6', fg: '#4a6fa5' },
 ]
 
-/** 网格封面：极浅色渐变，不抢 logo */
+/** 网格封面：冷调极浅渐变，不抢 logo */
 const COVER_GRADIENTS = [
-  'linear-gradient(135deg,#EEF2F7,#E4EAF2)',
-  'linear-gradient(135deg,#F7F0F3,#EFE6EC)',
-  'linear-gradient(135deg,#EDF4F8,#E3EEF4)',
-  'linear-gradient(135deg,#EDF6F3,#E3F0EB)',
-  'linear-gradient(135deg,#F8F3EA,#F0E9DC)',
-  'linear-gradient(135deg,#F0F0F8,#E8E8F3)',
-  'linear-gradient(135deg,#EEF6EE,#E5F0E5)',
-  'linear-gradient(135deg,#EEF3F8,#E4ECF3)',
+  'linear-gradient(135deg,#eef2f8,#e3e9f3)',
+  'linear-gradient(135deg,#f4eff5,#e9e6ef)',
+  'linear-gradient(135deg,#ecf3f9,#e2edf5)',
+  'linear-gradient(135deg,#ecf5f2,#e2efe9)',
+  'linear-gradient(135deg,#eef0f6,#e4e9f2)',
+  'linear-gradient(135deg,#eff0f9,#e8e9f3)',
+  'linear-gradient(135deg,#edf4ee,#e4ece4)',
+  'linear-gradient(135deg,#ecf2f8,#e3ecf4)',
 ]
 
 function hashString(s: string): number {

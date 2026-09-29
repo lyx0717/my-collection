@@ -18,7 +18,7 @@ export default function CollectionsSection({ onEdit, onCreate, onDelete }: Props
         title="分组管理"
         desc="扁平一级分组；删除分组不会删除书签，它们会回到「未分组」。"
       />
-      <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(28,27,25,.05)]">
+      <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(30,40,60,.05)]">
         <div className="space-y-2">
           {collections.map((col) => {
             const count = bookmarks.filter((b) => b.collectionId === col.id).length

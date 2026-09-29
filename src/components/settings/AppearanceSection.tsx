@@ -9,7 +9,7 @@ export default function AppearanceSection() {
   return (
     <section id="sec-appearance" className="scroll-mt-24">
       <SectionTitle title="外观" desc="切换书签库的界面风格，偏好保存在本浏览器。" />
-      <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(28,27,25,.05)]">
+      <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(30,40,60,.05)]">
         <p className="mb-3 text-[13px] font-semibold text-ink2">界面风格</p>
         <div className="grid gap-2.5 sm:grid-cols-2">
           {(

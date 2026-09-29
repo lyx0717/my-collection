@@ -42,19 +42,19 @@ export default function EngineSearchBox() {
   }
 
   return (
-    <div className="flex h-[38px] max-w-[560px] flex-1 items-center gap-1 rounded-[11px] border border-line bg-canvas pl-2 pr-1 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_3px_rgba(62,92,255,.12)]">
+    <div className="flex h-[38px] max-w-[560px] flex-1 items-center gap-1 rounded-[11px] border border-line bg-canvas pl-2 pr-1 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_3px_rgba(66,99,235,.12)]">
       {/* 引擎切换 */}
       <div className="relative shrink-0" ref={menuRef}>
         <button
           onClick={() => setMenuOpen((v) => !v)}
-          className="flex h-[30px] items-center gap-1 rounded-lg bg-white px-2 text-[12.5px] font-semibold text-ink2 shadow-[0_1px_2px_rgba(28,27,25,.06)] transition-colors hover:text-accent"
+          className="flex h-[30px] items-center gap-1 rounded-lg bg-white px-2 text-[12.5px] font-semibold text-ink2 shadow-[0_1px_2px_rgba(30,40,60,.06)] transition-colors hover:text-accent"
         >
           {active.name}
           <ChevronDown size={13} className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {menuOpen && (
-          <div className="animate-pop absolute left-0 top-10 z-50 w-72 overflow-hidden rounded-2xl border border-line bg-white p-1.5 shadow-[0_24px_60px_-20px_rgba(28,27,25,.35)]">
+          <div className="animate-pop absolute left-0 top-10 z-50 w-72 overflow-hidden rounded-2xl border border-line bg-white p-1.5 shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)]">
             {engines.map((e) => (
               <div
                 key={e.id}
@@ -142,7 +142,7 @@ export default function EngineSearchBox() {
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && submit()}
         placeholder={`搜网页：${active.name}（回车打开）`}
-        className="h-full w-full min-w-0 flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-[#aca89f]"
+        className="h-full w-full min-w-0 flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-[#9aa1ab]"
       />
       {query ? (
         <button

@@ -92,7 +92,7 @@ export default function BatchToolbar({
           onChange={(e) => setTagDraft(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && submitTags()}
           placeholder="加标签，回车"
-          className="h-8 w-28 rounded-lg border border-line bg-white px-2 text-[12px] outline-none placeholder:text-[#b5b1a8] focus:border-accent sm:w-32"
+          className="h-8 w-28 rounded-lg border border-line bg-white px-2 text-[12px] outline-none placeholder:text-[#a8adb7] focus:border-accent sm:w-32"
         />
       </div>
 

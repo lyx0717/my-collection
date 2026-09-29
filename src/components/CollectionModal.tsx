@@ -64,7 +64,7 @@ export default function CollectionModal({
       <form
         onSubmit={submit}
         onClick={(e) => e.stopPropagation()}
-        className="animate-pop w-full max-w-[380px] rounded-[18px] bg-white p-6 shadow-[0_24px_60px_-20px_rgba(28,27,25,.35)]"
+        className="animate-pop w-full max-w-[380px] rounded-[18px] bg-white p-6 shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)]"
       >
         <div className="flex items-start justify-between">
           <div>
@@ -94,7 +94,7 @@ export default function CollectionModal({
               onChange={(e) => setEmoji(e.target.value)}
               maxLength={4}
               placeholder="📁"
-              className="h-10 w-16 shrink-0 rounded-[10px] border border-line bg-white px-2 text-center text-[15px] placeholder:text-[#b5b1a8] focus:border-accent focus:shadow-[0_0_0_3px_rgba(62,92,255,.12)]"
+              className="h-10 w-16 shrink-0 rounded-[10px] border border-line bg-white px-2 text-center text-[15px] placeholder:text-[#a8adb7] focus:border-accent focus:shadow-[0_0_0_3px_rgba(66,99,235,.12)]"
             />
           </div>
           <div className="min-w-0 flex-1">
@@ -110,7 +110,7 @@ export default function CollectionModal({
                 setError('')
               }}
               placeholder="例如：学习资料"
-              className="h-10 w-full min-w-0 rounded-[10px] border border-line bg-white px-3 text-[13.5px] placeholder:text-[#b5b1a8] focus:border-accent focus:shadow-[0_0_0_3px_rgba(62,92,255,.12)]"
+              className="h-10 w-full min-w-0 rounded-[10px] border border-line bg-white px-3 text-[13.5px] placeholder:text-[#a8adb7] focus:border-accent focus:shadow-[0_0_0_3px_rgba(66,99,235,.12)]"
             />
           </div>
         </div>
