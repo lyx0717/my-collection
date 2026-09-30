@@ -21,7 +21,6 @@ import { useBatchSelection } from '../hooks/useBatchSelection'
 import Sidebar from '../components/Sidebar'
 import Topbar from '../components/Topbar'
 import BookmarkFilterInput from '../components/BookmarkFilterInput'
-import ProfileCard from '../components/ProfileCard'
 import BookmarkRow from '../components/BookmarkRow'
 import BookmarkGridCard from '../components/BookmarkGridCard'
 import BookmarkTile from '../components/BookmarkTile'
@@ -270,7 +269,6 @@ export default function HomePage() {
           </div>
 
           <div className="mx-auto max-w-5xl py-5">
-            <ProfileCard className="mb-5" />
             <div className="mb-4 flex flex-wrap items-center gap-3">
               <h1 className="text-[20px] font-bold">{contextTitle}</h1>
               <span className="text-[12.5px] text-ink3">
