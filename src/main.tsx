@@ -5,18 +5,21 @@ import './index.css'
 import App from './App'
 import { BookmarksProvider } from './store/BookmarksContext'
 import { AppearanceProvider } from './store/AppearanceContext'
+import { ProfileProvider } from './store/ProfileContext'
 import { ToastProvider } from './components/Toast'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AppearanceProvider>
-      <BookmarksProvider>
-        <ToastProvider>
-          <HashRouter>
-            <App />
-          </HashRouter>
-        </ToastProvider>
-      </BookmarksProvider>
+      <ProfileProvider>
+        <BookmarksProvider>
+          <ToastProvider>
+            <HashRouter>
+              <App />
+            </HashRouter>
+          </ToastProvider>
+        </BookmarksProvider>
+      </ProfileProvider>
     </AppearanceProvider>
   </StrictMode>,
 )

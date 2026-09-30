@@ -6,19 +6,21 @@ import {
   Info,
   Palette,
   Tag,
+  User,
 } from 'lucide-react'
 import { useBookmarks } from '../store/BookmarksContext'
 import { useToast } from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
 import CollectionModal from '../components/CollectionModal'
 import AppearanceSection from '../components/settings/AppearanceSection'
+import ProfileSection from '../components/settings/ProfileSection'
 import DataSection from '../components/settings/DataSection'
 import CollectionsSection from '../components/settings/CollectionsSection'
 import TagsSection from '../components/settings/TagsSection'
 import AboutSection from '../components/settings/AboutSection'
 import type { Collection } from '../types'
 
-type Section = 'appearance' | 'data' | 'collections' | 'tags' | 'about'
+type Section = 'appearance' | 'profile' | 'data' | 'collections' | 'tags' | 'about'
 
 type ConfirmState =
   | null
@@ -39,6 +41,7 @@ export default function SettingsPage() {
 
   const navItems: Array<{ key: Section; label: string; icon: ReactNode }> = [
     { key: 'appearance', label: '外观', icon: <Palette size={15} /> },
+    { key: 'profile', label: '个人名片', icon: <User size={15} /> },
     { key: 'data', label: '数据导入导出', icon: <HardDrive size={15} /> },
     { key: 'collections', label: '分组管理', icon: <Folder size={15} /> },
     { key: 'tags', label: '标签管理', icon: <Tag size={15} /> },
@@ -93,6 +96,7 @@ export default function SettingsPage() {
 
         <div className="min-w-0 flex-1 space-y-10 pb-20">
           <AppearanceSection />
+          <ProfileSection />
           <DataSection />
           <CollectionsSection
             onEdit={(col) => setCollectionModal({ mode: 'edit', collection: col })}
