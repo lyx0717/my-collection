@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Check, ChevronDown, Plus, Search, Trash2, X } from 'lucide-react'
 import { useSearchEngines } from '../hooks/useSearchEngines'
+import { engineDomain } from '../lib/engines'
+import Favicon from './Favicon'
 
 /** 顶部搜索引擎框：切换百度/必应/Google/自定义，回车新标签页打开结果 */
 export default function EngineSearchBox() {
@@ -47,8 +49,9 @@ export default function EngineSearchBox() {
       <div className="relative shrink-0" ref={menuRef}>
         <button
           onClick={() => setMenuOpen((v) => !v)}
-          className="flex h-[30px] items-center gap-1 rounded-lg bg-white px-2 text-[12.5px] font-semibold text-ink2 shadow-[0_1px_2px_rgba(30,40,60,.06)] transition-colors hover:text-accent"
+          className="flex h-[30px] items-center gap-1.5 rounded-lg bg-white px-2 text-[12.5px] font-semibold text-ink2 shadow-[0_1px_2px_rgba(30,40,60,.06)] transition-colors hover:text-accent"
         >
+          <Favicon domain={engineDomain(active)} title={active.name} size="sm" className="rounded" />
           {active.name}
           <ChevronDown size={13} className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
         </button>
@@ -70,6 +73,7 @@ export default function EngineSearchBox() {
                   <span className={`h-4 w-4 ${active.id === e.id ? 'text-accent' : 'text-transparent'}`}>
                     <Check size={15} />
                   </span>
+                  <Favicon domain={engineDomain(e)} title={e.name} size="sm" className="rounded" />
                   <span className={active.id === e.id ? 'font-semibold text-accent-ink' : 'text-ink'}>
                     {e.name}
                   </span>

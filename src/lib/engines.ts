@@ -1,9 +1,16 @@
+import { extractDomain } from './url'
+
 export interface SearchEngine {
   id: string
   name: string
   /** 查询模板，%s 为关键词占位符 */
   url: string
   builtin?: boolean
+}
+
+/** 从查询模板提取域名，用于搜索引擎图标 */
+export function engineDomain(engine: Pick<SearchEngine, 'url'>): string {
+  return extractDomain(engine.url.replace(/%s/g, 'x'))
 }
 
 export const BUILTIN_ENGINES: SearchEngine[] = [
