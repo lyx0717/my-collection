@@ -27,7 +27,7 @@ export default function CollectionsSection({ onEdit, onCreate, onDelete }: Props
                 key={col.id}
                 className="flex items-center gap-3 rounded-xl border border-line bg-surface-2 px-3.5 py-2.5"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[15px]">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface text-[15px]">
                   {col.emoji ?? '📁'}
                 </span>
                 <span className="text-[13.5px] font-medium">{col.name}</span>
@@ -36,14 +36,14 @@ export default function CollectionsSection({ onEdit, onCreate, onDelete }: Props
                   <button
                     aria-label={`编辑分组 ${col.name}`}
                     onClick={() => onEdit(col)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-ink3 hover:bg-white hover:text-ink"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-ink3 hover:bg-surface hover:text-ink"
                   >
                     <Pencil size={14} />
                   </button>
                   <button
                     aria-label={`删除分组 ${col.name}`}
                     onClick={() => onDelete(col)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-ink3 hover:bg-white hover:text-danger"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-ink3 hover:bg-surface hover:text-danger"
                   >
                     <Trash2 size={14} />
                   </button>

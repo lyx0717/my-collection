@@ -43,7 +43,7 @@ export default function BatchToolbar({
   }
 
   const btnCls =
-    'flex h-8 items-center gap-1.5 rounded-lg border border-line bg-white px-2.5 text-[12px] font-medium text-ink2 hover:border-line2 hover:bg-surface-2'
+    'flex h-8 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 text-[12px] font-medium text-ink2 hover:border-line2 hover:bg-surface-2'
 
   return (
     <div className="animate-rise mb-3 flex flex-wrap items-center gap-2 rounded-2xl border border-accent/30 bg-accent-soft/40 px-3 py-2.5">
@@ -71,7 +71,7 @@ export default function BatchToolbar({
             }
             e.target.value = ''
           }}
-          className="h-8 appearance-none rounded-lg border border-line bg-white pl-7 pr-6 text-[12px] font-medium text-ink2 outline-none"
+          className="h-8 appearance-none rounded-lg border border-line bg-surface pl-7 pr-6 text-[12px] font-medium text-ink2 outline-none"
         >
           <option value="">移动到分组…</option>
           {collections.map((c) => (
@@ -92,7 +92,7 @@ export default function BatchToolbar({
           onChange={(e) => setTagDraft(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && submitTags()}
           placeholder="加标签，回车"
-          className="h-8 w-28 rounded-lg border border-line bg-white px-2 text-[12px] outline-none placeholder:text-[#a8adb7] focus:border-accent sm:w-32"
+          className="h-8 w-28 rounded-lg border border-line bg-surface px-2 text-[12px] outline-none placeholder:text-ink4 focus:border-accent sm:w-32"
         />
       </div>
 
@@ -108,7 +108,7 @@ export default function BatchToolbar({
       <button
         onClick={onClear}
         aria-label="退出多选"
-        className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg text-ink3 hover:bg-white hover:text-ink"
+        className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg text-ink3 hover:bg-surface hover:text-ink"
       >
         <X size={14} />
       </button>

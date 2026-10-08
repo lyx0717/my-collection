@@ -145,7 +145,7 @@ export default function DataSection() {
             dragging ? 'border-accent bg-accent-soft' : 'border-line2 bg-surface-2'
           }`}
         >
-          <span className="mx-auto mb-3 flex h-[42px] w-[42px] items-center justify-center rounded-xl border border-line bg-white text-accent">
+          <span className="mx-auto mb-3 flex h-[42px] w-[42px] items-center justify-center rounded-xl border border-line bg-surface text-accent">
             {parsing ? (
               <span className="h-[19px] w-[19px] animate-spin rounded-full border-2 border-line2 border-t-accent" />
             ) : (
@@ -188,7 +188,7 @@ export default function DataSection() {
                 {parsed?.format} · 共 {preview.length} 条
               </span>
               {dupCount > 0 && (
-                <span className="rounded-md bg-[#fbf1e2] px-2 py-0.5 text-[11.5px] text-[#b4681c]">
+                <span className="rounded-md bg-warn-soft px-2 py-0.5 text-[11.5px] text-warn-ink">
                   {dupCount} 条重复将跳过
                 </span>
               )}
@@ -204,7 +204,7 @@ export default function DataSection() {
                     <select
                       value={preview.find((p) => p.collectionName === folder)?.target}
                       onChange={(e) => setTargetForFolder(folder, e.target.value)}
-                      className="h-8 rounded-lg border border-line bg-white px-2 text-[12px] outline-none"
+                      className="h-8 rounded-lg border border-line bg-surface px-2 text-[12px] outline-none"
                     >
                       <option value="__new">新建分组「{folder}」</option>
                       {collections.map((c) => (
@@ -225,7 +225,7 @@ export default function DataSection() {
                 <label
                   key={`${p.key}-${i}`}
                   className={`flex items-center gap-3 border-b border-line px-3 py-2 last:border-0 ${
-                    p.duplicate ? 'bg-surface-2 text-ink3' : 'bg-white hover:bg-surface-2'
+                    p.duplicate ? 'bg-surface-2 text-ink3' : 'bg-surface hover:bg-surface-2'
                   }`}
                 >
                   <input
@@ -249,7 +249,7 @@ export default function DataSection() {
                     {extractDomain(p.url)}
                   </span>
                   {p.duplicate && (
-                    <span className="shrink-0 text-[11px] text-[#b4681c]">已存在</span>
+                    <span className="shrink-0 text-[11px] text-warn-ink">已存在</span>
                   )}
                 </label>
               ))}
@@ -282,14 +282,14 @@ export default function DataSection() {
           <div className="ml-auto flex gap-2.5">
             <button
               onClick={downloadJson}
-              className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-white px-3.5 text-[12.5px] font-medium text-ink2 hover:bg-surface-2"
+              className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-surface px-3.5 text-[12.5px] font-medium text-ink2 hover:bg-surface-2"
             >
               <Download size={14} />
               导出 JSON
             </button>
             <button
               onClick={downloadNetscape}
-              className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-white px-3.5 text-[12.5px] font-medium text-ink2 hover:bg-surface-2"
+              className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-surface px-3.5 text-[12.5px] font-medium text-ink2 hover:bg-surface-2"
             >
               <Download size={14} />
               导出浏览器 HTML

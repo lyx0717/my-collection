@@ -260,7 +260,7 @@ export default function HomePage() {
                 className={`shrink-0 rounded-full border px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
                   chip.active
                     ? 'border-ink bg-ink text-white'
-                    : 'border-line bg-white/80 text-ink2'
+                    : 'border-line bg-surface/80 text-ink2'
                 }`}
               >
                 {chip.label}
@@ -292,7 +292,7 @@ export default function HomePage() {
                   className={`flex h-[34px] items-center gap-1.5 rounded-[10px] border px-2.5 text-[12.5px] font-medium transition-colors ${
                     batchMode
                       ? 'border-accent bg-accent-soft text-accent-ink'
-                      : 'border-line bg-white text-ink2 hover:border-line2'
+                      : 'border-line bg-surface text-ink2 hover:border-line2'
                   }`}
                 >
                   <CheckSquare size={13} />
@@ -300,7 +300,7 @@ export default function HomePage() {
                   <span className="sm:hidden">{batchMode ? '退出' : '多选'}</span>
                 </button>
                 )}
-                <div className="flex rounded-[10px] bg-[#eceef2] p-[3px]">
+                <div className="flex rounded-[10px] bg-segment p-[3px]">
                   {(
                     [
                       ['list', List, '列表视图'],
@@ -315,8 +315,8 @@ export default function HomePage() {
                       onClick={() => setView(mode)}
                       className={`flex h-7 w-[30px] items-center justify-center rounded-[7px] transition-all ${
                         view === mode
-                          ? 'bg-white text-ink shadow-[0_1px_3px_rgba(30,40,60,.12)]'
-                          : 'text-[#9aa1ab]'
+                          ? 'bg-surface text-ink shadow-[0_1px_3px_rgba(30,40,60,.12)]'
+                          : 'text-ink4'
                       }`}
                     >
                       <Icon size={15} />
@@ -423,7 +423,7 @@ export default function HomePage() {
                       </button>
                       <a
                         href="#/settings"
-                        className="inline-flex h-11 items-center gap-2 rounded-xl border border-line2 bg-white px-5 text-[14px] font-medium text-ink2 hover:bg-surface-2"
+                        className="inline-flex h-11 items-center gap-2 rounded-xl border border-line2 bg-surface px-5 text-[14px] font-medium text-ink2 hover:bg-surface-2"
                       >
                         <Upload size={15} />
                         导入浏览器书签
@@ -457,7 +457,7 @@ export default function HomePage() {
                           onClick={() => updateParams((p) => {
                             p.delete('q'); p.delete('tag'); p.delete('d'); p.delete('c'); p.delete('star'); p.delete('none')
                           })}
-                          className="inline-flex h-10 items-center rounded-lg border border-line2 bg-white px-4 text-[13px] font-medium text-ink2 hover:bg-surface-2"
+                          className="inline-flex h-10 items-center rounded-lg border border-line2 bg-surface px-4 text-[13px] font-medium text-ink2 hover:bg-surface-2"
                         >
                           查看全部书签
                         </button>

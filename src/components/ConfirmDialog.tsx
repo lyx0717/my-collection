@@ -52,7 +52,7 @@ export default function ConfirmDialog({
             ref={confirmRef}
             onClick={onConfirm}
             className={`h-9 rounded-[10px] px-4 text-[13px] font-semibold text-white transition-colors ${
-              danger ? 'bg-danger hover:bg-[#d03d42]' : 'bg-accent hover:bg-accent-ink'
+              danger ? 'bg-danger hover:bg-danger-ink' : 'bg-accent hover:bg-accent-ink'
             }`}
           >
             {confirmText}

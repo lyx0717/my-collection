@@ -31,13 +31,13 @@ export default function AboutSection({ onReset, onClear }: Props) {
         <div className="mt-5 flex flex-wrap gap-2.5 border-t border-line pt-5">
           <button
             onClick={onReset}
-            className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-white px-3.5 text-[12.5px] font-medium text-ink2 hover:bg-surface-2"
+            className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-surface px-3.5 text-[12.5px] font-medium text-ink2 hover:bg-surface-2"
           >
             恢复内置书签
           </button>
           <button
             onClick={onClear}
-            className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-white px-3.5 text-[12.5px] font-medium text-ink2 hover:border-danger/40 hover:text-danger"
+            className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-surface px-3.5 text-[12.5px] font-medium text-ink2 hover:border-danger/40 hover:text-danger"
           >
             清空全部数据
           </button>

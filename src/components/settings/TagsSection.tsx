@@ -68,7 +68,7 @@ export default function TagsSection({ onDeleteTag }: Props) {
                   <button
                     aria-label="取消"
                     onClick={() => setEditingTag(null)}
-                    className="flex h-6 w-6 items-center justify-center rounded text-ink3 hover:bg-white"
+                    className="flex h-6 w-6 items-center justify-center rounded text-ink3 hover:bg-surface"
                   >
                     <X size={12} />
                   </button>
@@ -87,14 +87,14 @@ export default function TagsSection({ onDeleteTag }: Props) {
                       setEditingTag(tag)
                       setTagDraft(tag)
                     }}
-                    className="flex h-6 w-6 items-center justify-center rounded text-ink3 hover:bg-white hover:text-ink"
+                    className="flex h-6 w-6 items-center justify-center rounded text-ink3 hover:bg-surface hover:text-ink"
                   >
                     <Pencil size={11} />
                   </button>
                   <button
                     aria-label={`删除标签 ${tag}`}
                     onClick={() => onDeleteTag(tag, count)}
-                    className="flex h-6 w-6 items-center justify-center rounded text-ink3 hover:bg-white hover:text-danger"
+                    className="flex h-6 w-6 items-center justify-center rounded text-ink3 hover:bg-surface hover:text-danger"
                   >
                     <Trash2 size={11} />
                   </button>

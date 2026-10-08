@@ -10,3 +10,6 @@ dist-ssr
 
 # IAB 浏览器调试产物
 .playwright-cli/
+
+# workbuddy 发布标记
+.wbapp_*.genie

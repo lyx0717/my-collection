@@ -72,7 +72,7 @@ export default function BookmarkGridCard({
           />
         ) : (
           <span
-            className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden border border-white/40 bg-white/50 shadow-[0_1px_2px_rgba(30,40,60,.06)] backdrop-blur-sm ${logoBox}`}
+            className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden border border-line2 bg-surface/50 shadow-[0_1px_2px_rgba(30,40,60,.06)] backdrop-blur-sm ${logoBox}`}
           >
             {!failed && src ? (
               <img
@@ -107,7 +107,7 @@ export default function BookmarkGridCard({
           onToggle={() => onToggleStar(bookmark.id)}
           size={compact ? 'sm' : 'md'}
           revealOnHover={!bookmark.starred}
-          className="bg-white/85 backdrop-blur-sm"
+          className="bg-surface/85 backdrop-blur-sm"
         />
       </div>
 

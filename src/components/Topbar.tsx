@@ -41,7 +41,7 @@ export default function Topbar({ onAdd, onOpenMenu }: TopbarProps) {
       <Link
         to="/settings"
         aria-label="设置"
-        className="ml-auto flex h-[38px] shrink-0 items-center gap-1.5 rounded-[11px] border border-line bg-white px-2.5 text-[13px] font-medium text-ink2 transition-colors hover:border-line2 hover:bg-surface-2 hover:text-accent sm:px-3"
+        className="ml-auto flex h-[38px] shrink-0 items-center gap-1.5 rounded-[11px] border border-line bg-surface px-2.5 text-[13px] font-medium text-ink2 transition-colors hover:border-line2 hover:bg-surface-2 hover:text-accent sm:px-3"
       >
         <Settings size={16} />
         <span className="hidden sm:inline">设置</span>

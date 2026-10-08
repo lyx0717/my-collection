@@ -1,37 +1,214 @@
 @import 'tailwindcss';
 
-@theme {
-  --color-canvas: #f7f8fa;
-  --color-surface: #ffffff;
-  --color-surface-2: #f4f6f8;
-  --color-ink: #1a1d21;
-  --color-ink2: #555b66;
-  --color-ink3: #9aa0a8;
-  --color-line: #e8eaed;
-  --color-line2: #dde1e6;
-  --color-accent: #4263eb;
-  --color-accent-ink: #3b5bdb;
-  --color-accent-soft: #edf2ff;
-  --color-star: #f5a524;
-  --color-danger: #e5484d;
-  --color-success: #2b9e58;
+/* ===================================================================
+   主题机制：双轨 CSS 变量
+   1) 实际值挂 :root（亮色），:root[data-theme='dark'] 整体覆盖（深色）
+   2) @theme inline 让 Tailwind utility 引用运行时变量
+   切换主题 = document.documentElement.dataset.theme = 'dark'，组件零改动
+   =================================================================== */
 
-  --font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
-    'Microsoft YaHei', 'Inter', 'Helvetica Neue', sans-serif;
+:root {
+  color-scheme: light;
 
-  /* 玻璃模式 token：更透 chrome + 强折射，配合底部冷色光晕 */
+  /* —— 中性底 —— */
+  --canvas: #f7f8fa;
+  --surface: #ffffff;
+  --surface-2: #f4f6f8;
+  --segment: #eceef2;
+
+  /* —— 墨色四级：正文 / 次级 / 说明 / 占位符与图标灰 —— */
+  --ink: #1a1d21;
+  --ink-2: #555b66;
+  --ink-3: #8a9099;
+  --ink-4: #9aa1ab;
+
+  /* —— 线 —— */
+  --line: #e8eaed;
+  --line-2: #dde1e6;
+
+  /* —— 品牌与语义 —— */
+  --accent: #4263eb;
+  --accent-ink: #3b5bdb;
+  --accent-soft: #edf2ff;
+  --accent-ring: rgba(66, 99, 235, 0.12);
+  --star: #f5a524;
+  --danger: #e5484d;
+  --danger-ink: #d03d42;
+  --success: #2b9e58;
+
+  /* 成功/警示条一族（BookmarkModal 提示条、DataSection 角标） */
+  --success-soft: #f4faf6;
+  --success-border: #d9ecdf;
+  --success-ink: #1e7c47;
+  --success-text: #4f8a66;
+  --warn-soft: #fdf6ea;
+  --warn-border: #f0d9b5;
+  --warn-ink: #b4681c;
+  --warn-text: #8a5a1e;
+
+  /* —— 氛围光晕（实心底极微弱 / 玻璃底加强给 blur 折射）—— */
+  --aura-indigo: 66, 99, 235;
+  --aura-violet: 139, 92, 246;
+  --aura-cyan: 34, 211, 238;
+  --glow-1: 0.07;
+  --glow-2: 0.06;
+  --aura-1: 0.22;
+  --aura-2: 0.18;
+  --aura-3: 0.16;
+  --aura-4: 0.12;
+
+  /* —— 原生控件 —— */
+  --selection: rgba(66, 99, 235, 0.18);
+  --scroll-thumb: #d4d8de;
+  --scroll-thumb-hover: #c2c8d0;
+
+  /* —— 玻璃模式（亮色）—— */
   --glass-bg: rgba(255, 255, 255, 0.36);
   --glass-bg-soft: rgba(255, 255, 255, 0.32);
   --glass-bg-hover: rgba(255, 255, 255, 0.5);
   --glass-border: rgba(255, 255, 255, 0.55);
   --glass-border-hover: rgba(255, 255, 255, 0.75);
-  --glass-blur: blur(32px) saturate(200%);
-  --glass-blur-tile: blur(24px) saturate(200%);
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --glass-ring: rgba(255, 255, 255, 0.4);
+  --glass-shadow: 0 16px 40px -20px rgba(30, 40, 60, 0.2);
+
+  /* —— 域名徽章 12 组（favicon 兜底）—— */
+  --badge-bg-0: #eef1f5; --badge-fg-0: #3a4150;
+  --badge-bg-1: #e7f0ff; --badge-fg-1: #0057a4;
+  --badge-bg-2: #e8f0ff; --badge-fg-2: #4263eb;
+  --badge-bg-3: #e3f7f1; --badge-fg-3: #0c9d8c;
+  --badge-bg-4: #fce8f1; --badge-fg-4: #cf3d7a;
+  --badge-bg-5: #eef2ff; --badge-fg-5: #4a5fd8;
+  --badge-bg-6: #e2f3fb; --badge-fg-6: #0285b6;
+  --badge-bg-7: #ffede6; --badge-fg-7: #e8741e;
+  --badge-bg-8: #efecfc; --badge-fg-8: #6b4fe0;
+  --badge-bg-9: #eef9ec; --badge-fg-9: #5ba829;
+  --badge-bg-10: #fdecea; --badge-fg-10: #c0392b;
+  --badge-bg-11: #e9f0f6; --badge-fg-11: #4a6fa5;
+
+  /* —— 网格封面渐变 8 组 —— */
+  --cover-a-0: #eef2f8; --cover-b-0: #e3e9f3;
+  --cover-a-1: #f4eff5; --cover-b-1: #e9e6ef;
+  --cover-a-2: #ecf3f9; --cover-b-2: #e2edf5;
+  --cover-a-3: #ecf5f2; --cover-b-3: #e2efe9;
+  --cover-a-4: #eef0f6; --cover-b-4: #e4e9f2;
+  --cover-a-5: #eff0f9; --cover-b-5: #e8e9f3;
+  --cover-a-6: #edf4ee; --cover-b-6: #e4ece4;
+  --cover-a-7: #ecf2f8; --cover-b-7: #e3ecf4;
 }
 
-:root {
-  color-scheme: light;
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --canvas: #101216;
+  --surface: #181b20;
+  --surface-2: #20242b;
+  --segment: #20242b;
+
+  --ink: #e8eaed;
+  --ink-2: #a8adb6;
+  --ink-3: #80868f;
+  --ink-4: #616873;
+
+  --line: #2a2e36;
+  --line-2: #343943;
+
+  --accent: #7a96ff;
+  --accent-ink: #9db1ff;
+  --accent-soft: rgba(122, 150, 255, 0.14);
+  --accent-ring: rgba(122, 150, 255, 0.25);
+  --star: #ffb224;
+  --danger: #ff6b6f;
+  --danger-ink: #ff8589;
+  --success: #45d483;
+
+  --success-soft: #16241c;
+  --success-border: #24382d;
+  --success-ink: #45d483;
+  --success-text: #8fd0ab;
+  --warn-soft: #2a2418;
+  --warn-border: #45351d;
+  --warn-ink: #f0a860;
+  --warn-text: #d9b98a;
+
+  --glow-1: 0.1;
+  --glow-2: 0.09;
+  /* 深色玻璃需要更强氛围光才看得见折射：毛玻璃夜色 */
+  --aura-1: 0.38;
+  --aura-2: 0.3;
+  --aura-3: 0.24;
+  --aura-4: 0.3;
+
+  --selection: rgba(122, 150, 255, 0.32);
+  --scroll-thumb: #2e333c;
+  --scroll-thumb-hover: #3a404c;
+
+  --glass-bg: rgba(22, 25, 31, 0.55);
+  --glass-bg-soft: rgba(22, 25, 31, 0.48);
+  --glass-bg-hover: rgba(28, 32, 40, 0.62);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 255, 255, 0.16);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  --glass-ring: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 16px 40px -20px rgba(0, 0, 0, 0.55);
+
+  --badge-bg-0: #1f2634; --badge-fg-0: #9db8ff;
+  --badge-bg-1: #16283a; --badge-fg-1: #6ec1ff;
+  --badge-bg-2: #1d2438; --badge-fg-2: #8fa8ff;
+  --badge-bg-3: #122b26; --badge-fg-3: #5fd4bd;
+  --badge-bg-4: #2d1b28; --badge-fg-4: #ff9ec9;
+  --badge-bg-5: #1e2236; --badge-fg-5: #a3b2ff;
+  --badge-bg-6: #0f2a33; --badge-fg-6: #5cc8e8;
+  --badge-bg-7: #2d211a; --badge-fg-7: #ffa76b;
+  --badge-bg-8: #231d33; --badge-fg-8: #b9a3ff;
+  --badge-bg-9: #1a2b1a; --badge-fg-9: #93d96b;
+  --badge-bg-10: #2f1c1a; --badge-fg-10: #ff9d94;
+  --badge-bg-11: #1c2530; --badge-fg-11: #94b6d9;
+
+  --cover-a-0: #1d2128; --cover-b-0: #262b34;
+  --cover-a-1: #1e212b; --cover-b-1: #272a36;
+  --cover-a-2: #1c222a; --cover-b-2: #252c36;
+  --cover-a-3: #1b2320; --cover-b-3: #242c29;
+  --cover-a-4: #241d24; --cover-b-4: #2d262e;
+  --cover-a-5: #1d2129; --cover-b-5: #262a35;
+  --cover-a-6: #1a2321; --cover-b-6: #232c2a;
+  --cover-a-7: #1c222a; --cover-b-7: #252d37;
+}
+
+/* Tailwind utility 引用运行时变量：bg-canvas / text-ink3 等既有类名全部保持不变 */
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-segment: var(--segment);
+  --color-ink: var(--ink);
+  --color-ink2: var(--ink-2);
+  --color-ink3: var(--ink-3);
+  --color-ink4: var(--ink-4);
+  --color-line: var(--line);
+  --color-line2: var(--line-2);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-star: var(--star);
+  --color-danger: var(--danger);
+  --color-danger-ink: var(--danger-ink);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-border: var(--success-border);
+  --color-success-ink: var(--success-ink);
+  --color-success-text: var(--success-text);
+  --color-warn-soft: var(--warn-soft);
+  --color-warn-border: var(--warn-border);
+  --color-warn-ink: var(--warn-ink);
+  --color-warn-text: var(--warn-text);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Inter', 'Helvetica Neue', sans-serif;
+
+  /* blur/saturate 不随主题变化，留在编译期 */
+  --glass-blur: blur(32px) saturate(200%);
+  --glass-blur-tile: blur(24px) saturate(200%);
 }
 
 /* 输入类元素统一去除默认 outline，焦点态用边框 + 光环表达 */
@@ -47,11 +224,11 @@ select:focus-visible {
 }
 
 body {
-  /* 净白底 + 左上淡靛蓝、右下淡紫的极微弱光晕：只在大留白处隐约可见 */
+  /* 净底 + 左上淡靛蓝、右下淡紫的极微弱光晕：只在大留白处隐约可见 */
   background-color: var(--color-canvas);
   background-image:
-    radial-gradient(1100px 560px at 12% -8%, rgba(66, 99, 235, 0.07), transparent 60%),
-    radial-gradient(1000px 600px at 92% 108%, rgba(139, 92, 246, 0.06), transparent 60%);
+    radial-gradient(1100px 560px at 12% -8%, rgba(var(--aura-indigo), var(--glow-1)), transparent 60%),
+    radial-gradient(1000px 600px at 92% 108%, rgba(var(--aura-violet), var(--glow-2)), transparent 60%);
   background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-sans);
@@ -60,7 +237,7 @@ body {
 }
 
 ::selection {
-  background: rgba(66, 99, 235, 0.18);
+  background: var(--selection);
 }
 
 :focus-visible {
@@ -74,12 +251,12 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d4d8de;
+  background: var(--scroll-thumb);
   border-radius: 8px;
   border: 2px solid var(--color-canvas);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #c2c8d0;
+  background: var(--scroll-thumb-hover);
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;
@@ -166,8 +343,8 @@ html[data-glass='on'] .glass-card:hover {
   -webkit-backdrop-filter: var(--glass-blur);
   box-shadow:
     var(--glass-highlight),
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.4),
-    0 16px 40px -20px rgba(30, 40, 60, 0.2);
+    inset 0 0 0 0.5px var(--glass-ring),
+    var(--glass-shadow);
 }
 
 html[data-glass='on'] .tile-shell {
@@ -201,15 +378,13 @@ html[data-glass='on'] .glass-topbar-chips {
   -webkit-backdrop-filter: var(--glass-blur);
 }
 
-/* 玻璃模式：顶部提亮 + 保留冷调微光 */
+/* 玻璃模式：顶部提亮 + 氛围光晕给 blur 折射的色彩 */
 html[data-glass='on'] body {
-  /* 冷色氛围层：给 blur 可折射的色彩，玻璃才看得出来 */
   background-color: var(--color-canvas);
   background-image:
-    radial-gradient(900px 520px at 8% -10%, rgba(66, 99, 235, 0.22), transparent 55%),
-    radial-gradient(820px 480px at 96% 12%, rgba(139, 92, 246, 0.18), transparent 52%),
-    radial-gradient(1000px 620px at 78% 108%, rgba(34, 211, 238, 0.16), transparent 55%),
-    radial-gradient(700px 420px at 20% 88%, rgba(66, 99, 235, 0.12), transparent 58%);
+    radial-gradient(900px 520px at 8% -10%, rgba(var(--aura-indigo), var(--aura-1)), transparent 55%),
+    radial-gradient(820px 480px at 96% 12%, rgba(var(--aura-violet), var(--aura-2)), transparent 52%),
+    radial-gradient(1000px 620px at 78% 108%, rgba(var(--aura-cyan), var(--aura-3)), transparent 55%),
+    radial-gradient(700px 420px at 20% 88%, rgba(var(--aura-indigo), var(--aura-4)), transparent 58%);
   background-attachment: fixed;
 }
-

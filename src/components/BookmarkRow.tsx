@@ -73,7 +73,7 @@ function RowBody({
           </button>
           {collectionName && (
             <>
-              <span className="h-[3px] w-[3px] shrink-0 rounded-full bg-[#c4cad3]" />
+              <span className="h-[3px] w-[3px] shrink-0 rounded-full bg-line2" />
               <span className="shrink-0">{collectionName}</span>
             </>
           )}
@@ -115,14 +115,14 @@ function RowBody({
         <button
           onClick={() => onEdit(bookmark)}
           aria-label={`编辑 ${bookmark.title}`}
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[#9aa1ab] opacity-100 transition-opacity hover:bg-canvas hover:text-ink2 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
+          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-ink4 opacity-100 transition-opacity hover:bg-canvas hover:text-ink2 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
         >
           <Pencil size={14} />
         </button>
         <button
           onClick={() => onDelete(bookmark)}
           aria-label={`删除 ${bookmark.title}`}
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-[#9aa1ab] opacity-100 transition-opacity hover:bg-danger/10 hover:text-danger lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
+          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-ink4 opacity-100 transition-opacity hover:bg-danger/10 hover:text-danger lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
         >
           <Trash2 size={14} />
         </button>

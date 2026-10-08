@@ -213,7 +213,7 @@ export default function BookmarkModal({
   }
 
   const inputCls =
-    'h-10 w-full rounded-[10px] border border-line bg-white px-3 text-[13.5px] text-ink outline-none transition-shadow placeholder:text-[#a8adb7] focus:border-accent focus:shadow-[0_0_0_3px_rgba(66,99,235,.12)]'
+    'h-10 w-full rounded-[10px] border border-line bg-surface px-3 text-[13.5px] text-ink outline-none transition-shadow placeholder:text-ink4 focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-ring)]'
   const labelCls = 'mb-1.5 block text-[12px] font-semibold text-ink2'
 
   return (
@@ -227,7 +227,7 @@ export default function BookmarkModal({
       <form
         onSubmit={submit}
         onClick={(e) => e.stopPropagation()}
-        className="animate-pop flex max-h-[94dvh] w-full max-w-[440px] flex-col overflow-y-auto rounded-t-[18px] bg-white shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)] sm:rounded-[18px]"
+        className="animate-pop flex max-h-[94dvh] w-full max-w-[440px] flex-col overflow-y-auto rounded-t-[18px] bg-surface shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)] sm:rounded-[18px]"
       >
         <div className="flex items-start justify-between px-[22px] pt-5">
           <div>
@@ -288,11 +288,11 @@ export default function BookmarkModal({
             </div>
           )}
           {fetchStatus === 'fetched' && (
-            <div className="flex items-start gap-2.5 rounded-[11px] border border-[#d9ecdf] bg-[#f4faf6] px-3.5 py-2.5">
+            <div className="flex items-start gap-2.5 rounded-[11px] border border-success-border bg-success-soft px-3.5 py-2.5">
               <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-success" />
               <div>
-                <b className="text-[12.5px] text-[#1e7c47]">已自动获取网站信息</b>
-                <p className="text-[11.5px] text-[#4f8a66]">标题、描述与图标均可手动修改</p>
+                <b className="text-[12.5px] text-success-ink">已自动获取网站信息</b>
+                <p className="text-[11.5px] text-success-text">标题、描述与图标均可手动修改</p>
               </div>
             </div>
           )}
@@ -306,14 +306,14 @@ export default function BookmarkModal({
           )}
 
           {duplicate && !forceSave && (
-            <div className="flex items-start gap-2.5 rounded-[11px] border border-[#f0d9b5] bg-[#fdf6ea] px-3.5 py-2.5">
-              <AlertTriangle size={15} className="mt-0.5 shrink-0 text-[#b4681c]" />
-              <div className="text-[12px] leading-5 text-[#8a5a1e]">
+            <div className="flex items-start gap-2.5 rounded-[11px] border border-warn-border bg-warn-soft px-3.5 py-2.5">
+              <AlertTriangle size={15} className="mt-0.5 shrink-0 text-warn-ink" />
+              <div className="text-[12px] leading-5 text-warn-text">
                 已收藏过相同链接：「{duplicate.title}」
                 <button
                   type="button"
                   onClick={() => setForceSave(true)}
-                  className="ml-1 font-semibold underline underline-offset-2 hover:text-[#6d4516]"
+                  className="ml-1 font-semibold underline underline-offset-2 hover:text-warn-ink"
                 >
                   仍然保存
                 </button>
@@ -344,7 +344,7 @@ export default function BookmarkModal({
             <textarea
               id="bm-desc"
               rows={2}
-              className="w-full resize-y rounded-[10px] border border-line bg-white px-3 py-2.5 text-[13px] leading-6 outline-none transition-shadow placeholder:text-[#a8adb7] focus:border-accent focus:shadow-[0_0_0_3px_rgba(66,99,235,.12)]"
+              className="w-full resize-y rounded-[10px] border border-line bg-surface px-3 py-2.5 text-[13px] leading-6 outline-none transition-shadow placeholder:text-ink4 focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-ring)]"
               value={description}
               onChange={(e) => {
                 setDescription(e.target.value)
@@ -367,7 +367,7 @@ export default function BookmarkModal({
                     onChange={(e) => setNewColEmoji(e.target.value)}
                     maxLength={4}
                     placeholder="emoji"
-                    className="h-10 w-14 shrink-0 rounded-[10px] border border-line bg-white px-2 text-center text-[15px] placeholder:text-[#a8adb7] focus:border-accent focus:shadow-[0_0_0_3px_rgba(66,99,235,.12)]"
+                    className="h-10 w-14 shrink-0 rounded-[10px] border border-line bg-surface px-2 text-center text-[15px] placeholder:text-ink4 focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-ring)]"
                   />
                   <input
                     value={newColName}

@@ -30,7 +30,7 @@ export default function DomainBatchBar({ domain, count, collections, onMove }: D
             setValue('')
             e.target.value = ''
           }}
-          className="h-8 appearance-none rounded-lg border border-line bg-white pl-7 pr-7 text-[12px] font-medium text-ink2 outline-none focus:border-accent"
+          className="h-8 appearance-none rounded-lg border border-line bg-surface pl-7 pr-7 text-[12px] font-medium text-ink2 outline-none focus:border-accent"
         >
           <option value="">移动到分组…</option>
           {collections.map((c) => (
