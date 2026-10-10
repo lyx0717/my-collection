@@ -133,7 +133,7 @@ export default function DataSection() {
         title="数据导入导出"
         desc="书签保存在当前浏览器本地。清缓存、换电脑前请先导出 JSON 备份。"
       />
-      <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(30,40,60,.05)]">
+      <div className="glass-card rounded-[20px] border border-line2/60 p-5">
         <div
           onDragOver={(e) => {
             e.preventDefault()
@@ -146,7 +146,7 @@ export default function DataSection() {
             const f = e.dataTransfer.files?.[0]
             if (f) void loadFile(f)
           }}
-          className={`rounded-[14px] border-[1.5px] border-dashed px-6 py-7 text-center transition-colors ${
+          className={`rounded-[20px] border-[1.5px] border-dashed px-6 py-7 text-center transition-colors ${
             dragging ? 'border-accent bg-accent-soft' : 'border-line2 bg-surface-2'
           }`}
         >
@@ -214,7 +214,6 @@ export default function DataSection() {
                       <option value="__new">新建分组「{folder}」</option>
                       {collections.map((c) => (
                         <option key={c.id} value={c.id}>
-                          {c.emoji ? `${c.emoji} ` : ''}
                           {c.name}
                         </option>
                       ))}

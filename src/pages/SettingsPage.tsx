@@ -1,15 +1,10 @@
 import { useState, type ReactNode } from 'react'
-import {
-  ArrowLeft,
-  Folder,
-  HardDrive,
-  Info,
-  Palette,
-} from 'lucide-react'
+import { ArrowLeft, Folder, HardDrive, Info, Palette } from 'lucide-react'
 import { useBookmarks } from '../store/BookmarksContext'
 import { useToast } from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
 import CollectionModal from '../components/CollectionModal'
+import CapsuleNav, { type CapsuleNavItem } from '../components/CapsuleNav'
 import AppearanceSection from '../components/settings/AppearanceSection'
 import DataSection from '../components/settings/DataSection'
 import CollectionsSection from '../components/settings/CollectionsSection'
@@ -35,59 +30,67 @@ export default function SettingsPage() {
   >(null)
 
   const navItems: Array<{ key: Section; label: string; icon: ReactNode }> = [
-    { key: 'appearance', label: '外观', icon: <Palette size={15} /> },
-    { key: 'data', label: '数据导入导出', icon: <HardDrive size={15} /> },
-    { key: 'collections', label: '分组管理', icon: <Folder size={15} /> },
-    { key: 'about', label: '关于', icon: <Info size={15} /> },
+    { key: 'appearance', label: '外观', icon: <Palette size={16} strokeWidth={1.8} /> },
+    { key: 'data', label: '数据导入导出', icon: <HardDrive size={16} strokeWidth={1.8} /> },
+    { key: 'collections', label: '分组管理', icon: <Folder size={16} strokeWidth={1.8} /> },
+    { key: 'about', label: '关于', icon: <Info size={16} strokeWidth={1.8} /> },
   ]
 
-  const submitCollection = (name: string, emoji?: string) => {
+  const submitCollection = (name: string, icon?: string) => {
     if (collectionModal?.mode === 'edit') {
-      renameCollection(collectionModal.collection.id, name, emoji)
+      renameCollection(collectionModal.collection.id, name, icon)
       toast(`分组「${name}」已更新`)
     } else {
-      addCollection(name, emoji)
+      addCollection(name, icon)
       toast(`分组「${name}」已创建`)
     }
   }
 
   return (
-    <div className="min-h-dvh bg-canvas">
-      <header className="glass-topbar sticky top-0 z-40 flex h-[62px] items-center gap-3 border-b border-line bg-surface/95 px-4 backdrop-blur sm:px-6">
-        <a
-          href="#/"
-          className="flex h-9 items-center gap-1.5 rounded-[10px] px-2 text-[13px] text-ink2 hover:bg-surface-2"
-        >
-          <ArrowLeft size={15} />
-          <span className="hidden sm:inline">返回书签</span>
-        </a>
-        <h1 className="text-[16px] font-bold">设置</h1>
+    // 同 HomePage：不加 bg-canvas，否则会盖住 body 下的氛围光层
+    <div className="min-h-dvh">
+      {/* 顶部通栏 fixed，与首页 DockBar 同一形态 */}
+      <header className="glass-chrome fixed inset-x-0 top-0 z-40 flex h-14 items-center border-b px-4 sm:px-6">
+        <div className="mx-auto flex w-full max-w-6xl items-center gap-2.5">
+          <a
+            href="#/"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[12px] text-ink2 transition-colors hover:bg-surface-2 hover:text-accent"
+            aria-label="返回书签"
+          >
+            <ArrowLeft size={17} />
+          </a>
+          <h1 className="text-[15px] font-bold">设置</h1>
+        </div>
       </header>
 
-      <div className="mx-auto flex max-w-5xl gap-8 px-4 py-8 sm:px-6">
-        <nav className="hidden w-[168px] shrink-0 md:block">
-          <div className="sticky top-24 flex flex-col gap-1">
-            {navItems.map((n) => (
-              <button
-                key={n.key}
-                onClick={() => {
-                  setSection(n.key)
-                  document.getElementById(`sec-${n.key}`)?.scrollIntoView({ behavior: 'smooth' })
-                }}
-                className={`flex items-center gap-2 rounded-[10px] px-3 py-2 text-left text-[13.5px] font-medium transition-colors ${
-                  section === n.key
-                    ? 'bg-accent-soft font-semibold text-accent-ink'
-                    : 'text-ink2 hover:bg-surface-2'
-                }`}
-              >
-                {n.icon}
-                {n.label}
-              </button>
-            ))}
-          </div>
-        </nav>
+      {/* fixed 顶栏不占文档流，垫一段等高空白，
+          否则下方 sticky 导航会整体上移 56px、压住内容。 */}
+      <div aria-hidden className="h-14" />
 
-        <div className="min-w-0 flex-1 space-y-10 pb-20">
+      {/* 导航：与首页分组导航共用 CapsuleNav，宽度同样按内容自适应居中。
+          sticky top-14 让它吸在通栏顶栏下方。 */}
+      <div className="sticky top-14 z-30 px-4 py-3 sm:px-6">
+        <CapsuleNav
+          ariaLabel="设置导航"
+          items={navItems.map<CapsuleNavItem>((n) => ({
+            key: n.key,
+            label: n.label,
+            icon: n.icon,
+            active: section === n.key,
+            onClick: () => {
+              setSection(n.key)
+              document.getElementById(`sec-${n.key}`)?.scrollIntoView({ behavior: 'smooth' })
+            },
+          }))}
+          maxWidth="min(700px, calc(100vw - 32px))"
+        />
+      </div>
+
+      {/* 内容宽度收到 760px：iOS 设置页是分组列表（约 390~430pt），
+          过宽的设置页会让人失去「这是一份清单」的认知。
+          pt-6 让首个区块与吸顶胶囊拉开距离。 */}
+      <div className="mx-auto max-w-[760px] px-4 pt-5 pb-20 sm:px-6">
+        <div className="pt-4">
           <AppearanceSection />
           <DataSection />
           <CollectionsSection
@@ -133,7 +136,7 @@ export default function SettingsPage() {
       {confirm && typeof confirm === 'object' && 'collection' in confirm && (
         <ConfirmDialog
           title={`删除分组「${confirm.collection.name}」？`}
-          message="分组内的书签不会被删除，会移动到「未分组」。"
+          message="分组内的书签不会被删除，它们会回到「全部」里。"
           confirmText="删除分组"
           danger
           onConfirm={() => {

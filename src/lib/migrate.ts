@@ -18,12 +18,12 @@ export const CURRENT_VERSION = 4
 
 /** v4 分组定义（顺序即侧栏顺序） */
 export const V4_COLLECTIONS: Collection[] = [
-  { id: 'col_dev', name: '开发', emoji: '💻', order: 0 },
-  { id: 'col_ai', name: 'AI', emoji: '🤖', order: 1 },
-  { id: 'col_work', name: '工作', emoji: '💼', order: 2 },
-  { id: 'col_life', name: '生活', emoji: '🏠', order: 3 },
-  { id: 'col_tool', name: '工具', emoji: '🧰', order: 4 },
-  { id: 'col_sci', name: '科学', emoji: '🔬', order: 5 },
+  { id: 'col_dev', name: '开发', icon: 'Code', order: 0 },
+  { id: 'col_ai', name: 'AI', icon: 'Cpu', order: 1 },
+  { id: 'col_work', name: '工作', icon: 'Briefcase', order: 2 },
+  { id: 'col_life', name: '生活', icon: 'Home', order: 3 },
+  { id: 'col_tool', name: '工具', icon: 'Wrench', order: 4 },
+  { id: 'col_sci', name: '科学', icon: 'Sparkles', order: 5 },
 ]
 
 /** v3 分组 id → v4 分组 id。col_media 先按域名再决定去向，故不在这张表里。 */

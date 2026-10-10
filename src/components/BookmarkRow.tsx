@@ -1,17 +1,15 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Pencil, Star, Trash2 } from 'lucide-react'
+import { GripVertical, Pencil, Trash2 } from 'lucide-react'
 import type { Bookmark } from '../types'
 import { shortDate } from '../lib/date'
 import Favicon from './Favicon'
-import StarButton from './StarButton'
 
 interface BookmarkRowProps {
   bookmark: Bookmark
   collectionName?: string
   onEdit: (bm: Bookmark) => void
   onDelete: (bm: Bookmark) => void
-  onToggleStar: (id: string) => void
   onDomainClick?: (domain: string) => void
   selectMode?: boolean
   selected?: boolean
@@ -24,7 +22,6 @@ function RowBody({
   collectionName,
   onEdit,
   onDelete,
-  onToggleStar,
   onDomainClick,
   dragHandleProps,
   isDragging,
@@ -34,7 +31,7 @@ function RowBody({
 }) {
   return (
     <div
-      className={`group flex items-center gap-3 rounded-[14px] border border-line bg-surface px-3.5 py-2.5 shadow-[0_1px_2px_rgba(30,40,60,.05)] transition-[transform,box-shadow,border-color] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px] hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(30,40,60,.18),0_2px_6px_rgba(30,40,60,.05)] ${
+      className={`glass-card group flex items-center gap-3 rounded-[20px] border border-line bg-surface px-3.5 py-2.5 shadow-[0_1px_2px_rgba(30,40,60,.05)] transition-[transform,box-shadow,border-color] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px] hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(30,40,60,.18),0_2px_6px_rgba(30,40,60,.05)] ${
         isDragging ? 'z-10 opacity-60 shadow-xl ring-2 ring-accent/40' : ''
       }`}
     >
@@ -91,11 +88,6 @@ function RowBody({
       </span>
 
       <div className="flex shrink-0 items-center gap-0.5">
-        <StarButton
-          starred={bookmark.starred}
-          onToggle={() => onToggleStar(bookmark.id)}
-          revealOnHover={!bookmark.starred}
-        />
         <button
           onClick={() => onEdit(bookmark)}
           aria-label={`编辑 ${bookmark.title}`}
@@ -135,7 +127,7 @@ export default function BookmarkRow(props: BookmarkRowProps) {
     return (
       <label
         ref={setNodeRef}
-        className={`flex cursor-pointer items-center gap-3 rounded-[14px] border px-3.5 py-2.5 transition-colors ${
+        className={`flex cursor-pointer items-center gap-3 rounded-[20px] border px-3.5 py-2.5 transition-colors ${
           selected
             ? 'border-accent/50 bg-accent-soft/50'
             : 'border-line bg-surface hover:border-line2 hover:bg-surface-2'
@@ -155,7 +147,6 @@ export default function BookmarkRow(props: BookmarkRowProps) {
             {collectionName ? ` · ${collectionName}` : ''}
           </div>
         </div>
-        {bookmark.starred && <Star size={13} className="shrink-0 fill-star text-star" />}
       </label>
     )
   }

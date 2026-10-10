@@ -9,9 +9,8 @@ export interface Bookmark {
   domain: string
   faviconUrl?: string
   cover?: string
-  /** undefined = 未分组 */
+  /** undefined = 未分组；未分组书签归入「全部」，不再有独立视图 */
   collectionId?: string
-  starred: boolean
   createdAt: string
   updatedAt: string
 }
@@ -19,7 +18,8 @@ export interface Bookmark {
 export interface Collection {
   id: string
   name: string
-  emoji?: string
+  /** lucide 图标名（见 lib/collectionIcons.ts）。缺省时按名称 hash 稳定取一个。 */
+  icon?: string
   order: number
 }
 
@@ -30,19 +30,17 @@ export interface StoreShape {
 }
 
 /** 新建/编辑表单提交的数据 */
-export type BookmarkInput = Omit<Bookmark, 'id' | 'createdAt' | 'updatedAt' | 'domain' | 'starred'> & {
-  starred?: boolean
-}
+export type BookmarkInput = Omit<Bookmark, 'id' | 'createdAt' | 'updatedAt' | 'domain'>
 
 export type ViewMode = 'list' | 'grid' | 'tile'
 export type SortMode = 'desc' | 'asc' | 'az'
 
-/** 侧栏作用域 */
-export type Scope =
-  | { type: 'all' }
-  | { type: 'starred' }
-  | { type: 'none' }
-  | { type: 'collection'; id: string }
+/**
+ * 分组导航的作用域。
+ * 只剩「全部」与「分组」两种 —— 星标视图与未分组视图均已下线，
+ * 没有分组的书签直接出现在「全部」里，不再单列。
+ */
+export type Scope = { type: 'all' } | { type: 'collection'; id: string }
 
 export interface ParsedImportBookmark {
   url: string

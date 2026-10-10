@@ -1,6 +1,5 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Star } from 'lucide-react'
 import type { Bookmark } from '../types'
 import { letterColor } from '../lib/color'
 import { badgeText } from '../lib/badge'
@@ -25,7 +24,7 @@ export default function BookmarkTile({ bookmark, sortable = false, onOpen }: Boo
     <div
       ref={setNodeRef}
       style={sortable ? { transform: CSS.Transform.toString(transform), transition } : undefined}
-      className={`tile-shell group flex min-h-[100px] min-w-[80px] touch-none flex-col items-center gap-2 rounded-2xl border border-transparent px-2.5 py-4 text-center transition-[transform,background-color,border-color] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px] hover:border-line hover:bg-surface ${
+      className={`tile-shell group flex min-h-[100px] min-w-[80px] touch-none flex-col items-center gap-2 rounded-[20px] border border-transparent px-2.5 py-4 text-center transition-[transform,background-color,border-color] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px] hover:border-line hover:bg-surface ${
         isDragging ? 'z-10 opacity-70 ring-2 ring-accent/50' : ''
       }`}
       {...(sortable ? { ...attributes, ...listeners } : {})}
@@ -38,7 +37,7 @@ export default function BookmarkTile({ bookmark, sortable = false, onOpen }: Boo
         className="relative flex h-14 w-14 items-center justify-center transition-transform group-hover:scale-105"
       >
         <span
-          className="absolute inset-0 overflow-hidden rounded-2xl border shadow-[0_2px_8px_-2px_rgba(30,40,60,.12)]"
+          className="absolute inset-0 overflow-hidden rounded-[20px] border shadow-[0_2px_8px_-2px_rgba(30,40,60,.12)]"
           style={{
             background: failed ? color.bg : 'var(--surface)',
             borderColor: failed ? color.bg : 'var(--color-line)',
@@ -50,7 +49,7 @@ export default function BookmarkTile({ bookmark, sortable = false, onOpen }: Boo
               alt=""
               loading="lazy"
               onError={handleError}
-              className="h-full w-full rounded-2xl p-3"
+              className="h-full w-full rounded-[20px] p-3"
             />
           ) : failed ? (
             <span
@@ -65,14 +64,6 @@ export default function BookmarkTile({ bookmark, sortable = false, onOpen }: Boo
             </span>
           )}
         </span>
-        {bookmark.starred && (
-          <span
-            className="absolute -right-1.5 -top-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full border border-line bg-surface shadow-sm"
-            aria-label="已星标"
-          >
-            <Star size={11} className="fill-star text-star" />
-          </span>
-        )}
       </button>
       <span className="line-clamp-2 w-full break-words text-[12px] leading-[1.35] text-ink2 group-hover:text-ink">
         {bookmark.title}

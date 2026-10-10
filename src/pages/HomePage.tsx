@@ -13,15 +13,14 @@ import {
   X,
 } from 'lucide-react'
 import { useBookmarks } from '../store/BookmarksContext'
-import { useAppearance } from '../store/AppearanceContext'
 import { useToast } from '../components/Toast'
 import type { Bookmark, Scope, ViewMode } from '../types'
 import { dedupeKey } from '../lib/url'
 import { itemEnter, viewContainer } from '../lib/motion'
 import { useBookmarkFilter } from '../hooks/useBookmarkFilter'
 import { useBatchSelection } from '../hooks/useBatchSelection'
-import Sidebar from '../components/Sidebar'
-import Topbar from '../components/Topbar'
+import DockBar from '../components/DockBar'
+import GroupNav from '../components/GroupNav'
 import BookmarkFilterInput from '../components/BookmarkFilterInput'
 import BookmarkRow from '../components/BookmarkRow'
 import BookmarkGridCard from '../components/BookmarkGridCard'
@@ -32,40 +31,18 @@ import BookmarkModal from '../components/BookmarkModal'
 import BatchToolbar from '../components/BatchToolbar'
 import DomainBatchBar from '../components/DomainBatchBar'
 import SortableBookmarks from '../components/SortableBookmarks'
-import CollectionModal from '../components/CollectionModal'
-import ConfirmDialog from '../components/ConfirmDialog'
 import EmptyState from '../components/EmptyState'
-import type { Collection } from '../types'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const VIEW_KEY = 'mybookmarks:view'
 
 export default function HomePage() {
-  const {
-    bookmarks,
-    collections,
-    seedLoading,
-    toggleStar,
-    removeBookmark,
-    addCollection,
-    renameCollection,
-    removeCollection,
-    bulkUpdate,
-    bulkRemove,
-    reorderBookmarks,
-    reorderCollections,
-  } = useBookmarks()
-  const { glassMode } = useAppearance()
-  const isGlass = glassMode === 'glass'
+  const { bookmarks, collections, seedLoading, removeBookmark, bulkUpdate, bulkRemove, reorderBookmarks } =
+    useBookmarks()
   const toast = useToast()
   const [params, setParams] = useSearchParams()
   const [deleting, setDeleting] = useState<Bookmark | null>(null)
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false)
-  const [collectionModal, setCollectionModal] = useState<
-    | { mode: 'create' }
-    | { mode: 'edit'; collection: Collection }
-    | null
-  >(null)
-  const [deletingCollection, setDeletingCollection] = useState<Collection | null>(null)
 
   const [modal, setModal] = useState<
     | { mode: 'add' }
@@ -73,7 +50,6 @@ export default function HomePage() {
     | { mode: 'preset'; url: string; title?: string; bookmarklet: boolean }
     | null
   >(null)
-  const [mobileMenu, setMobileMenu] = useState(false)
 
   const initialView = (): ViewMode => {
     const saved = localStorage.getItem(VIEW_KEY)
@@ -91,7 +67,6 @@ export default function HomePage() {
     contextTitle,
     hasActiveFilter,
     searchFiltered,
-    starredCount,
   } = useBookmarkFilter(bookmarks, collections, params)
 
   const visibleIds = visible.map((b) => b.id)
@@ -105,7 +80,7 @@ export default function HomePage() {
     exitBatch,
   } = useBatchSelection(visibleIds)
 
-  // 拖拽：全部/分组/星标/未分组可用；搜索与标签域名筛选、批量多选时禁用
+  // 拖拽：全部/分组可用；搜索与域名筛选、批量多选时禁用
   const dragEnabled = !batchMode && !searchFiltered
 
   const updateParams = (mutate: (p: URLSearchParams) => void) => {
@@ -117,11 +92,7 @@ export default function HomePage() {
   const setScope = (s: Scope) =>
     updateParams((p) => {
       p.delete('c')
-      p.delete('star')
-      p.delete('none')
       if (s.type === 'collection') p.set('c', s.id)
-      if (s.type === 'starred') p.set('star', '1')
-      if (s.type === 'none') p.set('none', '1')
     })
 
   useEffect(() => {
@@ -157,18 +128,6 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, params])
 
-  const handleSubmitCollection = (name: string, emoji?: string) => {
-    if (collectionModal?.mode === 'edit') {
-      renameCollection(collectionModal.collection.id, name, emoji)
-      toast(`分组「${name}」已更新`)
-    } else {
-      const created = addCollection(name, emoji)
-      toast(`分组「${name}」已创建`)
-      setScope({ type: 'collection', id: created.id })
-      setMobileMenu(false)
-    }
-  }
-
   if (seedLoading) {
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-3 bg-canvas text-ink3">
@@ -179,91 +138,53 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-canvas">
-      <Sidebar
-        total={bookmarks.length}
-        starredCount={starredCount}
-        collections={collections}
-        collectionCounts={collectionCounts}
-        scope={scope}
-        onScope={(s) => {
-          setScope(s)
-          setMobileMenu(false)
-        }}
-        onAddCollection={() => setCollectionModal({ mode: 'create' })}
-        onEditCollection={(col) => setCollectionModal({ mode: 'edit', collection: col })}
-        onDeleteCollection={(col) => setDeletingCollection(col)}
-        onReorderCollections={(orderedIds) => {
-          reorderCollections(orderedIds)
-          toast('分组顺序已更新')
-        }}
-        mobileOpen={mobileMenu}
-        onCloseMobile={() => setMobileMenu(false)}
-      />
+    // 容器不能带 bg-canvas：不透明底色会盖住 body 的玻璃底料，
+    // 玻璃背后就没有内容可折射，透出来的只剩一片死白。底色由 body 负责。
+    <div className="min-h-dvh">
+      {/* 顶部通栏（fixed，通栏贴边） */}
+      <DockBar />
 
-      <div
-        className={
-          isGlass
-            ? 'relative flex min-w-0 flex-1 flex-col overflow-hidden'
-            : 'flex min-w-0 flex-1 flex-col'
-        }
-      >
-        <Topbar
-          onAdd={() => setModal({ mode: 'add' })}
-          onOpenMenu={() => setMobileMenu(true)}
+      {/* DockBar 是 fixed，不占文档流。必须先垫一段与它等高的空白，
+          否则 sticky 导航会紧贴视口顶（top:0 基准），整体上移 56px。 */}
+      <div aria-hidden className="h-14" />
+
+      {/* 分组导航：sticky 吸在通栏顶栏下方，滚动时始终可见。
+          top-14 必须等于 DockBar 的固定高度（h-14 = 56px），
+          否则胶囊与顶栏之间会露出一条缝隙。
+          只做点击切换，增删改与排序都在设置页。 */}
+      <div className="sticky top-14 z-30 px-4 py-3 sm:px-6">
+        <GroupNav
+          total={bookmarks.length}
+          collections={collections}
+          collectionCounts={collectionCounts}
+          scope={scope}
+          onScope={setScope}
         />
+      </div>
 
-        <main
-          className={`flex-1 overflow-y-auto px-4 pb-10 sm:px-6 ${
-            isGlass ? 'pt-0' : ''
-          }`}
-        >
-          {/* 玻璃模式：顶栏为绝对定位，用垫片把分组条放到其下方，避免与 sticky 叠出空隙 */}
-          {isGlass && <div aria-hidden className="h-[62px] shrink-0" />}
-
-          {/* 手机分组 chips */}
-          <div
-            className={`flex gap-2 overflow-x-auto border-b border-line px-4 py-2.5 lg:hidden [mask-image:linear-gradient(to right,#000_calc(100%_-_18px),transparent)] ${
-              isGlass
-                ? 'glass-topbar-chips sticky top-[62px] z-30 -mx-4 bg-surface'
-                : 'sticky top-0 z-30 -mx-4 bg-surface'
-            }`}
-          >
-            {[
-              { label: `全部 ${bookmarks.length}`, active: scope.type === 'all', onClick: () => setScope({ type: 'all' }) },
-              { label: `★ 星标 ${starredCount}`, active: scope.type === 'starred', onClick: () => setScope({ type: 'starred' }) },
-              ...collections.map((c) => ({
-                label: `${c.emoji ?? ''} ${c.name} ${collectionCounts.get(c.id) ?? 0}`,
-                active: scope.type === 'collection' && scope.id === c.id,
-                onClick: () => setScope({ type: 'collection', id: c.id }),
-              })),
-            ].map((chip) => (
-              <button
-                key={chip.label}
-                onClick={chip.onClick}
-                className={`shrink-0 rounded-full border px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
-                  chip.active
-                    ? 'border-ink bg-ink text-white'
-                    : 'border-line bg-surface/80 text-ink2'
-                }`}
-              >
-                {chip.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="mx-auto max-w-5xl py-5">
-            <div className="mb-4 flex flex-wrap items-center gap-3">
-              <h1 className="text-[20px] font-bold">{contextTitle}</h1>
-              <span className="text-[12.5px] text-ink3">
-                <CountUp value={visible.length} /> 条
-              </span>
+      {/* pt-6：与吸顶胶囊保持舒适间距（胶囊自身 py-3 已占 12px） */}
+      <main className="mx-auto max-w-6xl px-4 pt-6 pb-24 sm:px-6">
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <h1 className="text-[22px] font-bold tracking-[-0.01em]">{contextTitle}</h1>
+            <span className="text-[12.5px] text-ink3">
+              <CountUp value={visible.length} /> 条
+            </span>
               <BookmarkFilterInput
                 value={query}
                 count={visible.length}
                 onChange={(q) => updateParams((p) => (q ? p.set('q', q) : p.delete('q')))}
               />
+              {/* 操作组：添加 / 多选 / 视图切换。
+                  「添加书签」原先在顶栏，但用户想加书签时视线在卡片区，
+                  按钮却要移到屏幕最上方 —— 移到内容工具条，与多选、视图切换同组。 */}
               <div className="ml-auto flex items-center gap-2.5">
+                <button
+                  onClick={() => setModal({ mode: 'add' })}
+                  className="flex h-[34px] items-center gap-1.5 rounded-[12px] bg-accent px-3 text-[12.5px] font-semibold text-white shadow-[0_4px_12px_-5px_var(--accent-shadow)] transition-colors hover:bg-accent-ink"
+                >
+                  <Plus size={14} strokeWidth={2.4} />
+                  <span className="hidden sm:inline">添加书签</span>
+                </button>
                 {view !== 'tile' && (
                 <button
                   onClick={() => {
@@ -369,10 +290,6 @@ export default function HomePage() {
                   bulkUpdate([...selectedIds], { collectionId })
                   exitBatch()
                 }}
-                onStar={() => {
-                  bulkUpdate([...selectedIds], { starred: true })
-                  exitBatch()
-                }}
                 onDelete={() => setBatchDeleteOpen(true)}
               />
             )}
@@ -446,7 +363,7 @@ export default function HomePage() {
                   const bm = visible.find((b) => b.id === id)
                   if (!bm) return null
                   return (
-                    <div className="pointer-events-none flex items-center gap-2.5 rounded-[14px] border border-line2 bg-surface px-3.5 py-2.5 shadow-xl">
+                    <div className="pointer-events-none flex items-center gap-2.5 rounded-[20px] border border-line2 bg-surface px-3.5 py-2.5 shadow-xl">
                       <Favicon domain={bm.domain} faviconUrl={bm.faviconUrl} size="sm" />
                       <span className="max-w-[220px] truncate text-[13.5px] font-medium text-ink">
                         {bm.title}
@@ -490,7 +407,6 @@ export default function HomePage() {
                             onToggleSelect={toggleSelect}
                             onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
                             onDelete={(b) => setDeleting(b)}
-                            onToggleStar={toggleStar}
                             onDomainClick={(d) => updateParams((p) => p.set('d', d))}
                           />
                         ) : view === 'tile' ? (
@@ -504,7 +420,6 @@ export default function HomePage() {
                             bookmark={bm}
                             compact
                             sortable={dragEnabled}
-                            onToggleStar={toggleStar}
                             onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
                             onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
                             onDelete={(b) => setDeleting(b)}
@@ -516,9 +431,7 @@ export default function HomePage() {
                 </AnimatePresence>
               </SortableBookmarks>
             )}
-          </div>
-        </main>
-      </div>
+      </main>
 
       {modal?.mode === 'add' && (
         <BookmarkModal key="add" onClose={() => setModal(null)} />
@@ -554,15 +467,6 @@ export default function HomePage() {
         />
       )}
 
-      {collectionModal && (
-        <CollectionModal
-          initial={collectionModal.mode === 'edit' ? collectionModal.collection : null}
-          existingNames={collections.map((c) => c.name)}
-          onSubmit={handleSubmitCollection}
-          onClose={() => setCollectionModal(null)}
-        />
-      )}
-
       {batchDeleteOpen && (
         <ConfirmDialog
           title={`删除 ${selectedIds.size} 条书签？`}
@@ -576,27 +480,6 @@ export default function HomePage() {
             toast(`已删除 ${selectedIds.size} 条书签`)
           }}
           onCancel={() => setBatchDeleteOpen(false)}
-        />
-      )}
-
-      {deletingCollection && (
-        <ConfirmDialog
-          title={`删除分组「${deletingCollection.name}」？`}
-          message="分组内的书签不会被删除，会移动到「未分组」。"
-          confirmText="删除分组"
-          danger
-          onConfirm={() => {
-            removeCollection(deletingCollection.id)
-            toast(`分组「${deletingCollection.name}」已删除`)
-            setDeletingCollection(null)
-            if (
-              scope.type === 'collection' &&
-              scope.id === deletingCollection.id
-            ) {
-              setScope({ type: 'all' })
-            }
-          }}
-          onCancel={() => setDeletingCollection(null)}
         />
       )}
     </div>

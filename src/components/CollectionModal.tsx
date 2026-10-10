@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { X } from 'lucide-react'
 import type { Collection } from '../types'
+import { COLLECTION_ICONS, iconForCollection } from '../lib/collectionIcons'
 
 interface CollectionModalProps {
   /** 传入则为编辑，否则新建 */
   initial?: Collection | null
   existingNames: string[]
-  onSubmit: (name: string, emoji?: string) => void
+  onSubmit: (name: string, icon?: string) => void
   onClose: () => void
 }
 
@@ -17,7 +18,8 @@ export default function CollectionModal({
   onClose,
 }: CollectionModalProps) {
   const [name, setName] = useState(initial?.name ?? '')
-  const [emoji, setEmoji] = useState(initial?.emoji ?? '')
+  // 未指定时先给一个按名称 hash 得到的图标，用户不选也能保存
+  const [icon, setIcon] = useState<string | undefined>(initial?.icon ?? undefined)
   const [error, setError] = useState('')
   const nameRef = useRef<HTMLInputElement>(null)
 
@@ -42,16 +44,19 @@ export default function CollectionModal({
       setError('请填写分组名称')
       return
     }
-    if (
-      existingNames.some((n) => n === trimmed) &&
-      trimmed !== initial?.name
-    ) {
+    if (existingNames.some((n) => n === trimmed) && trimmed !== initial?.name) {
       setError('已存在同名分组')
       return
     }
-    onSubmit(trimmed, emoji.trim() || undefined)
+    onSubmit(trimmed, icon)
     onClose()
   }
+
+  // 预览当前生效的图标：未选时按名称 hash 回退
+  const preview = icon ?? iconForCollection({ name: name.trim() || 'new' })
+  const PreviewIcon = COLLECTION_ICONS.includes(preview as never)
+    ? (preview as (typeof COLLECTION_ICONS)[number])
+    : COLLECTION_ICONS[0]
 
   return (
     <div
@@ -64,7 +69,7 @@ export default function CollectionModal({
       <form
         onSubmit={submit}
         onClick={(e) => e.stopPropagation()}
-        className="animate-pop w-full max-w-[380px] rounded-[18px] bg-surface p-6 shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)]"
+        className="animate-pop max-h-[86vh] w-full max-w-[420px] overflow-y-auto rounded-[20px] bg-surface p-6 shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)]"
       >
         <div className="flex items-start justify-between">
           <div>
@@ -77,43 +82,64 @@ export default function CollectionModal({
             type="button"
             onClick={onClose}
             aria-label="关闭"
-            className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-ink3 hover:bg-surface-2"
+            className="flex h-[30px] w-[30px] items-center justify-center rounded-[10px] text-ink3 hover:bg-surface-2"
           >
             <X size={16} />
           </button>
         </div>
 
-        <div className="mt-5 flex gap-3">
-          <div className="w-20 shrink-0">
-            <label className="mb-1.5 block text-[12px] font-semibold text-ink2" htmlFor="col-emoji">
-              图标
-            </label>
-            <input
-              id="col-emoji"
-              value={emoji}
-              onChange={(e) => setEmoji(e.target.value)}
-              maxLength={4}
-              placeholder="📁"
-              className="h-10 w-16 shrink-0 rounded-[10px] border border-line bg-surface px-2 text-center text-[15px] placeholder:text-ink4 focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-ring)]"
-            />
-          </div>
-          <div className="min-w-0 flex-1">
-            <label className="mb-1.5 block text-[12px] font-semibold text-ink2" htmlFor="col-name">
-              名称
-            </label>
-            <input
-              ref={nameRef}
-              id="col-name"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value)
-                setError('')
-              }}
-              placeholder="例如：学习资料"
-              className="h-10 w-full min-w-0 rounded-[10px] border border-line bg-surface px-3 text-[13.5px] placeholder:text-ink4 focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-ring)]"
-            />
-          </div>
+        <div className="mt-5">
+          <label className="mb-1.5 block text-[12px] font-semibold text-ink2" htmlFor="col-name">
+            名称
+          </label>
+          <input
+            ref={nameRef}
+            id="col-name"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value)
+              setError('')
+            }}
+            placeholder="例如：学习资料"
+            className="h-10 w-full min-w-0 rounded-[10px] border border-line bg-surface px-3 text-[13.5px] placeholder:text-ink4 focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-ring)]"
+          />
         </div>
+
+        <div className="mt-4">
+          <div className="mb-1.5 flex items-baseline justify-between">
+            <span className="text-[12px] font-semibold text-ink2">图标</span>
+            <span className="text-[11px] text-ink3">与导航栏显示一致</span>
+          </div>
+          {/* 图标网格：选中态用 accent 填充，与导航选中态同一套 */}
+          <div className="grid grid-cols-8 gap-1.5">
+            {COLLECTION_ICONS.map((Icon) => {
+              const name = (Icon as { name?: string }).name ?? ''
+              const selected = preview === name || preview === Icon
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  title={name}
+                  aria-label={name}
+                  aria-pressed={selected}
+                  onClick={() => setIcon(name)}
+                  className={`flex h-9 w-9 items-center justify-center rounded-[10px] transition-colors ${
+                    selected
+                      ? 'bg-accent text-white'
+                      : 'bg-surface-2 text-ink3 hover:bg-surface-2/70 hover:text-ink'
+                  }`}
+                >
+                  <Icon size={17} strokeWidth={1.8} />
+                </button>
+              )
+            })}
+          </div>
+          <p className="mt-2 flex items-center gap-1.5 text-[11px] leading-4 text-ink3">
+            <PreviewIcon size={13} strokeWidth={1.8} className="shrink-0" />
+            导航里会显示这个图标；不选则按分组名自动分配一个固定的。
+          </p>
+        </div>
+
         {error && <p className="mt-2 text-[12px] text-danger">{error}</p>}
 
         <div className="mt-6 flex justify-end gap-2.5">

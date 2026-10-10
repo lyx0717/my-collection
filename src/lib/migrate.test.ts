@@ -10,22 +10,22 @@ import {
 import type { Bookmark, Collection } from '../types'
 
 const V3_COLLECTIONS: Collection[] = [
-  { id: 'col_dev', name: '开发', emoji: '💻', order: 0 },
-  { id: 'col_ai', name: 'AI', emoji: '🤖', order: 1 },
-  { id: 'col_work', name: '工作', emoji: '💼', order: 2 },
-  { id: 'col_life', name: '生活', emoji: '🏠', order: 3 },
-  { id: 'col_media', name: '影音', emoji: '🎬', order: 4 },
-  { id: 'col_tool', name: '工具', emoji: '🧰', order: 5 },
-  { id: 'col_net', name: '网络', emoji: '🌐', order: 6 },
+  { id: 'col_dev', name: '开发', icon: 'Code', order: 0 },
+  { id: 'col_ai', name: 'AI', icon: 'Cpu', order: 1 },
+  { id: 'col_work', name: '工作', icon: 'Briefcase', order: 2 },
+  { id: 'col_life', name: '生活', icon: 'Home', order: 3 },
+  { id: 'col_media', name: '影音', icon: 'Film', order: 4 },
+  { id: 'col_tool', name: '工具', icon: 'Wrench', order: 5 },
+  { id: 'col_net', name: '网络', icon: 'Globe', order: 6 },
 ]
 
 const OLD_COLLECTIONS: Collection[] = [
-  { id: 'col_social', name: '主页', emoji: '🏠', order: 0 },
-  { id: 'col_shop', name: '杂项', emoji: '🛒', order: 1 },
-  { id: 'col_ai', name: 'AI', emoji: '🤖', order: 2 },
-  { id: 'col_work', name: '工作', emoji: '💼', order: 3 },
-  { id: 'col_dev', name: '程序员', emoji: '💻', order: 4 },
-  { id: 'col_life', name: '科学', emoji: '✈️', order: 5 },
+  { id: 'col_social', name: '主页', icon: 'Home', order: 0 },
+  { id: 'col_shop', name: '杂项', icon: 'ShoppingBag', order: 1 },
+  { id: 'col_ai', name: 'AI', icon: 'Cpu', order: 2 },
+  { id: 'col_work', name: '工作', icon: 'Briefcase', order: 3 },
+  { id: 'col_dev', name: '程序员', icon: 'Code', order: 4 },
+  { id: 'col_life', name: '科学', icon: 'Plane', order: 5 },
 ]
 
 /** 造一条 v3 书签 */
@@ -182,12 +182,11 @@ describe('migrateV3ToV4', () => {
   })
 
   it('书签其他字段原样保留', () => {
-    const out = run([{ ...bm('keep', 'github.com', 'col_dev'), starred: true, order: 7 }])
+    const out = run([{ ...bm('keep', 'github.com', 'col_dev'), order: 7 }])
     expect(out.bookmarks[0]).toMatchObject({
       id: 'keep',
       url: 'https://github.com',
       title: 'keep',
-      starred: true,
       order: 7,
     })
   })

@@ -5,7 +5,6 @@ import {
   ExternalLink,
   Loader2,
   Sparkles,
-  Star,
   X,
 } from 'lucide-react'
 import type { Bookmark } from '../types'
@@ -30,24 +29,19 @@ export default function BookmarkModal({
   fromBookmarklet,
   onClose,
 }: BookmarkModalProps) {
-  const { collections, addBookmark, updateBookmark, addCollection, findDuplicate } = useBookmarks()
+  const { collections, addBookmark, updateBookmark, findDuplicate } = useBookmarks()
   const toast = useToast()
 
   const [url, setUrl] = useState(editing?.url ?? preset?.url ?? '')
   const [title, setTitle] = useState(editing?.title ?? preset?.title ?? '')
   const [description, setDescription] = useState(editing?.description ?? '')
   const [collectionId, setCollectionId] = useState(editing?.collectionId ?? '')
-  const [starred, setStarred] = useState(editing?.starred ?? false)
   const [faviconUrl, setFaviconUrl] = useState(editing?.faviconUrl)
   const [cover, setCover] = useState(editing?.cover)
 
   const [fetchStatus, setFetchStatus] = useState<FetchStatus>('idle')
   const [urlError, setUrlError] = useState('')
   const [forceSave, setForceSave] = useState(false)
-  const [creatingCollection, setCreatingCollection] = useState(false)
-  const [newColName, setNewColName] = useState('')
-  const [newColEmoji, setNewColEmoji] = useState('')
-  const [colError, setColError] = useState('')
 
   const fetchedFor = useRef<string>('')
   const titleTouched = useRef(Boolean(editing || preset?.title))
@@ -141,17 +135,8 @@ export default function BookmarkModal({
       return
     }
 
-    // 输入了新分组名称但没点「创建」就直接保存：先建组再归属
-    let finalCollectionId = collectionId
-    if (creatingCollection) {
-      const name = newColName.trim()
-      if (name) {
-        const existing = collections.find((c) => c.name === name)
-        finalCollectionId = existing
-          ? existing.id
-          : addCollection(name, newColEmoji.trim() || undefined).id
-      }
-    }
+    // 分组只在设置页创建，这里直接用当前选中的那个
+    const finalCollectionId = collectionId
 
     const payload = {
       url: finalUrl,
@@ -160,7 +145,6 @@ export default function BookmarkModal({
       faviconUrl,
       cover,
       collectionId: finalCollectionId || undefined,
-      starred,
     }
 
     if (editing) {
@@ -171,24 +155,6 @@ export default function BookmarkModal({
       toast(`「${payload.title}」已收藏`)
     }
     onClose()
-  }
-
-  const createCollection = () => {
-    const name = newColName.trim()
-    if (!name) {
-      setColError('请填写分组名称')
-      return
-    }
-    if (collections.some((c) => c.name === name)) {
-      setColError('已存在同名分组')
-      return
-    }
-    const created = addCollection(name, newColEmoji.trim() || undefined)
-    setCollectionId(created.id)
-    setNewColName('')
-    setNewColEmoji('')
-    setColError('')
-    setCreatingCollection(false)
   }
 
   const inputCls =
@@ -206,7 +172,7 @@ export default function BookmarkModal({
       <form
         onSubmit={submit}
         onClick={(e) => e.stopPropagation()}
-        className="animate-pop flex max-h-[94dvh] w-full max-w-[440px] flex-col overflow-y-auto rounded-t-[18px] bg-surface shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)] sm:rounded-[18px]"
+        className="animate-pop flex max-h-[94dvh] w-full max-w-[440px] flex-col overflow-y-auto rounded-t-[18px] bg-surface shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)] sm:rounded-[20px]"
       >
         <div className="flex items-start justify-between px-[22px] pt-5">
           <div>
@@ -337,85 +303,34 @@ export default function BookmarkModal({
             <label className={labelCls} htmlFor="bm-col">
               分组
             </label>
-            {creatingCollection ? (
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <input
-                    autoFocus
-                    value={newColEmoji}
-                    onChange={(e) => setNewColEmoji(e.target.value)}
-                    maxLength={4}
-                    placeholder="emoji"
-                    className="h-10 w-14 shrink-0 rounded-[10px] border border-line bg-surface px-2 text-center text-[15px] placeholder:text-ink4 focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-ring)]"
-                  />
-                  <input
-                    value={newColName}
-                    onChange={(e) => {
-                      setNewColName(e.target.value)
-                      setColError('')
-                    }}
-                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), createCollection())}
-                    placeholder="新分组名称"
-                    className={`${inputCls} min-w-0 flex-1`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCreatingCollection(false)
-                      setColError('')
-                    }}
-                    aria-label="取消新建分组"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border border-line2 text-ink3 hover:bg-surface-2"
-                  >
-                    <X size={15} />
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  onClick={createCollection}
-                  className="h-9 w-full rounded-[10px] bg-accent text-[12.5px] font-semibold text-white hover:bg-accent-ink"
-                >
-                  创建分组
-                </button>
-              </div>
-            ) : (
-              <select
-                id="bm-col"
-                className={`${inputCls} cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23928E86%22 stroke-width=%222.4%22%3E%3Cpath d=%22m6 9 6 6 6-6%22/%3E%3C/svg%3E')] bg-[position:right_12px_center] bg-no-repeat pr-8`}
-                value={collectionId || '__none__'}
-                onChange={(e) => {
-                  if (e.target.value === '__new__') {
-                    setCreatingCollection(true)
-                  } else {
-                    setCollectionId(e.target.value === '__none__' ? '' : e.target.value)
-                  }
-                }}
+            {/* 分组的增删改统一在设置页，这里只做选择。
+                早先这里内嵌过「新建分组」表单，与设置页的分组管理重复，
+                且无法选图标（emoji 已下线）。 */}
+            <select
+              id="bm-col"
+              className={`${inputCls} cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23928E86%22 stroke-width=%222.4%22%3E%3Cpath d=%22m6 9 6 6 6-6%22/%3E%3C/svg%3E')] bg-[position:right_12px_center] bg-no-repeat pr-8`}
+              value={collectionId || '__none__'}
+              onChange={(e) => setCollectionId(e.target.value === '__none__' ? '' : e.target.value)}
+            >
+              <option value="__none__">未分组</option>
+              {collections.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            {collections.length === 0 && (
+              <a
+                href="#/settings"
+                className="mt-1.5 inline-block text-[11.5px] text-accent hover:underline"
               >
-                <option value="__none__">未分组</option>
-                {collections.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.emoji ? `${c.emoji} ` : ''}
-                    {c.name}
-                  </option>
-                ))}
-                <option value="__new__">＋ 新建分组…</option>
-              </select>
+                还没有分组，去设置里创建 →
+              </a>
             )}
-            {colError && <p className="mt-1.5 text-[12px] text-danger">{colError}</p>}
           </div>
         </div>
 
-        <div className="flex items-center justify-between border-t border-line px-[22px] py-3.5">
-          <button
-            type="button"
-            onClick={() => setStarred((s) => !s)}
-            className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[12.5px] font-medium transition-colors ${
-              starred ? 'text-star' : 'text-ink3 hover:bg-surface-2'
-            }`}
-          >
-            <Star size={15} className={starred ? 'fill-star' : undefined} />
-            {starred ? '已星标' : '加星标'}
-          </button>
+        <div className="flex items-center justify-end border-t border-line px-[22px] py-3.5">
           <div className="flex items-center gap-2.5">
             {url && (
               <a

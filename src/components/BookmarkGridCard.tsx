@@ -5,13 +5,11 @@ import type { Bookmark } from '../types'
 import { coverGradient, letterColor } from '../lib/color'
 import { badgeText } from '../lib/badge'
 import { useFaviconSrc } from '../hooks/useFavicon'
-import StarButton from './StarButton'
 
 interface BookmarkGridCardProps {
   bookmark: Bookmark
   compact?: boolean
   sortable?: boolean
-  onToggleStar: (id: string) => void
   onOpen: (bm: Bookmark) => void
   onEdit: (bm: Bookmark) => void
   onDelete: (bm: Bookmark) => void
@@ -21,7 +19,6 @@ export default function BookmarkGridCard({
   bookmark,
   compact = false,
   sortable = false,
-  onToggleStar,
   onOpen,
   onEdit,
   onDelete,
@@ -33,11 +30,11 @@ export default function BookmarkGridCard({
   })
 
   const coverH = compact ? 'h-[92px]' : 'h-[128px]'
-  const logoBox = compact ? 'h-11 w-11 rounded-[13px]' : 'h-16 w-16 rounded-[18px]'
+  const logoBox = compact ? 'h-11 w-11 rounded-[13px]' : 'h-16 w-16 rounded-[20px]'
   // 仅放大 logo（相对改版前约 1.5×），容器与卡片高度保持原样
   const logoImg = compact ? 'h-9 w-9 rounded-lg' : 'h-[54px] w-[54px] rounded-xl'
   const letter = compact ? 'text-[22px]' : 'text-[28px]'
-  const cardR = compact ? 'rounded-[14px]' : 'rounded-2xl'
+  const cardR = compact ? 'rounded-[20px]' : 'rounded-[20px]'
   const bodyP = compact ? 'px-3 py-2.5' : 'px-3.5 py-3'
   const titleCls = compact
     ? 'line-clamp-2 min-h-[34px] text-[12.5px] font-semibold leading-[1.36]'
@@ -98,16 +95,6 @@ export default function BookmarkGridCard({
           </span>
         )}
       </button>
-
-      <div className="absolute right-2 top-2" onPointerDown={(e) => e.stopPropagation()}>
-        <StarButton
-          starred={bookmark.starred}
-          onToggle={() => onToggleStar(bookmark.id)}
-          size={compact ? 'sm' : 'md'}
-          revealOnHover={!bookmark.starred}
-          className="bg-surface/85 backdrop-blur-sm"
-        />
-      </div>
 
       <div className={`flex flex-1 flex-col ${bodyP}`}>
         <button

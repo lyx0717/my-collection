@@ -79,7 +79,6 @@ function isBookmark(v: unknown): v is Bookmark {
     typeof b.url === 'string' &&
     /^https?:\/\//i.test(b.url) &&
     typeof b.title === 'string' &&
-    typeof b.starred === 'boolean' &&
     typeof b.createdAt === 'string'
   )
 }
@@ -182,11 +181,10 @@ interface BookmarksContextValue {
   addBookmark: (input: BookmarkInput) => Bookmark
   updateBookmark: (id: string, patch: Partial<BookmarkInput>) => void
   removeBookmark: (id: string) => void
-  toggleStar: (id: string) => void
   bulkAdd: (drafts: NewBookmarkDraft[]) => number
   findDuplicate: (url: string, exceptId?: string) => Bookmark | undefined
-  addCollection: (name: string, emoji?: string) => Collection
-  renameCollection: (id: string, name: string, emoji?: string) => void
+  addCollection: (name: string, icon?: string) => Collection
+  renameCollection: (id: string, name: string, icon?: string) => void
   removeCollection: (id: string) => void
   mergeCollections: (incoming: Collection[]) => void
   bulkUpdate: (ids: string[], patch: Partial<BookmarkInput>) => void
@@ -252,7 +250,6 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
       const now = new Date().toISOString()
       const bm: Bookmark = {
         id: uid(),
-        starred: input.starred ?? false,
         ...input,
         domain: extractDomain(input.url),
         createdAt: now,
@@ -311,18 +308,6 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
     [commit],
   )
 
-  const toggleStar = useCallback(
-    (id: string) => {
-      commit((s) => ({
-        ...s,
-        bookmarks: s.bookmarks.map((bm) =>
-          bm.id === id ? { ...bm, starred: !bm.starred } : bm,
-        ),
-      }))
-    },
-    [commit],
-  )
-
   const findDuplicate = useCallback(
     (url: string, exceptId?: string) => {
       const key = dedupeKey(url)
@@ -344,7 +329,6 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
         faviconUrl: d.faviconUrl,
         cover: d.cover,
         collectionId: d.collectionId,
-        starred: false,
         domain: extractDomain(d.url),
         createdAt: d.createdAt ?? now,
         updatedAt: now,
@@ -357,11 +341,11 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
   )
 
   const addCollection = useCallback(
-    (name: string, emoji?: string) => {
+    (name: string, icon?: string) => {
       const created: Collection = {
         id: uid('col'),
         name,
-        emoji,
+        icon,
         order: storeRef.current.collections.length,
       }
       commit((s) => ({ ...s, collections: [...s.collections, created] }))
@@ -371,11 +355,11 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
   )
 
   const renameCollection = useCallback(
-    (id: string, name: string, emoji?: string) => {
+    (id: string, name: string, icon?: string) => {
       commit((s) => ({
         ...s,
         collections: s.collections.map((c) =>
-          c.id === id ? { ...c, name, ...(emoji !== undefined ? { emoji } : {}) } : c,
+          c.id === id ? { ...c, name, ...(icon !== undefined ? { icon } : {}) } : c,
         ),
       }))
     },
@@ -484,7 +468,6 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
       addBookmark,
       updateBookmark,
       removeBookmark,
-      toggleStar,
       bulkAdd,
       findDuplicate,
       addCollection,
@@ -508,7 +491,6 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
       addBookmark,
       updateBookmark,
       removeBookmark,
-      toggleStar,
       bulkAdd,
       findDuplicate,
       addCollection,

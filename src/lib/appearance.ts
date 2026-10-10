@@ -1,29 +1,6 @@
-export type GlassMode = 'solid' | 'glass'
 export type ThemeMode = 'light' | 'dark' | 'system'
 
-const GLASS_KEY = 'mybookmarks:glass'
 const THEME_KEY = 'mybookmarks:theme'
-
-export function loadGlassMode(): GlassMode {
-  try {
-    return localStorage.getItem(GLASS_KEY) === 'glass' ? 'glass' : 'solid'
-  } catch {
-    return 'solid'
-  }
-}
-
-export function saveGlassMode(mode: GlassMode) {
-  try {
-    localStorage.setItem(GLASS_KEY, mode)
-  } catch {
-    // ignore
-  }
-}
-
-export function applyGlassMode(mode: GlassMode) {
-  if (mode === 'glass') document.documentElement.dataset.glass = 'on'
-  else delete document.documentElement.dataset.glass
-}
 
 /** 系统当前是否深色 */
 export function systemPrefersDark(): boolean {
@@ -57,8 +34,13 @@ export function saveTheme(mode: ThemeMode) {
   }
 }
 
-/** 设置/移除 html[data-theme]，与 index.html 防白闪脚本同一套规则 */
+/**
+ * 设置/移除 html[data-theme]，与 index.html 防白闪脚本同一套规则。
+ * 同时挂上 data-glass="on" —— 界面风格切换已下线，玻璃是唯一材质，
+ * 属性恒为 on，所有玻璃样式不再需要 `html[data-glass='on']` 前缀以外的条件。
+ */
 export function applyTheme(mode: ThemeMode) {
   if (resolvedTheme(mode) === 'dark') document.documentElement.dataset.theme = 'dark'
   else delete document.documentElement.dataset.theme
+  document.documentElement.dataset.glass = 'on'
 }

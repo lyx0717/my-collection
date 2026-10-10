@@ -1,11 +1,10 @@
 import { useMemo } from 'react'
 import type { Bookmark, Collection, Scope } from '../types'
 
+/** URL 参数 → 作用域。只认 c=分组 id，其余一律「全部」。 */
 export function scopeFromParams(p: URLSearchParams): Scope {
   const col = p.get('c')
   if (col) return { type: 'collection', id: col }
-  if (p.get('star') === '1') return { type: 'starred' }
-  if (p.get('none') === '1') return { type: 'none' }
   return { type: 'all' }
 }
 
@@ -19,10 +18,9 @@ export interface BookmarkFilterResult {
   contextTitle: string
   hasActiveFilter: boolean
   searchFiltered: boolean
-  starredCount: number
 }
 
-/** 书签库筛选：URL query → 可见列表 + 侧栏计数 */
+/** 书签库筛选：URL query → 可见列表 + 分组计数 */
 export function useBookmarkFilter(
   bookmarks: Bookmark[],
   collections: Collection[],
@@ -35,18 +33,15 @@ export function useBookmarkFilter(
   return useMemo(() => {
     const collectionMap = new Map(collections.map((c) => [c.id, c]))
     const collectionCounts = new Map<string, number>()
-    let starredCount = 0
 
     for (const bm of bookmarks) {
-      const key = bm.collectionId ?? '__none__'
-      collectionCounts.set(key, (collectionCounts.get(key) ?? 0) + 1)
-      if (bm.starred) starredCount += 1
+      if (bm.collectionId) {
+        collectionCounts.set(bm.collectionId, (collectionCounts.get(bm.collectionId) ?? 0) + 1)
+      }
     }
 
     const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
     const result = bookmarks.filter((bm) => {
-      if (scope.type === 'starred' && !bm.starred) return false
-      if (scope.type === 'none' && bm.collectionId) return false
       if (scope.type === 'collection' && bm.collectionId !== scope.id) return false
       if (domainFilter && bm.domain !== domainFilter) return false
       if (words.length) {
@@ -61,11 +56,10 @@ export function useBookmarkFilter(
     // 手动排序：按 order；搜索结果仍保持全局顺序，便于拖拽回主列表后位置可预期
     result.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 
-    let contextTitle = '全部书签'
-    if (scope.type === 'starred') contextTitle = '星标书签'
-    else if (scope.type === 'none') contextTitle = '未分组'
-    else if (scope.type === 'collection')
-      contextTitle = collectionMap.get(scope.id)?.name ?? '未知分组'
+    const contextTitle =
+      scope.type === 'collection'
+        ? (collectionMap.get(scope.id)?.name ?? '未知分组')
+        : '全部书签'
 
     return {
       query,
@@ -78,7 +72,6 @@ export function useBookmarkFilter(
       hasActiveFilter: Boolean(query || domainFilter) || scope.type !== 'all',
       /** 搜索/域名筛选：临时视图，禁用拖拽排序 */
       searchFiltered: Boolean(query || domainFilter),
-      starredCount,
     }
   }, [bookmarks, collections, query, scope, domainFilter])
 }

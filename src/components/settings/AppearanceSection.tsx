@@ -9,47 +9,13 @@ const THEME_OPTIONS = [
 ] as const
 
 export default function AppearanceSection() {
-  const { glassMode, setGlassMode, theme, setTheme } = useAppearance()
+  const { theme, setTheme } = useAppearance()
   const toast = useToast()
 
   return (
     <section id="sec-appearance" className="scroll-mt-24">
-      <SectionTitle title="外观" desc="切换书签库的界面风格，偏好保存在本浏览器。" />
-      <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(30,40,60,.05)]">
-        <p className="mb-3 text-[13px] font-semibold text-ink2">界面风格</p>
-        <div className="grid gap-2.5 sm:grid-cols-2">
-          {(
-            [
-              ['solid', '实心', '不透明卡片与顶栏，阅读对比度最高'],
-              ['glass', '玻璃', '顶栏/侧栏半透明，紧凑卡片悬停磨砂'],
-            ] as const
-          ).map(([value, title, hint]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => {
-                setGlassMode(value)
-                toast(value === 'glass' ? '已切换为玻璃模式' : '已切换为实心模式')
-              }}
-              className={`rounded-xl border p-4 text-left transition-colors ${
-                glassMode === value
-                  ? 'border-accent bg-accent-soft'
-                  : 'border-line bg-surface hover:border-line2'
-              }`}
-            >
-              <p
-                className={`text-[13.5px] font-semibold ${
-                  glassMode === value ? 'text-accent-ink' : 'text-ink'
-                }`}
-              >
-                {title}
-              </p>
-              <p className="mt-1 text-[12px] leading-5 text-ink3">{hint}</p>
-            </button>
-          ))}
-        </div>
-
-        <p className="mb-3 mt-5 text-[13px] font-semibold text-ink2">界面主题</p>
+      <SectionTitle title="外观" desc="界面固定为玻璃风格，这里只切换浅色 / 深色主题，偏好保存在本浏览器。" />
+      <div className="glass-card rounded-[20px] border border-line2/70 p-5">
         <div className="flex flex-wrap gap-2">
           {THEME_OPTIONS.map(([value, title]) => (
             <button
@@ -66,17 +32,19 @@ export default function AppearanceSection() {
                       : '已跟随系统主题',
                 )
               }}
-              className={`rounded-lg border px-3.5 py-2 text-[12.5px] font-medium transition-colors ${
+              className={`rounded-full border px-4 py-2 text-[13px] font-medium transition-[background-color,color,border-color,box-shadow] duration-[var(--dur-2)] ${
                 theme === value
-                  ? 'border-accent bg-accent-soft text-accent-ink'
-                  : 'border-line bg-surface text-ink2 hover:border-line2 hover:text-ink'
+                  ? 'border-accent bg-accent font-semibold text-white shadow-[0_4px_14px_-6px_var(--accent-shadow)]'
+                  : 'border-line2/70 bg-surface/60 text-ink2 hover:border-line2 hover:bg-surface-2 hover:text-ink'
               }`}
             >
               {title}
             </button>
           ))}
         </div>
-        <p className="mt-2.5 text-[11.5px] leading-5 text-ink3">「跟随系统」随操作系统的深色模式即时切换。</p>
+        <p className="mt-3 text-[12px] leading-5 text-ink3">
+          「跟随系统」随操作系统的深色模式即时切换。
+        </p>
       </div>
     </section>
   )

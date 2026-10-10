@@ -9,7 +9,6 @@ const bookmarks: Bookmark[] = [
     title: 'GitHub',
     domain: 'github.com',
     collectionId: 'col_dev',
-    starred: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
   },
@@ -18,13 +17,12 @@ const bookmarks: Bookmark[] = [
     url: 'https://example.com/',
     title: 'Example',
     domain: 'example.com',
-    starred: false,
     createdAt: '2026-01-02T00:00:00.000Z',
     updatedAt: '2026-01-02T00:00:00.000Z',
   },
 ]
 
-const collections: Collection[] = [{ id: 'col_dev', name: '开发', emoji: '💻', order: 0 }]
+const collections: Collection[] = [{ id: 'col_dev', name: '开发', icon: 'Code', order: 0 }]
 
 describe('exportNetscape + parseNetscape', () => {
   it('导出后可解析回分组与书签', () => {

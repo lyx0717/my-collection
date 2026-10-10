@@ -1,18 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import {
-  applyGlassMode,
-  applyTheme,
-  loadGlassMode,
-  loadTheme,
-  saveGlassMode,
-  saveTheme,
-  type GlassMode,
-  type ThemeMode,
-} from '../lib/appearance'
+import { applyTheme, loadTheme, saveTheme, type ThemeMode } from '../lib/appearance'
 
 interface AppearanceContextValue {
-  glassMode: GlassMode
-  setGlassMode: (mode: GlassMode) => void
   theme: ThemeMode
   setTheme: (mode: ThemeMode) => void
 }
@@ -20,12 +9,7 @@ interface AppearanceContextValue {
 const AppearanceContext = createContext<AppearanceContextValue | null>(null)
 
 export function AppearanceProvider({ children }: { children: ReactNode }) {
-  const [glassMode, setGlassModeState] = useState<GlassMode>(() => loadGlassMode())
   const [theme, setThemeState] = useState<ThemeMode>(() => loadTheme())
-
-  useEffect(() => {
-    applyGlassMode(glassMode)
-  }, [glassMode])
 
   useEffect(() => {
     applyTheme(theme)
@@ -40,22 +24,13 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
     return () => mq.removeEventListener('change', onChange)
   }, [theme])
 
-  const setGlassMode = useCallback((mode: GlassMode) => {
-    setGlassModeState(mode)
-    saveGlassMode(mode)
-    applyGlassMode(mode)
-  }, [])
-
   const setTheme = useCallback((mode: ThemeMode) => {
     setThemeState(mode)
     saveTheme(mode)
     applyTheme(mode)
   }, [])
 
-  const value = useMemo(
-    () => ({ glassMode, setGlassMode, theme, setTheme }),
-    [glassMode, setGlassMode, theme, setTheme],
-  )
+  const value = useMemo(() => ({ theme, setTheme }), [theme, setTheme])
 
   return <AppearanceContext.Provider value={value}>{children}</AppearanceContext.Provider>
 }

@@ -19,169 +19,203 @@
   --ease-out: cubic-bezier(0.3, 0.12, 0.2, 1);
   --ease-in-out: cubic-bezier(0.45, 0.05, 0.35, 1);
 
-  /* —— 中性底 —— */
-  --canvas: #f7f8fa;
+  /* —— iOS 浅色毛玻璃 ——
+     规范：backdrop 高斯模糊 16px、柔和低透明度白底、1px 半透明白描边、
+     20px 大圆角、极淡柔和阴影、低饱和配色。
+     整页只有一个玻璃色板（--glass-bg 系列），不再分 nav/panel/card 三档 ——
+     iOS 的 System Materials 靠「同一材质、不同层级」表达关系，
+     分三档 blur 只会让页面显得层数混乱。 */
+  --canvas: #f2f2f7;
   --surface: #ffffff;
-  --surface-2: #f4f6f8;
-  --segment: #eceef2;
+  --surface-2: #f7f7fa;
+  --segment: #ececf0;
 
-  /* —— 墨色四级：正文 / 次级 / 说明 / 占位符与图标灰 —— */
-  --ink: #1a1d21;
-  --ink-2: #555b66;
-  --ink-3: #8a9099;
-  --ink-4: #9aa1ab;
+  /* 文字层级：iOS label 色阶。正文用近黑，次级用 60% 灰，
+     保证在半透明白玻璃上依然清晰可读（这是「可读性高」的底线）。 */
+  --ink: #1c1c1e;
+  --ink-2: #3a3a3c;
+  --ink-3: #6e6e73;
+  --ink-4: #8e8e93;
 
-  /* —— 线 —— */
-  --line: #e8eaed;
-  --line-2: #dde1e6;
+  /* 线：iOS separator 语义，分隔线本身也带透明感 */
+  --line: rgba(60, 60, 67, 0.13);
+  --line-2: rgba(60, 60, 67, 0.2);
 
-  /* —— 品牌与语义 —— */
-  --accent: #4263eb;
-  --accent-ink: #3b5bdb;
-  --accent-soft: #edf2ff;
-  --accent-ring: rgba(66, 99, 235, 0.12);
-  --star: #f5a524;
-  --danger: #e5484d;
-  --danger-ink: #d03d42;
-  --success: #2b9e58;
+  /* 品牌色：iOS systemBlue，比早先的高饱和蓝退一档 */
+  --accent: #0a84ff;
+  --accent-ink: #0071e3;
+  --accent-soft: rgba(10, 132, 255, 0.1);
+  --accent-ring: rgba(10, 132, 255, 0.18);
+  --accent-shadow: rgba(10, 132, 255, 0.22);
+  --star: #ff9f0a;
+  --danger: #ff3b30;
+  --danger-ink: #d70015;
+  --success: #34c759;
 
   /* 成功/警示条一族（BookmarkModal 提示条、DataSection 角标） */
-  --success-soft: #f4faf6;
-  --success-border: #d9ecdf;
-  --success-ink: #1e7c47;
-  --success-text: #4f8a66;
-  --warn-soft: #fdf6ea;
-  --warn-border: #f0d9b5;
-  --warn-ink: #b4681c;
-  --warn-text: #8a5a1e;
-
-  /* —— 氛围光晕（实心底极微弱 / 玻璃底加强给 blur 折射）—— */
-  --aura-indigo: 66, 99, 235;
-  --aura-violet: 139, 92, 246;
-  --aura-cyan: 34, 211, 238;
-  --glow-1: 0.07;
-  --glow-2: 0.06;
-  --aura-1: 0.22;
-  --aura-2: 0.18;
-  --aura-3: 0.16;
-  --aura-4: 0.12;
+  --success-soft: rgba(52, 199, 89, 0.12);
+  --success-border: rgba(52, 199, 89, 0.28);
+  --success-ink: #248a3d;
+  --success-text: #4f9a63;
+  --warn-soft: rgba(255, 159, 10, 0.12);
+  --warn-border: rgba(255, 159, 10, 0.28);
+  --warn-ink: #b26a00;
+  --warn-text: #a8791f;
 
   /* —— 原生控件 —— */
-  --selection: rgba(66, 99, 235, 0.18);
-  --scroll-thumb: #d4d8de;
-  --scroll-thumb-hover: #c2c8d0;
+  --selection: rgba(10, 132, 255, 0.2);
+  --scroll-thumb: rgba(60, 60, 67, 0.24);
+  --scroll-thumb-hover: rgba(60, 60, 67, 0.34);
 
-  /* —— 玻璃模式（亮色）—— */
-  --glass-bg: rgba(255, 255, 255, 0.36);
-  --glass-bg-soft: rgba(255, 255, 255, 0.32);
-  --glass-bg-hover: rgba(255, 255, 255, 0.5);
-  --glass-border: rgba(255, 255, 255, 0.55);
-  --glass-border-hover: rgba(255, 255, 255, 0.75);
-  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  --glass-ring: rgba(255, 255, 255, 0.4);
-  --glass-shadow: 0 16px 40px -20px rgba(30, 40, 60, 0.2);
+  /* —— 玻璃材质（浅色）——
+     白底 68%：这是 iOS System Material Light 的典型取值。
+     底太透会让文字直接压在背景上，可读性崩；太实就失去玻璃感。
+     68% + 16px 模糊是「能看清背后轮廓但不影响阅读」的平衡点。 */
+  --glass-bg: rgba(255, 255, 255, 0.68);
+  --glass-bg-soft: rgba(255, 255, 255, 0.6);
+  --glass-bg-hover: rgba(255, 255, 255, 0.82);
+  --glass-bg-card: rgba(255, 255, 255, 0.68);
+  --glass-bg-card-hover: rgba(255, 255, 255, 0.84);
+  /* 悬浮导航专用材质：**保持透明**。
+     玻璃的可见度不来自自身颜色深浅，而来自「背后有没有明暗对比」——
+     胶囊半透明地压在一块有深浅差异的背景上，边界自然浮现；
+     把它涂成实色反而失去玻璃感（且在浅底上依然只是「一条灰带」）。
 
-  /* —— 域名徽章 12 组（favicon 兜底）—— */
-  --badge-bg-0: #eef1f5; --badge-fg-0: #3a4150;
-  --badge-bg-1: #e7f0ff; --badge-fg-1: #0057a4;
-  --badge-bg-2: #e8f0ff; --badge-fg-2: #4263eb;
-  --badge-bg-3: #e3f7f1; --badge-fg-3: #0c9d8c;
-  --badge-bg-4: #fce8f1; --badge-fg-4: #cf3d7a;
-  --badge-bg-5: #eef2ff; --badge-fg-5: #4a5fd8;
-  --badge-bg-6: #e2f3fb; --badge-fg-6: #0285b6;
-  --badge-bg-7: #ffede6; --badge-fg-7: #e8741e;
-  --badge-bg-8: #efecfc; --badge-fg-8: #6b4fe0;
-  --badge-bg-9: #eef9ec; --badge-fg-9: #5ba829;
-  --badge-bg-10: #fdecea; --badge-fg-10: #c0392b;
-  --badge-bg-11: #e9f0f6; --badge-fg-11: #4a6fa5;
+     所以这里只做两件事：
+     1) 描边加到接近不透明（0.95）—— 白边压在深色背景上才看得见，这是边界的主要来源
+     2) 投影加重 —— 给「浮在内容之上」一个物理线索
+     真正让胶囊显形的是 body 的明暗渐变（见下方 body 规则）。 */
+  --glass-bg-nav: rgba(255, 255, 255, 0.66);
+  --glass-border-nav: rgba(255, 255, 255, 0.95);
+  --glass-shadow-nav: 0 8px 28px -10px rgba(15, 20, 35, 0.26);
+  /* 1px 半透明白描边：玻璃的边界全靠它 */
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-border-hover: rgba(255, 255, 255, 0.95);
+  /* 极淡柔和阴影：iOS 不用纯黑阴影，用带点冷灰的浅色投影 */
+  --glass-shadow: 0 2px 10px -2px rgba(15, 20, 35, 0.06);
+  --glass-shadow-hover: 0 6px 20px -4px rgba(15, 20, 35, 0.1);
+  /* 顶部微高光：只给 1px、极淡，给玻璃一点「上边缘受光」的存在感。
+     不用 inset 大面积高光 —— 那是塑料感与「发光」的来源。 */
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --glass-ring: rgba(255, 255, 255, 0.5);
 
-  /* —— 网格封面渐变 8 组 —— */
-  --cover-a-0: #eef2f8; --cover-b-0: #e3e9f3;
-  --cover-a-1: #f4eff5; --cover-b-1: #e9e6ef;
-  --cover-a-2: #ecf3f9; --cover-b-2: #e2edf5;
-  --cover-a-3: #ecf5f2; --cover-b-3: #e2efe9;
-  --cover-a-4: #eef0f6; --cover-b-4: #e4e9f2;
-  --cover-a-5: #eff0f9; --cover-b-5: #e8e9f3;
-  --cover-a-6: #edf4ee; --cover-b-6: #e4ece4;
-  --cover-a-7: #ecf2f8; --cover-b-7: #e3ecf4;
+  /* —— 域名徽章 12 组（favicon 加载失败时的兜底首字块）——
+     全部低饱和：这些色块每条书签都会出现一次，
+     高饱和色板会让整页像万花筒。favicon 正常时不受影响。 */
+  --badge-bg-0: #f0f0f4; --badge-fg-0: #5a5a5f;
+  --badge-bg-1: #eaf1fb; --badge-fg-1: #4a76a8;
+  --badge-bg-2: #e9edfa; --badge-fg-2: #5560a8;
+  --badge-bg-3: #e6f2ee; --badge-fg-3: #4a8272;
+  --badge-bg-4: #f7ecf0; --badge-fg-4: #a05f78;
+  --badge-bg-5: #ecedf8; --badge-fg-5: #5f62a4;
+  --badge-bg-6: #e7f0f5; --badge-fg-6: #4e7b93;
+  --badge-bg-7: #f7efe6; --badge-fg-7: #a1744a;
+  --badge-bg-8: #eeecf7; --badge-fg-8: #6f5fa0;
+  --badge-bg-9: #eef3e7; --badge-fg-9: #6a8a4e;
+  --badge-bg-10: #f8ecea; --badge-fg-10: #a85c56;
+  --badge-bg-11: #eceef0; --badge-fg-11: #5c646c;
+
+  /* —— 网格卡片封面渐变 8 组 ——
+     同色系极低对比微差：只提供一点材质感，不引入新色相。 */
+  --cover-a-0: #eef0f4; --cover-b-0: #e5e8ee;
+  --cover-a-1: #f1eff3; --cover-b-1: #e8e5eb;
+  --cover-a-2: #edf0f4; --cover-b-2: #e4e8ee;
+  --cover-a-3: #edf2f0; --cover-b-3: #e4eae8;
+  --cover-a-4: #f0eff2; --cover-b-4: #e7e5e9;
+  --cover-a-5: #eeeff3; --cover-b-5: #e5e6eb;
+  --cover-a-6: #edf2ef; --cover-b-6: #e4eae7;
+  --cover-a-7: #eef0f3; --cover-b-7: #e5e7eb;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --canvas: #101216;
-  --surface: #181b20;
-  --surface-2: #20242b;
-  --segment: #20242b;
+  /* —— iOS 深色毛玻璃 ——
+     底色用 systemGroupedBackground 深色值（#000000 系）。
+     iOS 深色毛玻璃的关键不是「更黑」，而是**深色半透明底 + 明显白描边**：
+     底负责通透，1px 白边负责把卡片从深色背景里「捞」出来。 */
+  --canvas: #000000;
+  --surface: #1c1c1e;
+  --surface-2: #2c2c2e;
+  --segment: #2c2c2e;
 
-  --ink: #e8eaed;
-  --ink-2: #a8adb6;
-  --ink-3: #80868f;
-  --ink-4: #616873;
+  /* iOS 深色 label 色阶：正文接近纯白但不用 #fff（刺眼），
+     次级降到 60% 不透明度 —— 这就是「低对比度但不糊」的来源。 */
+  --ink: #f5f5f7;
+  --ink-2: #a8a8ad;
+  --ink-3: #7d7d82;
+  --ink-4: #636366;
 
-  --line: #2a2e36;
-  --line-2: #343943;
+  --line: rgba(84, 84, 88, 0.5);
+  --line-2: rgba(84, 84, 88, 0.72);
 
-  --accent: #7a96ff;
-  --accent-ink: #9db1ff;
-  --accent-soft: rgba(122, 150, 255, 0.14);
-  --accent-ring: rgba(122, 150, 255, 0.25);
-  --star: #ffb224;
-  --danger: #ff6b6f;
-  --danger-ink: #ff8589;
-  --success: #45d483;
+  --accent: #0a84ff;
+  --accent-ink: #409cff;
+  --accent-soft: rgba(10, 132, 255, 0.18);
+  --accent-ring: rgba(10, 132, 255, 0.3);
+  --accent-shadow: rgba(10, 132, 255, 0.28);
+  --star: #ff9f0a;
+  --danger: #ff453a;
+  --danger-ink: #ff6961;
+  --success: #30d158;
 
-  --success-soft: #16241c;
-  --success-border: #24382d;
-  --success-ink: #45d483;
-  --success-text: #8fd0ab;
-  --warn-soft: #2a2418;
-  --warn-border: #45351d;
-  --warn-ink: #f0a860;
-  --warn-text: #d9b98a;
+  --success-soft: rgba(48, 209, 88, 0.16);
+  --success-border: rgba(48, 209, 88, 0.34);
+  --success-ink: #30d158;
+  --success-text: #6fdd8c;
+  --warn-soft: rgba(255, 159, 10, 0.16);
+  --warn-border: rgba(255, 159, 10, 0.34);
+  --warn-ink: #ffb340;
+  --warn-text: #d9a25c;
 
-  --glow-1: 0.1;
-  --glow-2: 0.09;
-  /* 深色玻璃需要更强氛围光才看得见折射：毛玻璃夜色 */
-  --aura-1: 0.38;
-  --aura-2: 0.3;
-  --aura-3: 0.24;
-  --aura-4: 0.3;
+  --selection: rgba(10, 132, 255, 0.3);
+  --scroll-thumb: rgba(84, 84, 88, 0.5);
+  --scroll-thumb-hover: rgba(84, 84, 88, 0.7);
 
-  --selection: rgba(122, 150, 255, 0.32);
-  --scroll-thumb: #2e333c;
-  --scroll-thumb-hover: #3a404c;
-
-  --glass-bg: rgba(22, 25, 31, 0.55);
-  --glass-bg-soft: rgba(22, 25, 31, 0.48);
-  --glass-bg-hover: rgba(28, 32, 40, 0.62);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-border-hover: rgba(255, 255, 255, 0.16);
-  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  /* —— 玻璃材质（深色）——
+     深色底 62%：比浅色略高，因为深色下同样的 alpha 会显得更薄。
+     描边 0.12 白是 iOS 深色材质的标准值 —— 比浅色看着更「实」，
+     正好补上深色背景里卡片边界容易消失的问题。 */
+  --glass-bg: rgba(28, 28, 30, 0.62);
+  --glass-bg-soft: rgba(28, 28, 30, 0.54);
+  --glass-bg-hover: rgba(44, 44, 46, 0.72);
+  --glass-bg-card: rgba(28, 28, 30, 0.62);
+  --glass-bg-card-hover: rgba(44, 44, 46, 0.75);
+  --glass-bg-nav: rgba(30, 30, 32, 0.6);
+  --glass-border-nav: rgba(255, 255, 255, 0.2);
+  --glass-shadow-nav: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border-hover: rgba(255, 255, 255, 0.2);
+  /* 深色下阴影几乎不可见，主要靠描边分层；这里只留一道极淡的 */
+  --glass-shadow: 0 2px 10px -2px rgba(0, 0, 0, 0.3);
+  --glass-shadow-hover: 0 6px 20px -4px rgba(0, 0, 0, 0.45);
+  /* 深色的顶部高光要更淡，否则卡片上边缘会出现一条亮线（廉价感） */
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   --glass-ring: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 16px 40px -20px rgba(0, 0, 0, 0.55);
 
-  --badge-bg-0: #1f2634; --badge-fg-0: #9db8ff;
-  --badge-bg-1: #16283a; --badge-fg-1: #6ec1ff;
-  --badge-bg-2: #1d2438; --badge-fg-2: #8fa8ff;
-  --badge-bg-3: #122b26; --badge-fg-3: #5fd4bd;
-  --badge-bg-4: #2d1b28; --badge-fg-4: #ff9ec9;
-  --badge-bg-5: #1e2236; --badge-fg-5: #a3b2ff;
-  --badge-bg-6: #0f2a33; --badge-fg-6: #5cc8e8;
-  --badge-bg-7: #2d211a; --badge-fg-7: #ffa76b;
-  --badge-bg-8: #231d33; --badge-fg-8: #b9a3ff;
-  --badge-bg-9: #1a2b1a; --badge-fg-9: #93d96b;
-  --badge-bg-10: #2f1c1a; --badge-fg-10: #ff9d94;
-  --badge-bg-11: #1c2530; --badge-fg-11: #94b6d9;
+  /* 深色徽章：底为深色系统灰，前景低饱和 */
+  --badge-bg-0: #2c2c2e; --badge-fg-0: #a8a8ad;
+  --badge-bg-1: #1f2b3a; --badge-fg-1: #8fb3d4;
+  --badge-bg-2: #202436; --badge-fg-2: #97a3cc;
+  --badge-bg-3: #1b2f2a; --badge-fg-3: #85c0ae;
+  --badge-bg-4: #33232a; --badge-fg-4: #d199ab;
+  --badge-bg-5: #232433; --badge-fg-5: #a1a4d0;
+  --badge-bg-6: #1c2b33; --badge-fg-6: #8cb2c6;
+  --badge-bg-7: #33291f; --badge-fg-7: #d4a97c;
+  --badge-bg-8: #292433; --badge-fg-8: #b1a1d4;
+  --badge-bg-9: #26301f; --badge-fg-9: #adc08a;
+  --badge-bg-10: #332422; --badge-fg-10: #d69b95;
+  --badge-bg-11: #282c30; --badge-fg-11: #9aa5ae;
 
-  --cover-a-0: #1d2128; --cover-b-0: #262b34;
-  --cover-a-1: #1e212b; --cover-b-1: #272a36;
-  --cover-a-2: #1c222a; --cover-b-2: #252c36;
-  --cover-a-3: #1b2320; --cover-b-3: #242c29;
-  --cover-a-4: #241d24; --cover-b-4: #2d262e;
-  --cover-a-5: #1d2129; --cover-b-5: #262a35;
-  --cover-a-6: #1a2321; --cover-b-6: #232c2a;
-  --cover-a-7: #1c222a; --cover-b-7: #252d37;
+  /* 深色封面渐变：同为极低对比的同色系微差 */
+  --cover-a-0: #1c1c1e; --cover-b-0: #242426;
+  --cover-a-1: #1e1c1f; --cover-b-1: #262427;
+  --cover-a-2: #1b1d20; --cover-b-2: #232528;
+  --cover-a-3: #1a1f1d; --cover-b-3: #222726;
+  --cover-a-4: #201d1f; --cover-b-4: #282426;
+  --cover-a-5: #1c1c1e; --cover-b-5: #242426;
+  --cover-a-6: #1a1f1e; --cover-b-6: #222726;
+  --cover-a-7: #1c1d1f; --cover-b-7: #242528;
 }
 
 /* Tailwind utility 引用运行时变量：bg-canvas / text-ink3 等既有类名全部保持不变 */
@@ -215,9 +249,17 @@
   --font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', 'Inter', 'Helvetica Neue', sans-serif;
 
-  /* blur/saturate 不随主题变化，留在编译期 */
-  --glass-blur: blur(32px) saturate(200%);
-  --glass-blur-tile: blur(24px) saturate(200%);
+  /* iOS 毛玻璃规范：backdrop 高斯模糊 16px。
+     整页统一一档 —— 早先分 nav 40 / panel 28 / card 20 三档，
+     结果顶栏一片糊、卡片一片清，视觉上像两种材质拼在一起。
+     iOS 的 System Material 是同一模糊半径 + 不同底色透明度，
+     层级靠底色与描边表达，不靠模糊强度。
+     saturate 180% 是 iOS 的 vibrancy 效果：让透过来的颜色略微鲜艳。 */
+  --glass-blur: blur(16px) saturate(180%);
+  --glass-blur-nav: blur(16px) saturate(180%);
+  --glass-blur-panel: blur(16px) saturate(180%);
+  --glass-blur-card: blur(16px) saturate(180%);
+  --glass-blur-tile: blur(16px) saturate(180%);
 }
 
 /* 输入类元素统一去除默认 outline，焦点态用边框 + 光环表达 */
@@ -233,16 +275,33 @@ select:focus-visible {
 }
 
 body {
-  /* 净底 + 左上淡靛蓝、右下淡紫的极微弱光晕：只在大留白处隐约可见 */
+  /* 玻璃需要一个「有东西可折射」的底 —— 这是毛玻璃能成立的前提。
+     纯色底 + backdrop-filter = 模糊空转，视觉上跟实色卡片没区别。
+
+     关键是**明暗对比，不是颜色**：
+     玻璃的边界之所以能看见，靠的是它折射出的「背后明暗差」。
+     若整页是一个均匀的浅灰，玻璃透出来的也是均匀浅灰 —— 无论它本身多不透明，
+     都只是「一片浅灰上的一条浅灰」。所以这里给的是**中性明暗渐变**：
+     顶部偏亮、中段回落、底部略深，形成一条缓慢的纵向明暗带。
+
+     全程中性灰、不带任何色相 —— 之前「杀马特」就是色相太多导致的。
+     background-attachment: fixed 让渐变钉在视口，滚动时明暗关系稳定。 */
   background-color: var(--color-canvas);
   background-image:
-    radial-gradient(1100px 560px at 12% -8%, rgba(var(--aura-indigo), var(--glow-1)), transparent 60%),
-    radial-gradient(1000px 600px at 92% 108%, rgba(var(--aura-violet), var(--glow-2)), transparent 60%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 220px),
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.07) 100%);
   background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+:root[data-theme='dark'] body {
+  /* 深色底反过来：中心稍亮、四周更暗，给玻璃一点纵向纵深。
+     透明度同样极低（3.5%），只是让纯黑不那么死板。 */
+  background-image:
+    radial-gradient(120% 80% at 50% -20%, rgba(255, 255, 255, 0.05), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 400px);
 }
 
 ::selection {
@@ -333,15 +392,27 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
-/* —— 外观：实心 / 玻璃（html[data-glass="on"]）—— */
-/* 规则 A：chrome 玻璃；紧凑卡片/磁贴默认实心，仅 hover 磨砂 */
+/* —— 玻璃材质实现 ——
+   三层，全部对应 iOS System Material 的构成：
+   1) 半透明底色（--glass-bg 系列）
+   2) backdrop-filter 16px 模糊 + 180% saturate
+   3) 1px 半透明白描边 + 极淡阴影
 
-/* 主题/玻璃切换的雾化过渡：放 base 层，避免盖掉组件自己的 transition 工具类 */
+   已刻意去掉的两样东西：
+   · 噪点纹理层（feTurbulence）—— 之前用来给玻璃加「磨砂颗粒」，
+     但 16px 模糊本身已经足够毛玻璃，噪点只会让画面显脏。
+   · 氛围光晕层（.glass-aura）—— 之前用多团径向渐变给玻璃「上色」，
+     结果是色彩互相打架。iOS 的做法是背景保持纯净，
+     玻璃只负责把背景糊开，颜色层次交给底色与描边。 */
+
+/* 主题切换的雾化过渡：放 base 层，避免盖掉组件自己的 transition 工具类 */
 @layer base {
   body,
   .glass-chrome,
   .glass-topbar,
-  .glass-topbar-chips {
+  .glass-topbar-chips,
+  .glass-card,
+  .tile-shell {
     transition:
       background-color var(--dur-3) var(--ease-in-out),
       color var(--dur-3) var(--ease-in-out),
@@ -350,63 +421,77 @@ body {
   }
 }
 
+/* —— chrome：通栏顶栏与悬浮胶囊 ——
+   强制覆盖 Tailwind 的实色 bg-surface / border-line，否则会残留发黄边线。 */
+html[data-glass='on'] .glass-chrome,
+html[data-glass='on'] .glass-topbar {
+  background-color: var(--glass-bg);
+  border-color: var(--glass-border) !important;
+  backdrop-filter: var(--glass-blur-nav);
+  -webkit-backdrop-filter: var(--glass-blur-nav);
+  box-shadow: var(--glass-highlight), var(--glass-shadow);
+}
+
+/* 悬浮导航胶囊（分组导航 / 设置页导航）：
+   用独立的 --glass-bg-nav + --glass-shadow-nav 档位，
+   比卡片更实、投影更重 —— 这是让它从内容里「浮出来」的关键。 */
+html[data-glass='on'] .glass-topbar-chips {
+  /* 必须用 background-color，不能用 background 简写 ——
+     变量里存的是裸 rgba()，简写会把它当成 image 层的值而整体失效
+     （实测 computed backgroundImage = none）。 */
+  background-color: var(--glass-bg-nav);
+  border-color: var(--glass-border-nav);
+  backdrop-filter: var(--glass-blur-panel);
+  -webkit-backdrop-filter: var(--glass-blur-panel);
+  /* 不叠 --glass-highlight：胶囊本身已是半透明玻璃，再加顶部高光会显脏 */
+  box-shadow: var(--glass-shadow-nav);
+}
+
+/* —— 卡片与磁贴：常态即玻璃 ——
+   底 68% 白 + 16px 模糊 + 1px 白描边 + 极淡阴影。
+   hover 只做两件事：底色提到 84%、阴影略深。不加位移、不加发光，
+   iOS 的按钮反馈就是「亮一点」而已。 */
 html[data-glass='on'] .glass-card {
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    backdrop-filter 0.2s ease;
+  background-color: var(--glass-bg-card);
+  border-color: var(--glass-border);
+  backdrop-filter: var(--glass-blur-card);
+  -webkit-backdrop-filter: var(--glass-blur-card);
+  box-shadow: var(--glass-shadow);
 }
 
 html[data-glass='on'] .glass-card:hover {
-  background: var(--glass-bg-hover);
+  background-color: var(--glass-bg-card-hover);
   border-color: var(--glass-border-hover);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow:
-    var(--glass-highlight),
-    inset 0 0 0 0.5px var(--glass-ring),
-    var(--glass-shadow);
+  box-shadow: var(--glass-highlight), var(--glass-shadow-hover);
 }
 
 html[data-glass='on'] .tile-shell {
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    backdrop-filter 0.2s ease;
+  background-color: var(--glass-bg-card);
+  border-color: var(--glass-border);
+  backdrop-filter: var(--glass-blur-tile);
+  -webkit-backdrop-filter: var(--glass-blur-tile);
+  box-shadow: var(--glass-shadow);
 }
 
 html[data-glass='on'] .tile-shell:hover {
-  background: var(--glass-bg-soft);
+  background-color: var(--glass-bg-card-hover);
   border-color: var(--glass-border-hover);
-  backdrop-filter: var(--glass-blur-tile);
-  -webkit-backdrop-filter: var(--glass-blur-tile);
+  box-shadow: var(--glass-highlight), var(--glass-shadow-hover);
 }
 
-/* 玻璃态 chrome：强制覆盖 Tailwind 的实色 border-line，避免残留发黄边线 */
-html[data-glass='on'] .glass-chrome,
-html[data-glass='on'] .glass-topbar {
-  background: var(--glass-bg);
-  border-color: var(--glass-border) !important;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: var(--glass-highlight);
-}
-
-html[data-glass='on'] .glass-topbar-chips {
-  background: var(--glass-bg-soft);
-  border-bottom-color: var(--glass-border) !important;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-}
-
-/* 玻璃模式：顶部提亮 + 氛围光晕给 blur 折射的色彩 */
-html[data-glass='on'] body {
-  background-color: var(--color-canvas);
-  background-image:
-    radial-gradient(900px 520px at 8% -10%, rgba(var(--aura-indigo), var(--aura-1)), transparent 55%),
-    radial-gradient(820px 480px at 96% 12%, rgba(var(--aura-violet), var(--aura-2)), transparent 52%),
-    radial-gradient(1000px 620px at 78% 108%, rgba(var(--aura-cyan), var(--aura-3)), transparent 55%),
-    radial-gradient(700px 420px at 20% 88%, rgba(var(--aura-indigo), var(--aura-4)), transparent 58%);
-  background-attachment: fixed;
+/* —— prefers-reduced-transparency 降级 ——
+   毛玻璃靠背后内容做折射，视力障碍用户往往看不清那层半透明，
+   与其给个看不清的效果，不如直接给清楚的实色。 */
+@media (prefers-reduced-transparency: reduce) {
+  html[data-glass='on'] .glass-chrome,
+  html[data-glass='on'] .glass-topbar,
+  html[data-glass='on'] .glass-topbar-chips,
+  html[data-glass='on'] .glass-card,
+  html[data-glass='on'] .tile-shell {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--color-surface);
+    border-color: var(--line) !important;
+    box-shadow: none !important;
+  }
 }

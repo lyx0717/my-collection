@@ -35,7 +35,6 @@ export default function DomainBatchBar({ domain, count, collections, onMove }: D
           <option value="">移动到分组…</option>
           {collections.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.emoji ? `${c.emoji} ` : ''}
               {c.name}
             </option>
           ))}

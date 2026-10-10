@@ -44,12 +44,14 @@ export default function EngineSearchBox() {
   }
 
   return (
-    <div className="flex h-[38px] max-w-[560px] flex-1 items-center gap-1 rounded-[11px] border border-line bg-canvas pl-2 pr-1 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_3px_var(--accent-ring)]">
+    // 固定上限 380px：宽屏时不撑满整条顶栏（之前 flex-1 会一直拉到最右端，
+    // 看着像被拉长的输入条）；窄屏时靠 w-full 自适应缩窄。
+    <div className="flex h-9 w-full min-w-0 max-w-[380px] items-center gap-1 rounded-[13px] border border-line bg-canvas/70 pl-2 pr-1 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_3px_var(--accent-ring)]">
       {/* 引擎切换 */}
       <div className="relative shrink-0" ref={menuRef}>
         <button
           onClick={() => setMenuOpen((v) => !v)}
-          className="flex h-[30px] items-center gap-1.5 rounded-lg bg-surface px-2 text-[12.5px] font-semibold text-ink2 shadow-[0_1px_2px_rgba(30,40,60,.06)] transition-colors hover:text-accent"
+          className="flex h-[28px] items-center gap-1.5 rounded-[9px] bg-surface/80 px-2 text-[12.5px] font-semibold text-ink2 shadow-[0_1px_2px_rgba(30,40,60,.06)] transition-colors hover:text-accent"
         >
           <Favicon domain={engineDomain(active)} title={active.name} size="sm" className="rounded" />
           {active.name}
@@ -57,7 +59,7 @@ export default function EngineSearchBox() {
         </button>
 
         {menuOpen && (
-          <div className="animate-pop absolute left-0 top-10 z-50 w-72 overflow-hidden rounded-2xl border border-line bg-surface p-1.5 shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)]">
+          <div className="animate-pop absolute left-0 top-11 z-50 w-72 overflow-hidden rounded-2xl border border-line bg-surface p-1.5 shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)]">
             {engines.map((e) => (
               <div
                 key={e.id}
@@ -142,6 +144,7 @@ export default function EngineSearchBox() {
       </div>
 
       <input
+        id="engine-search-input"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && submit()}
@@ -152,7 +155,7 @@ export default function EngineSearchBox() {
         <button
           onClick={() => setQuery('')}
           aria-label="清空"
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-ink3 hover:text-ink"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[9px] text-ink3 hover:text-ink"
         >
           <X size={14} />
         </button>
@@ -160,7 +163,7 @@ export default function EngineSearchBox() {
         <button
           onClick={submit}
           aria-label="搜索"
-          className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg text-ink3 hover:bg-surface hover:text-accent"
+          className="flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-[9px] text-ink3 hover:bg-surface hover:text-accent"
         >
           <Search size={16} />
         </button>

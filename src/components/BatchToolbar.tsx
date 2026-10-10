@@ -1,4 +1,4 @@
-import { CheckSquare, FolderInput, Star, Trash2, X } from 'lucide-react'
+import { CheckSquare, FolderInput, Trash2, X } from 'lucide-react'
 import type { Collection } from '../types'
 import { useToast } from './Toast'
 
@@ -10,7 +10,6 @@ interface BatchToolbarProps {
   onSelectAll: () => void
   onClear: () => void
   onMove: (collectionId: string | undefined) => void
-  onStar: () => void
   onDelete: () => void
 }
 
@@ -22,7 +21,6 @@ export default function BatchToolbar({
   onSelectAll,
   onClear,
   onMove,
-  onStar,
   onDelete,
 }: BatchToolbarProps) {
   const toast = useToast()
@@ -31,7 +29,7 @@ export default function BatchToolbar({
     'flex h-8 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 text-[12px] font-medium text-ink2 hover:border-line2 hover:bg-surface-2'
 
   return (
-    <div className="animate-rise mb-3 flex flex-wrap items-center gap-2 rounded-2xl border border-accent/30 bg-accent-soft/40 px-3 py-2.5">
+    <div className="animate-rise mb-3 flex flex-wrap items-center gap-2 rounded-[20px] border border-accent/30 bg-accent-soft/40 px-3 py-2.5">
       <button onClick={onSelectAll} className="flex items-center gap-1.5 text-[12.5px] font-semibold text-accent-ink">
         <CheckSquare size={14} />
         {allSelected ? `取消全选（${selectedCount}）` : `已选 ${selectedCount} / ${totalCount}`}
@@ -49,7 +47,7 @@ export default function BatchToolbar({
             const label = e.target.selectedOptions[0].textContent
             if (e.target.value === '__none__') {
               onMove(undefined)
-              toast(`${selectedCount} 条已移到未分组`)
+              toast(`${selectedCount} 条已移出分组，可在「全部」中查看`)
             } else {
               onMove(e.target.value)
               toast(`${selectedCount} 条已移到「${label}」`)
@@ -61,18 +59,13 @@ export default function BatchToolbar({
           <option value="">移动到分组…</option>
           {collections.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.emoji ? `${c.emoji} ` : ''}
               {c.name}
             </option>
           ))}
-          <option value="__none__">未分组</option>
+          <option value="__none__">移出分组（回到全部）</option>
         </select>
       </div>
 
-      <button onClick={onStar} className={btnCls}>
-        <Star size={13} />
-        加星标
-      </button>
       <button onClick={onDelete} className={`${btnCls} hover:border-danger/40 hover:text-danger`}>
         <Trash2 size={13} />
         删除

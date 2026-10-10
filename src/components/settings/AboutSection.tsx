@@ -13,7 +13,7 @@ export default function AboutSection({ onReset, onClear }: Props) {
   return (
     <section id="sec-about" className="scroll-mt-24">
       <SectionTitle title="关于" />
-      <div className="rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(30,40,60,.05)]">
+      <div className="glass-card rounded-[20px] border border-line2/60 p-5">
         <dl className="grid grid-cols-2 gap-4 text-[13px] sm:grid-cols-3">
           <div>
             <dt className="text-ink3">书签总数</dt>

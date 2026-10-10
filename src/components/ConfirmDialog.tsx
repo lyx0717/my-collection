@@ -36,7 +36,7 @@ export default function ConfirmDialog({
       aria-modal="true"
     >
       <div
-        className="animate-pop w-full max-w-sm rounded-2xl border border-line bg-surface p-6 shadow-2xl"
+        className="animate-pop w-full max-w-sm rounded-[20px] border border-line bg-surface p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-[17px] font-bold text-ink">{title}</h3>
