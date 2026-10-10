@@ -25,7 +25,7 @@ export default function BookmarkTile({ bookmark, sortable = false, onOpen }: Boo
     <div
       ref={setNodeRef}
       style={sortable ? { transform: CSS.Transform.toString(transform), transition } : undefined}
-      className={`tile-shell group flex min-h-[100px] min-w-[80px] touch-none flex-col items-center gap-2 rounded-2xl border border-transparent px-2.5 py-4 text-center transition-colors hover:border-line hover:bg-surface ${
+      className={`tile-shell group flex min-h-[100px] min-w-[80px] touch-none flex-col items-center gap-2 rounded-2xl border border-transparent px-2.5 py-4 text-center transition-[transform,background-color,border-color] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px] hover:border-line hover:bg-surface ${
         isDragging ? 'z-10 opacity-70 ring-2 ring-accent/50' : ''
       }`}
       {...(sortable ? { ...attributes, ...listeners } : {})}
@@ -40,7 +40,7 @@ export default function BookmarkTile({ bookmark, sortable = false, onOpen }: Boo
         <span
           className="absolute inset-0 overflow-hidden rounded-2xl border shadow-[0_2px_8px_-2px_rgba(30,40,60,.12)]"
           style={{
-            background: failed ? color.bg : '#fff',
+            background: failed ? color.bg : 'var(--surface)',
             borderColor: failed ? color.bg : 'var(--color-line)',
           }}
         >

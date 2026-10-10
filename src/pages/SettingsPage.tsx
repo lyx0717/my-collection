@@ -5,7 +5,6 @@ import {
   HardDrive,
   Info,
   Palette,
-  Tag,
 } from 'lucide-react'
 import { useBookmarks } from '../store/BookmarksContext'
 import { useToast } from '../components/Toast'
@@ -14,21 +13,19 @@ import CollectionModal from '../components/CollectionModal'
 import AppearanceSection from '../components/settings/AppearanceSection'
 import DataSection from '../components/settings/DataSection'
 import CollectionsSection from '../components/settings/CollectionsSection'
-import TagsSection from '../components/settings/TagsSection'
 import AboutSection from '../components/settings/AboutSection'
 import type { Collection } from '../types'
 
-type Section = 'appearance' | 'data' | 'collections' | 'tags' | 'about'
+type Section = 'appearance' | 'data' | 'collections' | 'about'
 
 type ConfirmState =
   | null
   | 'reset'
   | 'clear'
   | { collection: Collection }
-  | { tag: string; count: number }
 
 export default function SettingsPage() {
-  const { collections, addCollection, renameCollection, removeCollection, removeTag, resetToSeed, clearAll } =
+  const { collections, addCollection, renameCollection, removeCollection, resetToSeed, clearAll } =
     useBookmarks()
   const toast = useToast()
   const [section, setSection] = useState<Section>('appearance')
@@ -41,7 +38,6 @@ export default function SettingsPage() {
     { key: 'appearance', label: '外观', icon: <Palette size={15} /> },
     { key: 'data', label: '数据导入导出', icon: <HardDrive size={15} /> },
     { key: 'collections', label: '分组管理', icon: <Folder size={15} /> },
-    { key: 'tags', label: '标签管理', icon: <Tag size={15} /> },
     { key: 'about', label: '关于', icon: <Info size={15} /> },
   ]
 
@@ -99,7 +95,6 @@ export default function SettingsPage() {
             onCreate={() => setCollectionModal({ mode: 'create' })}
             onDelete={(col) => setConfirm({ collection: col })}
           />
-          <TagsSection onDeleteTag={(tag, count) => setConfirm({ tag, count })} />
           <AboutSection
             onReset={() => setConfirm('reset')}
             onClear={() => setConfirm('clear')}
@@ -149,21 +144,6 @@ export default function SettingsPage() {
           onCancel={() => setConfirm(null)}
         />
       )}
-      {confirm && typeof confirm === 'object' && 'tag' in confirm && (
-        <ConfirmDialog
-          title={`删除标签「#${confirm.tag}」？`}
-          message={`该标签会从 ${confirm.count} 条书签上移除，书签本身不会被删除。`}
-          confirmText="删除标签"
-          danger
-          onConfirm={() => {
-            removeTag(confirm.tag)
-            setConfirm(null)
-            toast(`标签「#${confirm.tag}」已删除`)
-          }}
-          onCancel={() => setConfirm(null)}
-        />
-      )}
-
       {collectionModal && (
         <CollectionModal
           initial={collectionModal.mode === 'edit' ? collectionModal.collection : null}

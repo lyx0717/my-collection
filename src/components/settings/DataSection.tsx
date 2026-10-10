@@ -5,6 +5,7 @@ import { useToast } from '../Toast'
 import Favicon from '../Favicon'
 import { parseImportFile, type ParsedImport } from '../../lib/importFile'
 import { dedupeKey, extractDomain } from '../../lib/url'
+import { groupForTags } from '../../lib/migrate'
 import type { ParsedImportBookmark } from '../../types'
 import SectionTitle from './SectionTitle'
 
@@ -51,12 +52,17 @@ export default function DataSection() {
       setPreview(
         result.bookmarks.map((b) => {
           const key = dedupeKey(b.url)
+          // 归组优先级：备份自带 id > 文件夹同名 > 由标签语义推断 > 保持未分组。
+          // 外部来源（Chrome / Edge / iTab）大多只带 TAGS，靠标签推断才能落对位置
+          const guess = groupForTags(b.tags)
           const target =
             b.collectionId && validIds.has(b.collectionId)
               ? b.collectionId
               : b.collectionName
                 ? colByName.get(b.collectionName) ?? '__new'
-                : ''
+                : guess && validIds.has(guess)
+                  ? guess
+                  : ''
           return {
             ...b,
             key,
@@ -113,7 +119,6 @@ export default function DataSection() {
             : p.collectionName
               ? folderToCol.get(p.collectionName)
               : undefined,
-        tags: p.tags,
         createdAt: p.createdAt,
       }))
     bulkAdd(drafts)

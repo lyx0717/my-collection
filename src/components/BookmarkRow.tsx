@@ -12,7 +12,6 @@ interface BookmarkRowProps {
   onEdit: (bm: Bookmark) => void
   onDelete: (bm: Bookmark) => void
   onToggleStar: (id: string) => void
-  onTagClick?: (tag: string) => void
   onDomainClick?: (domain: string) => void
   selectMode?: boolean
   selected?: boolean
@@ -26,7 +25,6 @@ function RowBody({
   onEdit,
   onDelete,
   onToggleStar,
-  onTagClick,
   onDomainClick,
   dragHandleProps,
   isDragging,
@@ -36,7 +34,7 @@ function RowBody({
 }) {
   return (
     <div
-      className={`group flex items-center gap-3 rounded-[14px] border border-line bg-surface px-3.5 py-2.5 shadow-[0_1px_2px_rgba(30,40,60,.05)] transition-shadow duration-200 hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(30,40,60,.18),0_2px_6px_rgba(30,40,60,.05)] ${
+      className={`group flex items-center gap-3 rounded-[14px] border border-line bg-surface px-3.5 py-2.5 shadow-[0_1px_2px_rgba(30,40,60,.05)] transition-[transform,box-shadow,border-color] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px] hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(30,40,60,.18),0_2px_6px_rgba(30,40,60,.05)] ${
         isDragging ? 'z-10 opacity-60 shadow-xl ring-2 ring-accent/40' : ''
       }`}
     >
@@ -87,20 +85,6 @@ function RowBody({
           </p>
         )}
       </div>
-
-      {bookmark.tags.length > 0 && (
-        <div className="flex max-w-[40%] shrink-0 flex-wrap items-center justify-end gap-1.5">
-          {bookmark.tags.slice(0, 3).map((tag) => (
-            <button
-              key={tag}
-              onClick={() => onTagClick?.(tag)}
-              className="rounded-md border border-line bg-canvas px-2 py-[2px] text-[11.5px] text-ink2 hover:border-accent/40 hover:text-accent"
-            >
-              #{tag}
-            </button>
-          ))}
-        </div>
-      )}
 
       <span className="hidden w-12 shrink-0 text-right text-[12px] tabular-nums text-ink3 sm:block">
         {shortDate(bookmark.createdAt)}

@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   ExternalLink,
   Loader2,
-  Plus,
   Sparkles,
   Star,
   X,
@@ -14,7 +13,6 @@ import { useBookmarks } from '../store/BookmarksContext'
 import { useToast } from './Toast'
 import { fetchMetadata } from '../lib/metadata'
 import { extractDomain, isValidUrl, normalizeUrl } from '../lib/url'
-import { parseTags, tagsToText } from '../lib/tags'
 import Favicon from './Favicon'
 
 interface BookmarkModalProps {
@@ -32,14 +30,12 @@ export default function BookmarkModal({
   fromBookmarklet,
   onClose,
 }: BookmarkModalProps) {
-  const { collections, bookmarks, addBookmark, updateBookmark, addCollection, findDuplicate } =
-    useBookmarks()
+  const { collections, addBookmark, updateBookmark, addCollection, findDuplicate } = useBookmarks()
   const toast = useToast()
 
   const [url, setUrl] = useState(editing?.url ?? preset?.url ?? '')
   const [title, setTitle] = useState(editing?.title ?? preset?.title ?? '')
   const [description, setDescription] = useState(editing?.description ?? '')
-  const [tagsText, setTagsText] = useState(tagsToText(editing?.tags ?? []))
   const [collectionId, setCollectionId] = useState(editing?.collectionId ?? '')
   const [starred, setStarred] = useState(editing?.starred ?? false)
   const [faviconUrl, setFaviconUrl] = useState(editing?.faviconUrl)
@@ -164,7 +160,6 @@ export default function BookmarkModal({
       faviconUrl,
       cover,
       collectionId: finalCollectionId || undefined,
-      tags: parseTags(tagsText),
       starred,
     }
 
@@ -176,22 +171,6 @@ export default function BookmarkModal({
       toast(`「${payload.title}」已收藏`)
     }
     onClose()
-  }
-
-  const enteredTags = parseTags(tagsText)
-  const tagSuggestions = useMemo(() => {
-    const counter = new Map<string, number>()
-    for (const bm of bookmarks) for (const t of bm.tags) counter.set(t, (counter.get(t) ?? 0) + 1)
-    return [...counter.entries()]
-      .filter(([t]) => !enteredTags.includes(t))
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh'))
-      .slice(0, 10)
-      .map(([t]) => t)
-  }, [bookmarks, enteredTags])
-
-  const appendTag = (tag: string) => {
-    const next = [...enteredTags, tag]
-    setTagsText(tagsToText(next))
   }
 
   const createCollection = () => {
@@ -423,34 +402,6 @@ export default function BookmarkModal({
               </select>
             )}
             {colError && <p className="mt-1.5 text-[12px] text-danger">{colError}</p>}
-          </div>
-
-          <div>
-            <label className={labelCls} htmlFor="bm-tags">
-              标签
-            </label>
-            <input
-              id="bm-tags"
-              className={inputCls}
-              value={tagsText}
-              onChange={(e) => setTagsText(e.target.value)}
-              placeholder="用逗号分隔，如：前端， 工具"
-            />
-            {tagSuggestions.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {tagSuggestions.map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => appendTag(t)}
-                    className="flex items-center gap-0.5 rounded-md border border-line bg-canvas px-2 py-[3px] text-[11.5px] text-ink2 hover:border-accent/40 hover:text-accent"
-                  >
-                    <Plus size={10} />
-                    {t}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 

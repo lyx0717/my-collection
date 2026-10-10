@@ -11,7 +11,6 @@ export interface Bookmark {
   cover?: string
   /** undefined = 未分组 */
   collectionId?: string
-  tags: string[]
   starred: boolean
   createdAt: string
   updatedAt: string
@@ -25,7 +24,7 @@ export interface Collection {
 }
 
 export interface StoreShape {
-  version: 2
+  version: 4
   bookmarks: Bookmark[]
   collections: Collection[]
 }
@@ -49,6 +48,7 @@ export interface ParsedImportBookmark {
   url: string
   title: string
   description?: string
+  /** 导入源里的标签；v3 起不再入库存，仅用于推断分组 */
   tags: string[]
   collectionName?: string
   /** 本站完整备份携带的分组 id */

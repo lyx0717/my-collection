@@ -12,7 +12,6 @@ interface BookmarkGridCardProps {
   compact?: boolean
   sortable?: boolean
   onToggleStar: (id: string) => void
-  onTagClick?: (tag: string) => void
   onOpen: (bm: Bookmark) => void
   onEdit: (bm: Bookmark) => void
   onDelete: (bm: Bookmark) => void
@@ -23,7 +22,6 @@ export default function BookmarkGridCard({
   compact = false,
   sortable = false,
   onToggleStar,
-  onTagClick,
   onOpen,
   onEdit,
   onDelete,
@@ -49,7 +47,7 @@ export default function BookmarkGridCard({
     <article
       ref={setNodeRef}
       style={sortable ? { transform: CSS.Transform.toString(transform), transition } : undefined}
-      className={`glass-card group relative flex touch-none flex-col overflow-hidden border border-line bg-surface shadow-[0_1px_2px_rgba(30,40,60,.05)] transition-shadow duration-200 hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(30,40,60,.18),0_2px_6px_rgba(30,40,60,.05)] ${cardR} ${
+      className={`glass-card group relative flex touch-none flex-col overflow-hidden border border-line bg-surface shadow-[0_1px_2px_rgba(30,40,60,.05)] transition-[transform,box-shadow,border-color] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px] hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(30,40,60,.18),0_2px_6px_rgba(30,40,60,.05)] ${cardR} ${
         isDragging ? 'z-10 opacity-70 ring-2 ring-accent/50' : ''
       }`}
       {...(sortable ? { ...attributes, ...listeners } : {})}
@@ -152,19 +150,6 @@ export default function BookmarkGridCard({
           >
             {bookmark.description}
           </p>
-        )}
-        {bookmark.tags.length > 0 && (
-          <div className={`mt-2 flex flex-wrap gap-1 ${compact ? 'mt-1.5' : ''}`}>
-            {bookmark.tags.slice(0, 3).map((tag) => (
-              <button
-                key={tag}
-                onClick={() => onTagClick?.(tag)}
-                className="rounded-md border border-line bg-canvas px-[7px] py-[1.5px] text-[10.5px] text-ink2 hover:border-accent/40 hover:text-accent"
-              >
-                #{tag}
-              </button>
-            ))}
-          </div>
         )}
       </div>
     </article>

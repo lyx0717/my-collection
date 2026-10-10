@@ -12,11 +12,17 @@ import type { Bookmark, BookmarkInput, Collection, StoreShape } from '../types'
 import { uid } from '../lib/id'
 import { dedupeKey, extractDomain } from '../lib/url'
 import { exportNetscape } from '../lib/netscape'
+import { CURRENT_VERSION, migrateV2ToV4, migrateV3ToV4, type LegacyBookmark } from '../lib/migrate'
 
-const STORAGE_KEY = 'mybookmarks:v2'
+const STORAGE_KEY = 'mybookmarks:v4'
+/** 按版本从新到旧尝试迁移 */
+const LEGACY_KEYS: Array<{ key: string; version: 3 | 2 }> = [
+  { key: 'mybookmarks:v3', version: 3 },
+  { key: 'mybookmarks:v2', version: 2 },
+]
 const LEGACY_SYNC_KEY = 'mybookmarks:sync-config'
 
-const EMPTY_STORE: StoreShape = { version: 2, bookmarks: [], collections: [] }
+const EMPTY_STORE: StoreShape = { version: CURRENT_VERSION, bookmarks: [], collections: [] }
 
 /** 书签按 order 排序；无 order 的旧数据按当前数组位置补 order */
 function withBookmarkOrder(data: StoreShape): StoreShape {
@@ -73,8 +79,6 @@ function isBookmark(v: unknown): v is Bookmark {
     typeof b.url === 'string' &&
     /^https?:\/\//i.test(b.url) &&
     typeof b.title === 'string' &&
-    Array.isArray(b.tags) &&
-    b.tags.every((t) => typeof t === 'string') &&
     typeof b.starred === 'boolean' &&
     typeof b.createdAt === 'string'
   )
@@ -84,13 +88,27 @@ function isStore(v: unknown): v is StoreShape {
   if (typeof v !== 'object' || v === null) return false
   const s = v as Record<string, unknown>
   return (
-    s.version === 2 &&
+    s.version === CURRENT_VERSION &&
     Array.isArray(s.bookmarks) &&
     s.bookmarks.every(isBookmark) &&
     Array.isArray(s.collections)
   )
 }
 
+function persistLocal(data: StoreShape) {
+  const text = JSON.stringify(data)
+  localStorage.setItem(STORAGE_KEY, text)
+  return new Blob([text]).size
+}
+
+/**
+ * 读取本地数据，必要时执行版本迁移。
+ *
+ * v3 → v4：解散「影音」并入「生活」，生活 / 影音里的境外站点抽入「科学」（原「网络」）。
+ * v2 → v4：先按标签语义归组再落位。
+ * 迁移成功的判定标准是「数据条数不减少」—— 宁可让个别书签落入未分组，
+ * 也不能因为规则没覆盖到而丢书签。
+ */
 function loadLocal(): StoreShape | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -101,13 +119,50 @@ function loadLocal(): StoreShape | null {
   } catch {
     // 损坏时回落内置数据
   }
+
+  // 依次尝试迁移旧档
+  for (const { key, version } of LEGACY_KEYS) {
+    const migrated = migrateLegacy(key, version)
+    if (migrated) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated))
+      return migrated
+    }
+  }
   return null
 }
 
-function persistLocal(data: StoreShape) {
-  const text = JSON.stringify(data)
-  localStorage.setItem(STORAGE_KEY, text)
-  return new Blob([text]).size
+function migrateLegacy(key: string, version: 3 | 2): StoreShape | null {
+  try {
+    const legacyRaw = localStorage.getItem(key)
+    if (!legacyRaw) return null
+    const legacy: unknown = JSON.parse(legacyRaw)
+    if (typeof legacy !== 'object' || legacy === null) return null
+    const old = legacy as {
+      version?: unknown
+      bookmarks?: unknown
+      collections?: unknown
+    }
+    if (old.version !== version || !Array.isArray(old.bookmarks) || !Array.isArray(old.collections))
+      return null
+
+    const before = old.bookmarks.length
+    const migrated =
+      version === 3
+        ? migrateV3ToV4({
+            version: 3,
+            bookmarks: old.bookmarks as Bookmark[],
+            collections: old.collections as Collection[],
+          })
+        : migrateV2ToV4({
+            version: 2,
+            bookmarks: old.bookmarks as LegacyBookmark[],
+            collections: old.collections as Collection[],
+          })
+    // 条数对不上说明迁移丢数据，宁可不动旧数据
+    return migrated.bookmarks.length === before ? migrated : null
+  } catch {
+    return null
+  }
 }
 
 export interface NewBookmarkDraft {
@@ -117,7 +172,6 @@ export interface NewBookmarkDraft {
   faviconUrl?: string
   cover?: string
   collectionId?: string
-  tags: string[]
   createdAt?: string
 }
 
@@ -134,11 +188,8 @@ interface BookmarksContextValue {
   addCollection: (name: string, emoji?: string) => Collection
   renameCollection: (id: string, name: string, emoji?: string) => void
   removeCollection: (id: string) => void
-  renameTag: (oldName: string, newName: string) => void
-  removeTag: (name: string) => void
   mergeCollections: (incoming: Collection[]) => void
   bulkUpdate: (ids: string[], patch: Partial<BookmarkInput>) => void
-  bulkAddTags: (ids: string[], tags: string[]) => void
   bulkRemove: (ids: string[]) => void
   reorderBookmarks: (orderedIds: string[]) => void
   reorderCollections: (orderedIds: string[]) => void
@@ -293,7 +344,6 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
         faviconUrl: d.faviconUrl,
         cover: d.cover,
         collectionId: d.collectionId,
-        tags: d.tags,
         starred: false,
         domain: extractDomain(d.url),
         createdAt: d.createdAt ?? now,
@@ -336,38 +386,10 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
     (id: string) => {
       commit((s) => ({
         ...s,
-        version: 2,
+        version: CURRENT_VERSION,
         collections: s.collections.filter((c) => c.id !== id),
         bookmarks: s.bookmarks.map((bm) =>
           bm.collectionId === id ? { ...bm, collectionId: undefined } : bm,
-        ),
-      }))
-    },
-    [commit],
-  )
-
-  const renameTag = useCallback(
-    (oldName: string, newNameRaw: string) => {
-      const newName = newNameRaw.trim()
-      if (!newName || newName === oldName) return
-      commit((s) => ({
-        ...s,
-        bookmarks: s.bookmarks.map((bm) => {
-          if (!bm.tags.includes(oldName)) return bm
-          const tags = bm.tags.map((t) => (t === oldName ? newName : t))
-          return { ...bm, tags: [...new Set(tags)] }
-        }),
-      }))
-    },
-    [commit],
-  )
-
-  const removeTag = useCallback(
-    (name: string) => {
-      commit((s) => ({
-        ...s,
-        bookmarks: s.bookmarks.map((bm) =>
-          bm.tags.includes(name) ? { ...bm, tags: bm.tags.filter((t) => t !== name) } : bm,
         ),
       }))
     },
@@ -411,22 +433,6 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
     [commit],
   )
 
-  const bulkAddTags = useCallback(
-    (ids: string[], newTags: string[]) => {
-      if (!newTags.length) return
-      const idSet = new Set(ids)
-      commit((s) => ({
-        ...s,
-        bookmarks: s.bookmarks.map((bm) =>
-          idSet.has(bm.id)
-            ? { ...bm, tags: [...new Set([...bm.tags, ...newTags])] }
-            : bm,
-        ),
-      }))
-    },
-    [commit],
-  )
-
   const bulkRemove = useCallback(
     (ids: string[]) => {
       const idSet = new Set(ids)
@@ -446,7 +452,7 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
   }, [commit])
 
   const clearAll = useCallback(
-    () => commit(() => ({ version: 2, bookmarks: [], collections: [] })),
+    () => commit(() => ({ version: CURRENT_VERSION, bookmarks: [], collections: [] })),
     [commit],
   )
 
@@ -484,11 +490,8 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
       addCollection,
       renameCollection,
       removeCollection,
-      renameTag,
-      removeTag,
       mergeCollections,
       bulkUpdate,
-      bulkAddTags,
       bulkRemove,
       reorderBookmarks,
       reorderCollections,
@@ -511,11 +514,8 @@ export function BookmarksProvider({ children }: { children: ReactNode }) {
       addCollection,
       renameCollection,
       removeCollection,
-      renameTag,
-      removeTag,
       mergeCollections,
       bulkUpdate,
-      bulkAddTags,
       bulkRemove,
       reorderBookmarks,
       reorderCollections,

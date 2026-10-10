@@ -102,11 +102,8 @@ export function exportNetscape(bookmarks: Bookmark[], collections: Collection[])
     list
       .map((bm) => {
         const add = Math.floor(new Date(bm.createdAt).getTime() / 1000) || ''
-        const tags = bm.tags.map(escapeHtml).join(',')
-        const desc = bm.description ? `\n    <DD>${escapeHtml(bm.description)}` : ''
-        return `    <DT><A HREF="${escapeHtml(bm.url)}" ADD_DATE="${add}"${
-          tags ? ` TAGS="${tags}"` : ''
-        }>${escapeHtml(bm.title)}</A>${desc}`
+          const desc = bm.description ? `\n    <DD>${escapeHtml(bm.description)}` : ''
+        return `    <DT><A HREF="${escapeHtml(bm.url)}" ADD_DATE="${add}">${escapeHtml(bm.title)}</A>${desc}`
       })
       .join('\n')
 

@@ -21,7 +21,6 @@ import {
   Pencil,
   Plus,
   Star,
-  Tag,
   HardDriveDownload,
   Trash2,
   X,
@@ -34,13 +33,8 @@ interface SidebarProps {
   starredCount: number
   collections: Collection[]
   collectionCounts: Map<string, number>
-  tags: Array<[string, number]>
   scope: Scope
-  activeTags: string[]
   onScope: (scope: Scope) => void
-  onTag: (tag: string) => void
-  onClearTags: () => void
-  onDeleteTag?: (tag: string) => void
   onAddCollection: () => void
   onEditCollection: (col: Collection) => void
   onDeleteCollection: (col: Collection) => void
@@ -148,7 +142,7 @@ function SortableCollectionRow({
       >
         {count}
       </span>
-      <span className="flex w-0 shrink-0 items-center gap-0.5 overflow-hidden opacity-0 transition-all duration-150 group-hover/col:w-[52px] group-hover/col:opacity-100">
+      <span className="flex w-0 shrink-0 items-center gap-0.5 overflow-hidden opacity-0 transition-all duration-[var(--dur-2)] ease-[var(--ease-out)] group-hover/col:w-[52px] group-hover/col:opacity-100">
         <button
           onClick={(e) => {
             e.stopPropagation()
@@ -180,13 +174,8 @@ function SidebarBody(props: SidebarProps) {
     starredCount,
     collections,
     collectionCounts,
-    tags,
     scope,
-    activeTags,
     onScope,
-    onTag,
-    onClearTags,
-    onDeleteTag,
     onAddCollection,
     onEditCollection,
     onDeleteCollection,
@@ -240,96 +229,35 @@ function SidebarBody(props: SidebarProps) {
           <Plus size={14} />
         </button>
       </div>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleCollectionDragEnd}>
-        <SortableContext
-          items={collections.map((c) => c.id)}
-          strategy={verticalListSortingStrategy}
-          disabled={!onReorderCollections}
-        >
-          {collections.map((col) => (
-            <SortableCollectionRow
-              key={col.id}
-              col={col}
-              active={scopeIsActive(scope, 'collection', col.id)}
-              count={collectionCounts.get(col.id) ?? 0}
-              sortable={Boolean(onReorderCollections)}
-              onOpen={() => onScope({ type: 'collection', id: col.id })}
-              onEdit={() => onEditCollection(col)}
-              onDelete={() => onDeleteCollection(col)}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
-      <NavRow
-        active={scopeIsActive(scope, 'none')}
-        icon={<Folder size={16} strokeWidth={1.7} className="opacity-60" />}
-        label="未分组"
-        count={collectionCounts.get('__none__') ?? 0}
-        onClick={() => onScope({ type: 'none' })}
-      />
-
-      <div className="flex items-center justify-between px-2.5 pb-1.5 pt-4 text-[10.5px] font-semibold tracking-[0.14em] text-ink3">
-        标签
-        {activeTags.length > 0 && (
-          <button
-            onClick={onClearTags}
-            className="normal-case tracking-normal text-accent hover:underline"
-            style={{ letterSpacing: 0 }}
+      {/* 分组是唯一会增长的部分，交给它滚动，避免分组增多后底部「未分组」被挤出视口 */}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleCollectionDragEnd}>
+          <SortableContext
+            items={collections.map((c) => c.id)}
+            strategy={verticalListSortingStrategy}
+            disabled={!onReorderCollections}
           >
-            清除
-          </button>
-        )}
-      </div>
-      <div className="flex-1 overflow-y-auto">
-        {tags.length === 0 && <p className="px-2.5 text-[12px] text-ink3">还没有标签</p>}
-        {/* 已选标签：加间距与细描边，多选时不连成一片 */}
-        {activeTags.length > 0 && (
-          <div className="mb-1 flex flex-col gap-1">
-            {activeTags.map((tag) => (
-              <button
-                key={`active-${tag}`}
-                onClick={() => onTag(tag)}
-                className="flex w-full items-center gap-2 rounded-[10px] bg-accent-soft px-2.5 py-[6px] text-left text-[13px] font-semibold text-accent-ink ring-1 ring-accent/15"
-              >
-                <Tag size={13} strokeWidth={1.8} className="text-accent" />
-                <span className="truncate">{tag}</span>
-                <X size={12} className="ml-auto text-accent" />
-              </button>
+            {collections.map((col) => (
+              <SortableCollectionRow
+                key={col.id}
+                col={col}
+                active={scopeIsActive(scope, 'collection', col.id)}
+                count={collectionCounts.get(col.id) ?? 0}
+                sortable={Boolean(onReorderCollections)}
+                onOpen={() => onScope({ type: 'collection', id: col.id })}
+                onEdit={() => onEditCollection(col)}
+                onDelete={() => onDeleteCollection(col)}
+              />
             ))}
-          </div>
-        )}
-        {tags
-          .filter(([tag]) => !activeTags.includes(tag))
-          .map(([tag, count]) => (
-            <div
-              key={tag}
-              className="group/tag flex w-full items-center rounded-[10px] text-ink2 hover:bg-surface-2"
-            >
-              <button
-                onClick={() => onTag(tag)}
-                className="flex min-w-0 flex-1 items-center gap-2 px-2.5 py-[6px] text-left text-[13px]"
-              >
-                <Tag size={13} strokeWidth={1.8} className="shrink-0 text-ink3" />
-                <span className="truncate">{tag}</span>
-                <span className="ml-auto shrink-0 text-[11px] tabular-nums text-ink3 group-hover/tag:hidden">
-                  {count}
-                </span>
-              </button>
-              {onDeleteTag && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onDeleteTag(tag)
-                  }}
-                  aria-label={`删除标签 ${tag}`}
-                  title="删除标签（书签不会被删）"
-                  className="mr-1 hidden h-6 w-6 shrink-0 items-center justify-center rounded-md text-ink3 hover:bg-danger/10 hover:text-danger group-hover/tag:flex"
-                >
-                  <Trash2 size={11.5} />
-                </button>
-              )}
-            </div>
-          ))}
+          </SortableContext>
+        </DndContext>
+        <NavRow
+          active={scopeIsActive(scope, 'none')}
+          icon={<Folder size={16} strokeWidth={1.7} className="opacity-60" />}
+          label="未分组"
+          count={collectionCounts.get('__none__') ?? 0}
+          onClick={() => onScope({ type: 'none' })}
+        />
       </div>
 
       <a

@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { CheckSquare, FolderInput, Star, Tag, Trash2, X } from 'lucide-react'
+import { CheckSquare, FolderInput, Star, Trash2, X } from 'lucide-react'
 import type { Collection } from '../types'
 import { useToast } from './Toast'
 
@@ -11,7 +10,6 @@ interface BatchToolbarProps {
   onSelectAll: () => void
   onClear: () => void
   onMove: (collectionId: string | undefined) => void
-  onAddTags: (tags: string[]) => void
   onStar: () => void
   onDelete: () => void
 }
@@ -24,23 +22,10 @@ export default function BatchToolbar({
   onSelectAll,
   onClear,
   onMove,
-  onAddTags,
   onStar,
   onDelete,
 }: BatchToolbarProps) {
   const toast = useToast()
-  const [tagDraft, setTagDraft] = useState('')
-
-  const submitTags = () => {
-    const tags = tagDraft
-      .split(/[,，、]/)
-      .map((t) => t.trim().replace(/^#/, ''))
-      .filter(Boolean)
-    if (!tags.length) return
-    onAddTags(tags)
-    setTagDraft('')
-    toast(`已为 ${selectedCount} 条书签添加标签`)
-  }
 
   const btnCls =
     'flex h-8 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 text-[12px] font-medium text-ink2 hover:border-line2 hover:bg-surface-2'
@@ -82,18 +67,6 @@ export default function BatchToolbar({
           ))}
           <option value="__none__">未分组</option>
         </select>
-      </div>
-
-      {/* 加标签 */}
-      <div className="flex items-center gap-1">
-        <Tag size={13} className="text-ink3" />
-        <input
-          value={tagDraft}
-          onChange={(e) => setTagDraft(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && submitTags()}
-          placeholder="加标签，回车"
-          className="h-8 w-28 rounded-lg border border-line bg-surface px-2 text-[12px] outline-none placeholder:text-ink4 focus:border-accent sm:w-32"
-        />
       </div>
 
       <button onClick={onStar} className={btnCls}>
