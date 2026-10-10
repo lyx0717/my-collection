@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { AnimatePresence, m } from 'motion/react'
 import {
   CheckSquare,
   Globe,
@@ -16,6 +17,7 @@ import { useAppearance } from '../store/AppearanceContext'
 import { useToast } from '../components/Toast'
 import type { Bookmark, Scope, ViewMode } from '../types'
 import { dedupeKey } from '../lib/url'
+import { itemEnter, viewContainer } from '../lib/motion'
 import { useBookmarkFilter } from '../hooks/useBookmarkFilter'
 import { useBatchSelection } from '../hooks/useBatchSelection'
 import Sidebar from '../components/Sidebar'
@@ -24,6 +26,8 @@ import BookmarkFilterInput from '../components/BookmarkFilterInput'
 import BookmarkRow from '../components/BookmarkRow'
 import BookmarkGridCard from '../components/BookmarkGridCard'
 import BookmarkTile from '../components/BookmarkTile'
+import Favicon from '../components/Favicon'
+import CountUp from '../components/CountUp'
 import BookmarkModal from '../components/BookmarkModal'
 import BatchToolbar from '../components/BatchToolbar'
 import DomainBatchBar from '../components/DomainBatchBar'
@@ -46,9 +50,7 @@ export default function HomePage() {
     renameCollection,
     removeCollection,
     bulkUpdate,
-    bulkAddTags,
     bulkRemove,
-    removeTag,
     reorderBookmarks,
     reorderCollections,
   } = useBookmarks()
@@ -58,7 +60,6 @@ export default function HomePage() {
   const [params, setParams] = useSearchParams()
   const [deleting, setDeleting] = useState<Bookmark | null>(null)
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false)
-  const [deletingTag, setDeletingTag] = useState<string | null>(null)
   const [collectionModal, setCollectionModal] = useState<
     | { mode: 'create' }
     | { mode: 'edit'; collection: Collection }
@@ -83,12 +84,10 @@ export default function HomePage() {
   const {
     query,
     scope,
-    activeTags,
     domainFilter,
     visible,
     collectionMap,
     collectionCounts,
-    allTags,
     contextTitle,
     hasActiveFilter,
     searchFiltered,
@@ -123,14 +122,6 @@ export default function HomePage() {
       if (s.type === 'collection') p.set('c', s.id)
       if (s.type === 'starred') p.set('star', '1')
       if (s.type === 'none') p.set('none', '1')
-    })
-
-  const toggleTag = (tag: string) =>
-    updateParams((p) => {
-      const current = p.getAll('tag')
-      p.delete('tag')
-      const next = current.includes(tag) ? current.filter((t) => t !== tag) : [...current, tag]
-      next.forEach((t) => p.append('tag', t))
     })
 
   useEffect(() => {
@@ -194,18 +185,11 @@ export default function HomePage() {
         starredCount={starredCount}
         collections={collections}
         collectionCounts={collectionCounts}
-        tags={allTags}
         scope={scope}
-        activeTags={activeTags}
         onScope={(s) => {
           setScope(s)
           setMobileMenu(false)
         }}
-        onTag={(t) => {
-          toggleTag(t)
-        }}
-        onClearTags={() => updateParams((p) => p.delete('tag'))}
-        onDeleteTag={(tag) => setDeletingTag(tag)}
         onAddCollection={() => setCollectionModal({ mode: 'create' })}
         onEditCollection={(col) => setCollectionModal({ mode: 'edit', collection: col })}
         onDeleteCollection={(col) => setDeletingCollection(col)}
@@ -272,7 +256,7 @@ export default function HomePage() {
             <div className="mb-4 flex flex-wrap items-center gap-3">
               <h1 className="text-[20px] font-bold">{contextTitle}</h1>
               <span className="text-[12.5px] text-ink3">
-                {visible.length} 条
+                <CountUp value={visible.length} /> 条
               </span>
               <BookmarkFilterInput
                 value={query}
@@ -313,32 +297,27 @@ export default function HomePage() {
                       aria-label={label}
                       title={label}
                       onClick={() => setView(mode)}
-                      className={`flex h-7 w-[30px] items-center justify-center rounded-[7px] transition-all ${
-                        view === mode
-                          ? 'bg-surface text-ink shadow-[0_1px_3px_rgba(30,40,60,.12)]'
-                          : 'text-ink4'
+                      className={`relative flex h-7 w-[30px] items-center justify-center rounded-[7px] ${
+                        view === mode ? 'text-ink' : 'text-ink4'
                       }`}
                     >
-                      <Icon size={15} />
+                      {view === mode && (
+                        <m.span
+                          layoutId="view-pill"
+                          className="absolute inset-0 rounded-[7px] bg-surface shadow-[0_1px_3px_rgba(30,40,60,.12)]"
+                          transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.9 }}
+                        />
+                      )}
+                      <Icon size={15} className="relative z-10" />
                     </button>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* 激活的标签 / 域名筛选 */}
-            {(activeTags.length > 0 || domainFilter) && (
+            {/* 激活的域名筛选 */}
+            {domainFilter && (
               <div className="mb-3 flex flex-wrap items-center gap-1.5">
-                {activeTags.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => toggleTag(t)}
-                    className="flex items-center gap-1 rounded-md bg-accent-soft px-2 py-1 text-[12px] font-medium text-accent-ink hover:bg-accent/15"
-                  >
-                    #{t}
-                    <X size={11} />
-                  </button>
-                ))}
                 {domainFilter && (
                   <span className="flex items-center gap-1 rounded-md bg-accent-soft px-2 py-1 text-[12px] font-medium text-accent-ink">
                     <Globe size={11} />
@@ -353,12 +332,7 @@ export default function HomePage() {
                   </span>
                 )}
                 <button
-                  onClick={() =>
-                    updateParams((p) => {
-                      p.delete('tag')
-                      p.delete('d')
-                    })
-                  }
+                  onClick={() => updateParams((p) => p.delete('d'))}
                   className="text-[12px] text-ink3 underline-offset-2 hover:text-accent hover:underline"
                 >
                   清除筛选
@@ -393,10 +367,6 @@ export default function HomePage() {
                 onClear={exitBatch}
                 onMove={(collectionId) => {
                   bulkUpdate([...selectedIds], { collectionId })
-                  exitBatch()
-                }}
-                onAddTags={(tags) => {
-                  bulkAddTags([...selectedIds], tags)
                   exitBatch()
                 }}
                 onStar={() => {
@@ -472,56 +442,78 @@ export default function HomePage() {
                 view={view}
                 disabled={!dragEnabled}
                 onReorder={(orderedIds) => reorderBookmarks(orderedIds)}
+                renderOverlay={(id) => {
+                  const bm = visible.find((b) => b.id === id)
+                  if (!bm) return null
+                  return (
+                    <div className="pointer-events-none flex items-center gap-2.5 rounded-[14px] border border-line2 bg-surface px-3.5 py-2.5 shadow-xl">
+                      <Favicon domain={bm.domain} faviconUrl={bm.faviconUrl} size="sm" />
+                      <span className="max-w-[220px] truncate text-[13.5px] font-medium text-ink">
+                        {bm.title}
+                      </span>
+                    </div>
+                  )
+                }}
               >
-                {view === 'list' ? (
-                  <div className="flex flex-col gap-2">
-                    {visible.map((bm) => (
-                      <BookmarkRow
+                {/* 三视图共用一份 map：容器做切换过渡，包裹层做错峰进场（内层留给 dnd-kit） */}
+                <AnimatePresence mode="popLayout">
+                  <m.div
+                    key={view}
+                    variants={viewContainer}
+                    initial="hidden"
+                    animate="show"
+                    exit="exit"
+                    className={
+                      view === 'list'
+                        ? 'flex flex-col gap-2'
+                        : view === 'tile'
+                          ? 'grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-7'
+                          : 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+                    }
+                  >
+                    {visible.map((bm, i) => (
+                      <m.div
                         key={bm.id}
-                        bookmark={bm}
-                        sortable={dragEnabled}
-                        collectionName={
-                          bm.collectionId ? collectionMap.get(bm.collectionId)?.name : undefined
-                        }
-                        selectMode={batchMode}
-                        selected={selectedIds.has(bm.id)}
-                        onToggleSelect={toggleSelect}
-                        onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
-                        onDelete={(b) => setDeleting(b)}
-                        onToggleStar={toggleStar}
-                        onTagClick={toggleTag}
-                        onDomainClick={(d) => updateParams((p) => p.set('d', d))}
-                      />
+                        custom={i}
+                        variants={itemEnter}
+                        className={view === 'list' ? undefined : 'h-full'}
+                      >
+                        {view === 'list' ? (
+                          <BookmarkRow
+                            bookmark={bm}
+                            sortable={dragEnabled}
+                            collectionName={
+                              bm.collectionId ? collectionMap.get(bm.collectionId)?.name : undefined
+                            }
+                            selectMode={batchMode}
+                            selected={selectedIds.has(bm.id)}
+                            onToggleSelect={toggleSelect}
+                            onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
+                            onDelete={(b) => setDeleting(b)}
+                            onToggleStar={toggleStar}
+                            onDomainClick={(d) => updateParams((p) => p.set('d', d))}
+                          />
+                        ) : view === 'tile' ? (
+                          <BookmarkTile
+                            bookmark={bm}
+                            sortable={dragEnabled}
+                            onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
+                          />
+                        ) : (
+                          <BookmarkGridCard
+                            bookmark={bm}
+                            compact
+                            sortable={dragEnabled}
+                            onToggleStar={toggleStar}
+                            onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
+                            onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
+                            onDelete={(b) => setDeleting(b)}
+                          />
+                        )}
+                      </m.div>
                     ))}
-                  </div>
-                ) : view === 'tile' ? (
-                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-7">
-                    {visible.map((bm) => (
-                      <BookmarkTile
-                        key={bm.id}
-                        bookmark={bm}
-                        sortable={dragEnabled}
-                        onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                    {visible.map((bm) => (
-                      <BookmarkGridCard
-                        key={bm.id}
-                        bookmark={bm}
-                        compact
-                        sortable={dragEnabled}
-                        onToggleStar={toggleStar}
-                        onTagClick={toggleTag}
-                        onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
-                        onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
-                        onDelete={(b) => setDeleting(b)}
-                      />
-                    ))}
-                  </div>
-                )}
+                  </m.div>
+                </AnimatePresence>
               </SortableBookmarks>
             )}
           </div>
@@ -584,22 +576,6 @@ export default function HomePage() {
             toast(`已删除 ${selectedIds.size} 条书签`)
           }}
           onCancel={() => setBatchDeleteOpen(false)}
-        />
-      )}
-
-      {deletingTag && (
-        <ConfirmDialog
-          title={`删除标签「#${deletingTag}」？`}
-          message={`该标签会从相关书签上移除（书签不会被删除）。当前共有 ${bookmarks.filter((b) => b.tags.includes(deletingTag)).length} 条书签使用它。`}
-          confirmText="删除标签"
-          danger
-          onConfirm={() => {
-            removeTag(deletingTag)
-            if (activeTags.includes(deletingTag)) toggleTag(deletingTag)
-            toast(`标签「#${deletingTag}」已删除`)
-            setDeletingTag(null)
-          }}
-          onCancel={() => setDeletingTag(null)}
         />
       )}
 

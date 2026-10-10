@@ -1,4 +1,6 @@
+import { m, useAnimationControls } from 'motion/react'
 import { Star } from 'lucide-react'
+import { DUR, EASE } from '../lib/motion'
 
 interface StarButtonProps {
   starred: boolean
@@ -17,6 +19,7 @@ export default function StarButton({
   className = '',
   revealOnHover = true,
 }: StarButtonProps) {
+  const controls = useAnimationControls()
   const box = size === 'sm' ? 'h-6 w-6 rounded-md' : 'h-7 w-7 rounded-lg'
   const icon = size === 'sm' ? 12 : 14
   // 移动端不提供星标操作；桌面端未星标项 hover 行/卡片时显示
@@ -26,22 +29,28 @@ export default function StarButton({
       : 'opacity-100'
 
   return (
-    <button
+    <m.button
       type="button"
       role="switch"
       aria-checked={starred}
       aria-label={starred ? '取消星标' : '加星标'}
+      animate={controls}
+      initial={false}
+      whileHover={{ scale: 1.06 }}
+      whileTap={{ scale: 0.9 }}
       onClick={(e) => {
         e.stopPropagation()
         onToggle()
+        // 加星标时弹一下；取消不弹，避免撤销操作时的视觉噪音
+        if (!starred) {
+          controls.start({ scale: [1, 1.12, 1], transition: { duration: DUR[2], ease: EASE.soft } })
+        }
       }}
-      className={`flex items-center justify-center transition-all duration-150 hover:scale-105 ${box} ${hidden} ${
-        starred
-          ? 'text-star'
-          : 'text-ink4 hover:bg-canvas hover:text-ink2'
+      className={`flex items-center justify-center transition-opacity duration-[var(--dur-2)] ease-[var(--ease-out)] ${box} ${hidden} ${
+        starred ? 'text-star' : 'text-ink4 hover:bg-canvas hover:text-ink2'
       } ${className}`}
     >
       <Star size={icon} className={starred ? 'fill-star text-star' : undefined} />
-    </button>
+    </m.button>
   )
 }
