@@ -11,17 +11,41 @@ interface FaviconProps {
   className?: string
 }
 
+/**
+ * 容器尺寸（外框不动，只改内层图标的取景）
+ *
+ * RADIUS 统一 10px：原先 sm 用 rounded-md(6px)、md 用 10px，
+ * 同一枚图标在列表与弹窗里圆角不一致，视觉上像两种控件。
+ * 圆角值抽成常量，两档共用，避免以后再分叉。
+ */
+const RADIUS = 'rounded-[10px]'
+
+/** 外框：高宽固定，是卡片行高与栅格对齐的基准，不允许随内容变化 */
 const SIZES = {
-  sm: 'h-6 w-6 rounded-md',
-  md: 'h-[38px] w-[38px] rounded-[10px]',
+  sm: 'h-6 w-6',
+  md: 'h-[38px] w-[38px]',
 }
-const IMG_SIZES = {
-  sm: 'h-3.5 w-3.5 rounded-sm',
-  md: 'h-[21px] w-[21px] rounded',
-}
+
+/**
+ * 内层图标：撑满外框，用 object-contain 按原比例缩放。
+ *
+ * 原来 sm 是 3.5(14px) 放在 6(24px) 框里、md 是 21 放在 38 里，
+ * 都留了两三成边距，图标显得比容器小一圈。
+ *
+ * object-contain 是这里的关键：图标铺满外框的同时**按原比例缩放**，
+ * 遇到非正方形图标（有些站点 favicon 是长条）时也不会被拉变形，
+ * 而是自动收进可视区居中 —— 这正是「撑满可用空间但不出现变形」的做法。
+ * 若换成 object-fill / 默认的 fill，非正方形图标会被硬拉成正方形而失真。
+ *
+ * 两档尺寸已无差异（都撑满外框），故不按 size 分档。
+ * 外框已有 overflow-hidden，图标圆角由外框裁切即可，
+ * 内层不再单独设圆角，避免两层圆角叠加出的抗锯齿毛边。
+ */
+const IMG_CLS = 'h-full w-full object-contain'
+
 const LETTER_SIZES = {
-  sm: 'text-[11px]',
-  md: 'text-[15px]',
+  sm: 'text-[12px]',
+  md: 'text-[17px]',
 }
 
 /** favicon：自定义图标 → 站点 /favicon.ico → 文字徽章 */
@@ -31,8 +55,8 @@ export default function Favicon({ domain, title, faviconUrl, size = 'md', classN
 
   return (
     <span
-      className={`relative flex shrink-0 items-center justify-center overflow-hidden font-bold ${SIZES[size]} ${className}`}
-      style={{ background: failed ? color.bg : 'var(--badge-bg-0)' }}
+      className={`relative flex shrink-0 items-center justify-center overflow-hidden font-bold ${RADIUS} ${SIZES[size]} ${className}`}
+      style={{ background: failed ? color.bg : 'var(--logo-tile-bg)' }}
     >
       {failed ? (
         <span
@@ -47,7 +71,7 @@ export default function Favicon({ domain, title, faviconUrl, size = 'md', classN
           alt=""
           loading="lazy"
           onError={handleError}
-          className={`absolute ${IMG_SIZES[size]}`}
+          className={IMG_CLS}
         />
       ) : (
         <span className="h-3 w-3 animate-pulse rounded-full bg-line2" />

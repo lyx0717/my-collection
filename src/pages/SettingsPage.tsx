@@ -5,6 +5,7 @@ import { useToast } from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
 import CollectionModal from '../components/CollectionModal'
 import CapsuleNav, { type CapsuleNavItem } from '../components/CapsuleNav'
+import ThemeToggle from '../components/ThemeToggle'
 import AppearanceSection from '../components/settings/AppearanceSection'
 import DataSection from '../components/settings/DataSection'
 import CollectionsSection from '../components/settings/CollectionsSection'
@@ -60,6 +61,11 @@ export default function SettingsPage() {
             <ArrowLeft size={17} />
           </a>
           <h1 className="text-[15px] font-bold">设置</h1>
+          {/* 与首页 DockBar 同一套明暗切换，放在返回键与内容之间 ——
+              改主题时往往就在设置页里，不该还要退回首页才切得了。 */}
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
@@ -68,8 +74,10 @@ export default function SettingsPage() {
       <div aria-hidden className="h-14" />
 
       {/* 导航：与首页分组导航共用 CapsuleNav，宽度同样按内容自适应居中。
-          sticky top-14 让它吸在通栏顶栏下方。 */}
-      <div className="sticky top-14 z-30 px-4 py-3 sm:px-6">
+          sticky top-14 让它吸在通栏顶栏下方。
+          pointer-events-none + 胶囊内 auto：这条 sticky 带通栏占满，
+          而胶囊只有内容宽度，两侧空白若参与命中测试会吃掉下层内容的点击。 */}
+      <div className="pointer-events-none sticky top-14 z-30 px-4 py-3 sm:px-6">
         <CapsuleNav
           ariaLabel="设置导航"
           items={navItems.map<CapsuleNavItem>((n) => ({
@@ -88,9 +96,11 @@ export default function SettingsPage() {
 
       {/* 内容宽度收到 760px：iOS 设置页是分组列表（约 390~430pt），
           过宽的设置页会让人失去「这是一份清单」的认知。
-          pt-6 让首个区块与吸顶胶囊拉开距离。 */}
+          pt-6 让首个区块与吸顶胶囊拉开距离。
+          space-y-14 给每个模块标题与上一个模块留出 56px 呼吸位 ——
+          原来四个 section 直接相邻，标题紧贴上一块卡片的底边，看着像同一块内容。 */}
       <div className="mx-auto max-w-[760px] px-4 pt-5 pb-20 sm:px-6">
-        <div className="pt-4">
+        <div className="space-y-14 pt-4">
           <AppearanceSection />
           <DataSection />
           <CollectionsSection

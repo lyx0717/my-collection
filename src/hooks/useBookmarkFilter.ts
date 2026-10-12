@@ -1,13 +1,6 @@
 import { useMemo } from 'react'
 import type { Bookmark, Collection, Scope } from '../types'
 
-/** URL 参数 → 作用域。只认 c=分组 id，其余一律「全部」。 */
-export function scopeFromParams(p: URLSearchParams): Scope {
-  const col = p.get('c')
-  if (col) return { type: 'collection', id: col }
-  return { type: 'all' }
-}
-
 export interface BookmarkFilterResult {
   query: string
   scope: Scope
@@ -27,10 +20,14 @@ export function useBookmarkFilter(
   params: URLSearchParams,
 ): BookmarkFilterResult {
   const query = params.get('q') ?? ''
-  const scope = scopeFromParams(params)
+  // 依赖项必须用原始字符串，不能用 scopeFromParams 返回的对象 ——
+  // 它每次调用都返回新对象引用，放进 useMemo 依赖会让 memo 永远失效，
+  // 153 条书签的过滤 + 排序在每次渲染时重跑一遍。
+  const collectionId = params.get('c') ?? ''
   const domainFilter = params.get('d') ?? ''
 
   return useMemo(() => {
+    const scope: Scope = collectionId ? { type: 'collection', id: collectionId } : { type: 'all' }
     const collectionMap = new Map(collections.map((c) => [c.id, c]))
     const collectionCounts = new Map<string, number>()
 
@@ -73,5 +70,5 @@ export function useBookmarkFilter(
       /** 搜索/域名筛选：临时视图，禁用拖拽排序 */
       searchFiltered: Boolean(query || domainFilter),
     }
-  }, [bookmarks, collections, query, scope, domainFilter])
+  }, [bookmarks, collections, query, collectionId, domainFilter])
 }

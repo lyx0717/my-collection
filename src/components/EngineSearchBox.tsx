@@ -46,14 +46,14 @@ export default function EngineSearchBox() {
   return (
     // 固定上限 380px：宽屏时不撑满整条顶栏（之前 flex-1 会一直拉到最右端，
     // 看着像被拉长的输入条）；窄屏时靠 w-full 自适应缩窄。
-    <div className="flex h-9 w-full min-w-0 max-w-[380px] items-center gap-1 rounded-[13px] border border-line bg-canvas/70 pl-2 pr-1 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_3px_var(--accent-ring)]">
+    <div className="flex h-9 w-full min-w-0 max-w-[600px] items-center gap-1 rounded-[13px] border border-line bg-canvas/70 pl-2 pr-1 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_3px_var(--accent-ring)]">
       {/* 引擎切换 */}
       <div className="relative shrink-0" ref={menuRef}>
         <button
           onClick={() => setMenuOpen((v) => !v)}
           className="flex h-[28px] items-center gap-1.5 rounded-[9px] bg-surface/80 px-2 text-[12.5px] font-semibold text-ink2 shadow-[0_1px_2px_rgba(30,40,60,.06)] transition-colors hover:text-accent"
         >
-          <Favicon domain={engineDomain(active)} title={active.name} size="sm" className="rounded" />
+          <Favicon domain={engineDomain(active)} title={active.name} size="sm" />
           {active.name}
           <ChevronDown size={13} className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
         </button>
@@ -75,7 +75,7 @@ export default function EngineSearchBox() {
                   <span className={`h-4 w-4 ${active.id === e.id ? 'text-accent' : 'text-transparent'}`}>
                     <Check size={15} />
                   </span>
-                  <Favicon domain={engineDomain(e)} title={e.name} size="sm" className="rounded" />
+                  <Favicon domain={engineDomain(e)} title={e.name} size="sm" />
                   <span className={active.id === e.id ? 'font-semibold text-accent-ink' : 'text-ink'}>
                     {e.name}
                   </span>

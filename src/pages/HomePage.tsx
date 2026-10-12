@@ -51,9 +51,11 @@ export default function HomePage() {
     | null
   >(null)
 
+  // 默认网格视图：书签库以「扫」为主，网格一屏能看的信息量远高于列表。
+  // 老用户 localStorage 里已有的选择仍然优先，不强制改回来。
   const initialView = (): ViewMode => {
     const saved = localStorage.getItem(VIEW_KEY)
-    return saved === 'grid' || saved === 'tile' ? saved : 'list'
+    return saved === 'list' || saved === 'tile' ? saved : 'grid'
   }
   const [view, setView] = useState<ViewMode>(initialView)
 
@@ -151,8 +153,14 @@ export default function HomePage() {
       {/* 分组导航：sticky 吸在通栏顶栏下方，滚动时始终可见。
           top-14 必须等于 DockBar 的固定高度（h-14 = 56px），
           否则胶囊与顶栏之间会露出一条缝隙。
-          只做点击切换，增删改与排序都在设置页。 */}
-      <div className="sticky top-14 z-30 px-4 py-3 sm:px-6">
+          只做点击切换，增删改与排序都在设置页。
+
+          pointer-events-none + 内层 auto：这条 sticky 带是**通栏**的
+          （占满视口宽），而胶囊只有 ~700px 居中，两侧空出来的部分
+          同样会参与命中测试 —— 滚动时从胶囊下方掠过的卡片会被它吃掉点击，
+          表现就是「导航栏左右两侧的内容点不动」。
+          让容器整体穿透、只把胶囊本身恢复可点，点击区域就精确等于可见胶囊。 */}
+      <div className="pointer-events-none sticky top-14 z-30 px-4 py-3 sm:px-6">
         <GroupNav
           total={bookmarks.length}
           collections={collections}
@@ -167,7 +175,9 @@ export default function HomePage() {
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <h1 className="text-[22px] font-bold tracking-[-0.01em]">{contextTitle}</h1>
             <span className="text-[12.5px] text-ink3">
-              <CountUp value={visible.length} /> 条
+              {/* digits 传书签总数：筛选时计数在 0~总数之间跳，
+                  按总数预留位数，99→100 这类进位也不会撑宽容器。 */}
+              <CountUp value={visible.length} digits={String(bookmarks.length).length} /> 条
             </span>
               <BookmarkFilterInput
                 value={query}
@@ -185,15 +195,13 @@ export default function HomePage() {
                   <Plus size={14} strokeWidth={2.4} />
                   <span className="hidden sm:inline">添加书签</span>
                 </button>
-                {view !== 'tile' && (
+                {/* 多选仅列表视图开放：网格/磁贴的卡片上没有复选框锚点，
+                    强塞多选会逼出新的交互形态；列表行天然一行一项，
+                    复选框位置稳定。进入多选也就不再需要 setView('list')——
+                    按钮本身只在列表视图渲染，进来时已经在列表里。 */}
+                {view === 'list' && (
                 <button
-                  onClick={() => {
-                    if (batchMode) exitBatch()
-                    else {
-                      enterBatch()
-                      setView('list')
-                    }
-                  }}
+                  onClick={() => (batchMode ? exitBatch() : enterBatch())}
                   className={`flex h-[34px] items-center gap-1.5 rounded-[10px] border px-2.5 text-[12.5px] font-medium transition-colors ${
                     batchMode
                       ? 'border-accent bg-accent-soft text-accent-ink'
@@ -205,18 +213,30 @@ export default function HomePage() {
                   <span className="sm:hidden">{batchMode ? '退出' : '多选'}</span>
                 </button>
                 )}
-                <div className="flex rounded-[10px] bg-segment p-[3px]">
+                {/* 多选期间锁定：选中集是按「当前可见列表」建立的，
+                    切走视图（尤其切到磁贴/网格）等于换了一批条目，
+                    已勾选的 id 会与展示内容对不上，产生「看不见却仍在选中集」
+                    的错觉操作。所以多选时整组禁用，退出多选自动恢复。 */}
+                <div
+                  className={`flex rounded-[10px] bg-segment p-[3px] transition-opacity ${
+                    batchMode ? 'pointer-events-none opacity-40' : ''
+                  }`}
+                  aria-disabled={batchMode}
+                >
                   {(
                     [
-                      ['list', List, '列表视图'],
+                      // 顺序 = 使用频次：网格（默认）→ 磁贴 → 列表。
+                      // 列表放最后：它是备选形态，需要时才切过去；
+                      // 排在默认视图前面，会让最高频的那颗反而不显眼。
                       ['grid', LayoutGrid, '网格视图'],
                       ['tile', LayoutDashboard, '磁贴视图'],
+                      ['list', List, '列表视图'],
                     ] as const
                   ).map(([mode, Icon, label]) => (
                     <button
                       key={mode}
                       aria-label={label}
-                      title={label}
+                      title={batchMode ? '多选模式下不可切换视图' : label}
                       onClick={() => setView(mode)}
                       className={`relative flex h-7 w-[30px] items-center justify-center rounded-[7px] ${
                         view === mode ? 'text-ink' : 'text-ink4'

@@ -157,11 +157,18 @@ export default function BookmarkModal({
     onClose()
   }
 
+  // glass-field：内凹玻璃，与外层面板同一材质（实色框贴在玻璃上会割裂）。
+  // 底色 / 描边 / 内凹投影 / 聚焦光晕全部由 CSS 类按主题给，
+  // 这里只管尺寸与排版 —— 混用 Tailwind 的 focus:shadow 会把
+  // 样式表里「内凹投影 + 光晕」的组合覆盖成只剩光晕，内凹感就没了。
   const inputCls =
-    'h-10 w-full rounded-[10px] border border-line bg-surface px-3 text-[13.5px] text-ink outline-none transition-shadow placeholder:text-ink4 focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-ring)]'
+    'glass-field h-10 w-full rounded-[10px] border px-3 text-[13.5px] text-ink outline-none transition-[background-color,border-color,box-shadow] duration-[var(--dur-2)] placeholder:text-ink4'
   const labelCls = 'mb-1.5 block text-[12px] font-semibold text-ink2'
 
   return (
+    // 遮罩自带 backdrop-blur，把整屏压暗并糊掉。
+    // 弹窗本体再叠一层 glass-sheet（24px），两层模糊叠加后
+    // 背后的卡片彻底化开，表单只剩玻璃质感与自身内容。
     <div
       className="animate-fade-in fixed inset-0 z-[65] flex items-end justify-center bg-ink/40 backdrop-blur-[3px] sm:items-center sm:p-6"
       onClick={onClose}
@@ -172,7 +179,7 @@ export default function BookmarkModal({
       <form
         onSubmit={submit}
         onClick={(e) => e.stopPropagation()}
-        className="animate-pop flex max-h-[94dvh] w-full max-w-[440px] flex-col overflow-y-auto rounded-t-[18px] bg-surface shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)] sm:rounded-[20px]"
+        className="glass-sheet animate-pop flex max-h-[94dvh] w-full max-w-[440px] flex-col overflow-y-auto rounded-t-[18px] sm:rounded-[20px]"
       >
         <div className="flex items-start justify-between px-[22px] pt-5">
           <div>
@@ -289,7 +296,7 @@ export default function BookmarkModal({
             <textarea
               id="bm-desc"
               rows={2}
-              className="w-full resize-y rounded-[10px] border border-line bg-surface px-3 py-2.5 text-[13px] leading-6 outline-none transition-shadow placeholder:text-ink4 focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-ring)]"
+              className="glass-field w-full resize-y rounded-[10px] border px-3 py-2.5 text-[13px] leading-6 text-ink outline-none transition-[background-color,border-color,box-shadow] duration-[var(--dur-2)] placeholder:text-ink4"
               value={description}
               onChange={(e) => {
                 setDescription(e.target.value)
@@ -308,7 +315,7 @@ export default function BookmarkModal({
                 且无法选图标（emoji 已下线）。 */}
             <select
               id="bm-col"
-              className={`${inputCls} cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23928E86%22 stroke-width=%222.4%22%3E%3Cpath d=%22m6 9 6 6 6-6%22/%3E%3C/svg%3E')] bg-[position:right_12px_center] bg-no-repeat pr-8`}
+              className={`${inputCls} glass-select`}
               value={collectionId || '__none__'}
               onChange={(e) => setCollectionId(e.target.value === '__none__' ? '' : e.target.value)}
             >

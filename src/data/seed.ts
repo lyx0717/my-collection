@@ -19,7 +19,7 @@ export const SEED_DATA: StoreShape = {
     {
       "id": "col_work",
       "name": "工作",
-      "icon": "Briefcase",
+      "icon": "Newspaper",
       "order": 2
     },
     {
@@ -118,7 +118,7 @@ export const SEED_DATA: StoreShape = {
       "title": "小米有品",
       "domain": "xiaomiyoupin.com",
       "createdAt": "2026-09-18T00:52:00.000Z",
-      "updatedAt": "2026-09-20T02:29:30.024Z",
+      "updatedAt": "2026-10-12T06:15:03.581Z",
       "collectionId": "col_life",
       "order": 7
     },
@@ -351,7 +351,7 @@ export const SEED_DATA: StoreShape = {
       "updatedAt": "2026-09-20T06:23:45.476Z",
       "collectionId": "col_ai",
       "order": 30,
-      "description": "千问大模型"
+      "description": ""
     },
     {
       "id": "bm_d5005df1-1de7-4949-b6f8-54cc102fdb54",
@@ -665,11 +665,11 @@ export const SEED_DATA: StoreShape = {
     },
     {
       "id": "bm_6f0f4a9e-e2ce-4644-9576-c7763b125f7e",
-      "url": "https://gitcode.com/",
+      "url": "https://gitcode.com",
       "title": "GitCode",
       "domain": "gitcode.com",
       "createdAt": "2026-09-17T23:56:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "updatedAt": "2026-10-12T06:10:49.761Z",
       "collectionId": "col_dev",
       "order": 62
     },
@@ -1175,63 +1175,69 @@ export const SEED_DATA: StoreShape = {
     },
     {
       "id": "bm_b887d21d-1769-4d2b-95df-4b437750f1d8",
-      "url": "https://dualsim.hngtrust.com/tstc-ui/#/login",
-      "title": "柜台（SIM）",
+      "url": "https://dualsim.hngtrust.com/tstc-ui",
+      "title": "交易柜台",
       "domain": "dualsim.hngtrust.com",
       "createdAt": "2026-09-17T22:57:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "updatedAt": "2026-10-12T06:18:21.602Z",
       "collectionId": "col_work",
-      "order": 113
+      "order": 113,
+      "description": "SIM"
     },
     {
       "id": "bm_9d07845a-1e36-4a57-9ad2-ca43f019ec6a",
-      "url": "https://dualdemo.hngtrust.com/tstc-ui/#/login",
-      "title": "柜台（Demo）",
+      "url": "https://dualdemo.hngtrust.com/tstc-ui",
+      "title": "交易柜台",
       "domain": "dualdemo.hngtrust.com",
       "createdAt": "2026-09-17T22:56:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "updatedAt": "2026-10-12T06:18:14.846Z",
       "collectionId": "col_work",
-      "order": 114
+      "order": 114,
+      "description": "Demo"
     },
     {
       "id": "bm_61f08f32-8685-4ea5-a3f2-cada066b2997",
-      "url": "https://smartsales.hngtrust.com/tstc-ui/#/login",
-      "title": "柜台生产",
+      "url": "https://smartsales.hngtrust.com/tstc-ui",
+      "title": "交易柜台",
       "domain": "smartsales.hngtrust.com",
       "createdAt": "2026-09-17T22:55:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "updatedAt": "2026-10-12T06:17:54.661Z",
       "collectionId": "col_work",
-      "order": 115
+      "order": 115,
+      "description": "生产"
     },
     {
       "id": "bm_a6f4b2ab-b341-4d3b-b560-70a18f526ee3",
-      "url": "https://portal-sim.hngtrust.com/portal-admin/#/login",
-      "title": "门户管理（SIM）",
+      "url": "https://portal-sim.hngtrust.com/portal-admin",
+      "title": "门户管理",
       "domain": "portal-sim.hngtrust.com",
       "createdAt": "2026-09-17T22:54:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "updatedAt": "2026-10-12T06:22:03.604Z",
       "collectionId": "col_work",
-      "order": 116
+      "order": 116,
+      "description": "SIM"
     },
     {
       "id": "bm_80fb3f97-7e65-46ed-8611-4396787a4e54",
-      "url": "https://sim.hngtrust.com/portal-web/web/index",
-      "title": "门户前台（SIM）",
-      "domain": "sim.hngtrust.com",
+      "url": "https://portal-sim.hngtrust.com/portal-web/web/index",
+      "title": "门户官网",
+      "domain": "portal-sim.hngtrust.com",
       "createdAt": "2026-09-17T22:53:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "updatedAt": "2026-10-12T06:17:33.471Z",
       "collectionId": "col_work",
-      "order": 117
+      "order": 117,
+      "description": "SIM"
     },
     {
       "id": "bm_5c0869bf-5c0a-40d1-a727-8fdf422a0c93",
       "url": "https://portal-sim.hngtrust.com/cfb/login",
-      "title": "门户项目（SIM）",
+      "title": "机构客户服务平台",
       "domain": "portal-sim.hngtrust.com",
       "createdAt": "2026-09-17T22:52:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "updatedAt": "2026-10-12T06:17:24.506Z",
       "collectionId": "col_work",
-      "order": 118
+      "order": 118,
+      "description": "SIM"
     },
     {
       "id": "bm_c7c07ab7-f0d1-45ec-8ef5-b9187ff29c8a",
@@ -1264,16 +1270,6 @@ export const SEED_DATA: StoreShape = {
       "order": 121
     },
     {
-      "id": "bm_5e4d14a9-0d2c-4d56-9754-8e95bbcc95dd",
-      "url": "https://www.mac163.cn/",
-      "title": "小番茄盒子",
-      "domain": "mac163.cn",
-      "createdAt": "2026-09-17T22:48:00.000Z",
-      "updatedAt": "2026-09-20T02:33:23.643Z",
-      "collectionId": "col_tool",
-      "order": 122
-    },
-    {
       "id": "bm_4b05ba0e-98b1-4523-bd36-01e887c2ca64",
       "url": "https://macwk.cn/",
       "title": "MacWk",
@@ -1281,7 +1277,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:47:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 123
+      "order": 122
     },
     {
       "id": "bm_039c36a5-5071-4807-b8d2-f92a032288a0",
@@ -1291,7 +1287,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:46:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 124
+      "order": 123
     },
     {
       "id": "bm_33c10bce-8826-42f1-bc26-e807b5d6adc7",
@@ -1301,7 +1297,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:45:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 125
+      "order": 124
     },
     {
       "id": "bm_72826775-be00-4b08-92f8-976287414545",
@@ -1311,7 +1307,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:44:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 126
+      "order": 125
     },
     {
       "id": "bm_70af9b00-8c01-4ec3-a5fa-5e1f25360f20",
@@ -1321,7 +1317,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:43:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 127
+      "order": 126
     },
     {
       "id": "bm_8a9e4c98-61d9-4779-aeba-a761f56e030a",
@@ -1331,7 +1327,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:42:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 128
+      "order": 127
     },
     {
       "id": "bm_a7118dc9-27d9-4f36-81d9-95ae41327c13",
@@ -1341,37 +1337,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:41:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 129
-    },
-    {
-      "id": "bm_ba0b208a-76c4-42a5-a7f6-1688430dea3a",
-      "url": "https://www.wuji7.com/",
-      "title": "无极影院",
-      "domain": "wuji7.com",
-      "createdAt": "2026-09-17T22:40:00.000Z",
-      "updatedAt": "2026-09-20T02:34:29.313Z",
-      "collectionId": "col_life",
-      "order": 130
-    },
-    {
-      "id": "bm_38e7e900-1fb3-4167-955e-2773590b77e5",
-      "url": "https://www.660f.com/",
-      "title": "660 影视",
-      "domain": "660f.com",
-      "createdAt": "2026-09-17T22:39:00.000Z",
-      "updatedAt": "2026-09-20T02:34:29.313Z",
-      "collectionId": "col_life",
-      "order": 131
-    },
-    {
-      "id": "bm_c0634d75-2eb6-494e-a6e9-3055c43cde6b",
-      "url": "https://www.ghxi.com",
-      "title": "果核剥壳",
-      "domain": "ghxi.com",
-      "createdAt": "2026-09-17T22:38:00.000Z",
-      "updatedAt": "2026-09-20T02:33:23.643Z",
-      "collectionId": "col_tool",
-      "order": 132
+      "order": 128
     },
     {
       "id": "bm_9ed736e6-4d01-49b5-b983-3e4791aa6311",
@@ -1381,7 +1347,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:37:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 133
+      "order": 129
     },
     {
       "id": "bm_e15ab312-1c9c-4ec3-83d7-56ccee0ecdc5",
@@ -1391,7 +1357,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:34:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_life",
-      "order": 134
+      "order": 130
     },
     {
       "id": "bm_f73d4920-860e-403a-8045-d822fe11fdb7",
@@ -1401,7 +1367,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:33:00.000Z",
       "updatedAt": "2026-09-20T02:34:29.313Z",
       "collectionId": "col_sci",
-      "order": 135
+      "order": 131
     },
     {
       "id": "bm_bb78abb1-6794-4285-a2fe-9c70566863af",
@@ -1411,7 +1377,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:32:00.000Z",
       "updatedAt": "2026-09-20T02:34:29.313Z",
       "collectionId": "col_life",
-      "order": 136
+      "order": 132
     },
     {
       "id": "bm_f9b0ff0e-3650-447b-8b73-4c7b144caa0a",
@@ -1421,7 +1387,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:31:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 137
+      "order": 133
     },
     {
       "id": "bm_38ee1950-723b-4ac4-8a68-7bc0090acf89",
@@ -1431,7 +1397,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:30:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 138
+      "order": 134
     },
     {
       "id": "bm_47a94c25-b19d-4ec0-9335-44745e8298b8",
@@ -1441,7 +1407,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:29:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 139
+      "order": 135
     },
     {
       "id": "bm_acbded71-1169-4ad9-93f3-c23951229b91",
@@ -1451,7 +1417,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:28:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 140
+      "order": 136
     },
     {
       "id": "bm_0a382101-b639-45b2-9dc7-7b40ef4acb02",
@@ -1461,7 +1427,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:27:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 141
+      "order": 137
     },
     {
       "id": "bm_71cddd61-efb9-45a1-a728-3150f1699eac",
@@ -1471,7 +1437,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:26:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 142
+      "order": 138
     },
     {
       "id": "bm_e07fc300-18de-4d20-acd2-8f350bb8f757",
@@ -1481,7 +1447,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:25:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 143
+      "order": 139
     },
     {
       "id": "bm_8f91939d-2bc3-4d06-9c95-dfed77860c40",
@@ -1491,7 +1457,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:24:00.000Z",
       "updatedAt": "2026-09-20T02:34:45.563Z",
       "collectionId": "col_sci",
-      "order": 144
+      "order": 140
     },
     {
       "id": "bm_bcd049f4-7e4f-4862-aee3-83728f185fd2",
@@ -1501,17 +1467,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:23:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 145
-    },
-    {
-      "id": "bm_3d8a3f2f-b9aa-48f2-868c-e81662461b70",
-      "url": "https://jc.swk69978.com/doc/189/",
-      "title": "Apple 账号共享",
-      "domain": "jc.swk69978.com",
-      "createdAt": "2026-09-17T22:22:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_tool",
-      "order": 146
+      "order": 141
     },
     {
       "id": "bm_f77fced0-fba0-49ab-a400-8d7e77a2542a",
@@ -1521,7 +1477,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:21:00.000Z",
       "updatedAt": "2026-09-20T02:34:45.563Z",
       "collectionId": "col_sci",
-      "order": 147
+      "order": 142
     },
     {
       "id": "bm_002e87ef-eaff-4386-9215-beeacf2c094d",
@@ -1531,7 +1487,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:20:00.000Z",
       "updatedAt": "2026-09-20T02:34:45.563Z",
       "collectionId": "col_sci",
-      "order": 148
+      "order": 143
     },
     {
       "id": "bm_1b721fec-4607-477b-9135-875f4a5e31cb",
@@ -1541,7 +1497,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:19:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 149
+      "order": 144
     },
     {
       "id": "bm_dbf75dcb-fda7-4e56-8d53-04cba9d1e544",
@@ -1551,7 +1507,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:18:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 150
+      "order": 145
     },
     {
       "id": "bm_9ea42536-b270-4e0b-a6f8-c76fd5c68eff",
@@ -1561,7 +1517,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:17:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 151
+      "order": 146
     },
     {
       "id": "bm_fd926000-5e26-42b3-8b4f-338f84b30f45",
@@ -1571,7 +1527,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:16:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 152
+      "order": 147
     }
   ]
 }

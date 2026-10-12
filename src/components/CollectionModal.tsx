@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { X } from 'lucide-react'
 import type { Collection } from '../types'
-import { COLLECTION_ICONS, iconForCollection } from '../lib/collectionIcons'
+import {
+  COLLECTION_ICON_NAMES,
+  iconNameForCollection,
+  renderCollectionIcon,
+  resolveCollectionIcon,
+} from '../lib/collectionIcons'
 
 interface CollectionModalProps {
   /** 传入则为编辑，否则新建 */
@@ -52,11 +57,15 @@ export default function CollectionModal({
     onClose()
   }
 
-  // 预览当前生效的图标：未选时按名称 hash 回退
-  const preview = icon ?? iconForCollection({ name: name.trim() || 'new' })
-  const PreviewIcon = COLLECTION_ICONS.includes(preview as never)
-    ? (preview as (typeof COLLECTION_ICONS)[number])
-    : COLLECTION_ICONS[0]
+  // 预览当前生效的图标：未选时按名称 hash 回退。
+  // 全部按**字符串名字**比较，不再混用组件引用 ——
+  // 组件是对象，两次 import 得到的引用不一定全等，用它做选中判断本就不可靠。
+  // resolveCollectionIcon 再兜一层非法值（旧 seed / 手工导入的脏数据），
+  // 保证不会出现「一个都选不中」的空洞。
+  const preview = resolveCollectionIcon(
+    icon ?? iconNameForCollection({ name: name.trim() || 'new' }),
+    name.trim() || 'new',
+  )
 
   return (
     <div
@@ -110,32 +119,32 @@ export default function CollectionModal({
             <span className="text-[12px] font-semibold text-ink2">图标</span>
             <span className="text-[11px] text-ink3">与导航栏显示一致</span>
           </div>
-          {/* 图标网格：选中态用 accent 填充，与导航选中态同一套 */}
+          {/* 图标网格：选中态用 accent 填充，与导航选中态同一套。
+              key 与选中判断都基于图标名，天然唯一、必然只有一个命中。 */}
           <div className="grid grid-cols-8 gap-1.5">
-            {COLLECTION_ICONS.map((Icon) => {
-              const name = (Icon as { name?: string }).name ?? ''
-              const selected = preview === name || preview === Icon
+            {COLLECTION_ICON_NAMES.map((iconName) => {
+              const selected = preview === iconName
               return (
                 <button
-                  key={name}
+                  key={iconName}
                   type="button"
-                  title={name}
-                  aria-label={name}
+                  title={iconName}
+                  aria-label={iconName}
                   aria-pressed={selected}
-                  onClick={() => setIcon(name)}
+                  onClick={() => setIcon(iconName)}
                   className={`flex h-9 w-9 items-center justify-center rounded-[10px] transition-colors ${
                     selected
                       ? 'bg-accent text-white'
                       : 'bg-surface-2 text-ink3 hover:bg-surface-2/70 hover:text-ink'
                   }`}
                 >
-                  <Icon size={17} strokeWidth={1.8} />
+                  {renderCollectionIcon(iconName, 17)}
                 </button>
               )
             })}
           </div>
           <p className="mt-2 flex items-center gap-1.5 text-[11px] leading-4 text-ink3">
-            <PreviewIcon size={13} strokeWidth={1.8} className="shrink-0" />
+            {renderCollectionIcon(preview, 13)}
             导航里会显示这个图标；不选则按分组名自动分配一个固定的。
           </p>
         </div>

@@ -76,6 +76,19 @@
   --glass-bg-hover: rgba(255, 255, 255, 0.82);
   --glass-bg-card: rgba(255, 255, 255, 0.68);
   --glass-bg-card-hover: rgba(255, 255, 255, 0.84);
+  /* 浮层（弹窗）专用：底更实，保证表单文字压得住背后内容 */
+  --glass-bg-sheet: rgba(255, 255, 255, 0.78);
+  --glass-border-sheet: rgba(255, 255, 255, 0.9);
+  --glass-shadow-sheet: 0 24px 60px -20px rgba(15, 20, 35, 0.35);
+  /* 浮层内的输入框 —— 与面板的关系是「凹槽」，不是「贴片」。
+     浅色下关键：底色必须**比面板暗**，否则 0.42 的白叠在 0.78 的白上
+     合成后比面板更亮，视觉上就成了凸起的一块，跟内凹的意图正好相反。
+     所以这里用极淡的冷灰着色（压暗）而非加白，配合 inset 上缘暗影，
+     读起来才是「面板上凹下去一个槽」。 */
+  --glass-field-bg: rgba(15, 20, 35, 0.045);
+  --glass-field-bg-focus: rgba(15, 20, 35, 0.02);
+  --glass-field-border: rgba(15, 20, 35, 0.12);
+  --glass-field-inset: inset 0 1px 2px rgba(15, 20, 35, 0.1);
   /* 悬浮导航专用材质：**保持透明**。
      玻璃的可见度不来自自身颜色深浅，而来自「背后有没有明暗对比」——
      胶囊半透明地压在一块有深浅差异的背景上，边界自然浮现；
@@ -99,6 +112,14 @@
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.6);
   --glass-ring: rgba(255, 255, 255, 0.5);
 
+  /* —— 卡片内 logo 容器底色（网格视图用）——
+     刻意做成**单色弱化底**而不是按域名取色：网格一屏 20+ 张卡，
+     每张都按域名铺一个彩色块的话，正文区会被彻底淹没成万花筒，
+     标题反而读不出来。这里统一中性底，把颜色预算全留给文字层级。
+     域名差异改由「首字本身取彩色」来表达 —— 一点色彩暗示，
+     但不占面积、不与标题争夺注意力。 */
+  --logo-tile-bg: rgba(15, 20, 35, 0.05);
+
   /* —— 域名徽章 12 组（favicon 加载失败时的兜底首字块）——
      全部低饱和：这些色块每条书签都会出现一次，
      高饱和色板会让整页像万花筒。favicon 正常时不受影响。 */
@@ -114,17 +135,6 @@
   --badge-bg-9: #eef3e7; --badge-fg-9: #6a8a4e;
   --badge-bg-10: #f8ecea; --badge-fg-10: #a85c56;
   --badge-bg-11: #eceef0; --badge-fg-11: #5c646c;
-
-  /* —— 网格卡片封面渐变 8 组 ——
-     同色系极低对比微差：只提供一点材质感，不引入新色相。 */
-  --cover-a-0: #eef0f4; --cover-b-0: #e5e8ee;
-  --cover-a-1: #f1eff3; --cover-b-1: #e8e5eb;
-  --cover-a-2: #edf0f4; --cover-b-2: #e4e8ee;
-  --cover-a-3: #edf2f0; --cover-b-3: #e4eae8;
-  --cover-a-4: #f0eff2; --cover-b-4: #e7e5e9;
-  --cover-a-5: #eeeff3; --cover-b-5: #e5e6eb;
-  --cover-a-6: #edf2ef; --cover-b-6: #e4eae7;
-  --cover-a-7: #eef0f3; --cover-b-7: #e5e7eb;
 }
 
 :root[data-theme='dark'] {
@@ -181,6 +191,19 @@
   --glass-bg-hover: rgba(44, 44, 46, 0.72);
   --glass-bg-card: rgba(28, 28, 30, 0.62);
   --glass-bg-card-hover: rgba(44, 44, 46, 0.75);
+  /* 深色下的 logo 容器底要「白一点」而非「黑一点」——
+     深色底上叠黑色几乎看不出边界，反而像块脏斑。
+     用极淡的白作为抬升，与 iOS 深色材质里「浅色＝更靠前」的惯例一致。 */
+  --logo-tile-bg: rgba(255, 255, 255, 0.07);
+  /* 深色下浮层要比卡片更实：背后是移动的内容，透太多会晃眼 */
+  --glass-bg-sheet: rgba(28, 28, 30, 0.82);
+  --glass-border-sheet: rgba(255, 255, 255, 0.18);
+  --glass-shadow-sheet: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+  /* 深色下输入框要更暗才显出「凹」：白描边在深底上才有边界感 */
+  --glass-field-bg: rgba(0, 0, 0, 0.22);
+  --glass-field-bg-focus: rgba(0, 0, 0, 0.32);
+  --glass-field-border: rgba(255, 255, 255, 0.14);
+  --glass-field-inset: inset 0 1px 3px rgba(0, 0, 0, 0.4);
   --glass-bg-nav: rgba(30, 30, 32, 0.6);
   --glass-border-nav: rgba(255, 255, 255, 0.2);
   --glass-shadow-nav: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
@@ -206,16 +229,6 @@
   --badge-bg-9: #26301f; --badge-fg-9: #adc08a;
   --badge-bg-10: #332422; --badge-fg-10: #d69b95;
   --badge-bg-11: #282c30; --badge-fg-11: #9aa5ae;
-
-  /* 深色封面渐变：同为极低对比的同色系微差 */
-  --cover-a-0: #1c1c1e; --cover-b-0: #242426;
-  --cover-a-1: #1e1c1f; --cover-b-1: #262427;
-  --cover-a-2: #1b1d20; --cover-b-2: #232528;
-  --cover-a-3: #1a1f1d; --cover-b-3: #222726;
-  --cover-a-4: #201d1f; --cover-b-4: #282426;
-  --cover-a-5: #1c1c1e; --cover-b-5: #242426;
-  --cover-a-6: #1a1f1e; --cover-b-6: #222726;
-  --cover-a-7: #1c1d1f; --cover-b-7: #242528;
 }
 
 /* Tailwind utility 引用运行时变量：bg-canvas / text-ink3 等既有类名全部保持不变 */
@@ -255,11 +268,14 @@
      iOS 的 System Material 是同一模糊半径 + 不同底色透明度，
      层级靠底色与描边表达，不靠模糊强度。
      saturate 180% 是 iOS 的 vibrancy 效果：让透过来的颜色略微鲜艳。 */
-  --glass-blur: blur(16px) saturate(180%);
-  --glass-blur-nav: blur(16px) saturate(180%);
-  --glass-blur-panel: blur(16px) saturate(180%);
-  --glass-blur-card: blur(16px) saturate(180%);
-  --glass-blur-tile: blur(16px) saturate(180%);
+  --glass-blur: blur(10px) saturate(180%);
+  --glass-blur-nav: blur(10px) saturate(180%);
+  --glass-blur-panel: blur(10px) saturate(180%);
+  --glass-blur-card: blur(10px) saturate(180%);
+  --glass-blur-tile: blur(10px) saturate(180%);
+  /* 浮层专用：模糊半径更大。层级不靠模糊表达（见上方说明），
+     这里加强只是为了压住背后频繁移动的内容，24px 足以化开。 */
+  --glass-blur-sheet: blur(24px) saturate(180%);
 }
 
 /* 输入类元素统一去除默认 outline，焦点态用边框 + 光环表达 */
@@ -448,14 +464,24 @@ html[data-glass='on'] .glass-topbar-chips {
 }
 
 /* —— 卡片与磁贴：常态即玻璃 ——
-   底 68% 白 + 16px 模糊 + 1px 白描边 + 极淡阴影。
+   底 68% 白 + 1px 白描边 + 极淡阴影。
    hover 只做两件事：底色提到 84%、阴影略深。不加位移、不加发光，
-   iOS 的按钮反馈就是「亮一点」而已。 */
+   iOS 的按钮反馈就是「亮一点」而已。
+
+   刻意不加 backdrop-filter —— 这是本项目最大的一处性能取舍，原因：
+   一屏 40+ 张卡片 = 40+ 个独立 backdrop 层。每帧滚动浏览器都要
+   逐层回溯卡片背后的内容做模糊采样，滚动越快采样越跟不上，
+   于是卡片先以未模糊的旧纹理示人、再「补上」模糊 ——
+   视觉上就是用户反馈的「滚动时卡片重新加载了一下」。
+   叠加卡片自身还有 transform 过渡（hover 上浮），等于每帧都在重建图层。
+
+   而这里省掉模糊几乎不损失观感：卡片背后是 body 的极淡氛围底纹，
+   本来就没有可辨识的细节，模糊一张纯色 ≈ 什么都不做，
+   真正撑起「玻璃感」的是半透明底色 + 白描边 + 投影这三样，
+   它们全部保留。毛玻璃只留给真正有内容可折射的 chrome / 顶栏 / 胶囊。 */
 html[data-glass='on'] .glass-card {
   background-color: var(--glass-bg-card);
   border-color: var(--glass-border);
-  backdrop-filter: var(--glass-blur-card);
-  -webkit-backdrop-filter: var(--glass-blur-card);
   box-shadow: var(--glass-shadow);
 }
 
@@ -465,18 +491,86 @@ html[data-glass='on'] .glass-card:hover {
   box-shadow: var(--glass-highlight), var(--glass-shadow-hover);
 }
 
+/* 磁贴：常态「无壳」，hover 才浮出玻璃卡片。
+   只清 background-color 是不够的 —— box-shadow 与 border 都不依赖背景，
+   在透明底色上会变成一圈无主的灰影 + 一个白色空框，比有底色时更难看。
+   所以常态三层（背景/描边/投影）一起撤掉，hover 时原样回来。 */
 html[data-glass='on'] .tile-shell {
-  background-color: var(--glass-bg-card);
-  border-color: var(--glass-border);
-  backdrop-filter: var(--glass-blur-tile);
-  -webkit-backdrop-filter: var(--glass-blur-tile);
-  box-shadow: var(--glass-shadow);
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 html[data-glass='on'] .tile-shell:hover {
   background-color: var(--glass-bg-card-hover);
   border-color: var(--glass-border-hover);
   box-shadow: var(--glass-highlight), var(--glass-shadow-hover);
+}
+
+/* —— 浮层玻璃（弹窗 / 对话框）——
+   与卡片档位的区别有两处，都是被「浮在最上层」逼出来的：
+   1) 底色更实（--glass-bg-sheet 78%）—— 背后是用户刚点的那个页面，
+      透太多会让表单文字压在移动的内容上，读不了；
+   2) 模糊更强（24px）—— 背后信息量最大，越模糊越干净。
+
+   这里**保留** backdrop-filter，与 .glass-card 的取舍相反：
+   弹窗同屏只有 1 个 backdrop 层，代价可忽略；
+   而卡片是 40+ 个，滚动时逐层重采样才是性能杀手。
+   判断标准是「同屏实例数」，不是「是否叫玻璃」。 */
+html[data-glass='on'] .glass-sheet {
+  background-color: var(--glass-bg-sheet);
+  border: 1px solid var(--glass-border-sheet);
+  backdrop-filter: var(--glass-blur-sheet);
+  -webkit-backdrop-filter: var(--glass-blur-sheet);
+  box-shadow: var(--glass-highlight), var(--glass-shadow-sheet);
+}
+
+/* —— 浮层内的输入框：内凹玻璃 ——
+   弹窗面板是半透明的，里面若再压一排**实色**输入框，
+   等于玻璃上贴了几块白塑料 —— 这是「割裂感」的来源。
+   改成同一套材质的内凹形态：底色比面板更透（继续让背后的模糊透上来），
+   靠 inset 投影表现「凹进去」，而不是靠实色块表现「浮在上面」。
+
+   为什么用 inset 而不是再叠 backdrop-filter：
+   输入框是弹窗**内部**的子元素，它的 backdrop 就是已被面板糊过的内容，
+   再采样一次收益极小、却要多一个 backdrop 层。inset 投影零成本，
+   且能给到「内凹」这个真正需要的深度线索。 */
+html[data-glass='on'] .glass-field {
+  background-color: var(--glass-field-bg);
+  border-color: var(--glass-field-border);
+  box-shadow: var(--glass-field-inset);
+}
+
+html[data-glass='on'] .glass-field:focus,
+html[data-glass='on'] .glass-field:focus-visible {
+  background-color: var(--glass-field-bg-focus);
+  border-color: var(--color-accent);
+  /* 必须保留聚焦光晕 + 内凹投影两个效果。
+     这里不用 box shorthand 覆盖，而是叠在一起写全 ——
+     只写 ring 会把内凹投影整个抹掉，输入框会「弹」出来失去凹感；
+     只写 inset 则是焦点不可见，键盘用户无法判断焦点在哪。 */
+  box-shadow:
+    inset 0 1px 2px rgba(15, 20, 35, 0.08),
+    0 0 0 3px var(--accent-ring);
+}
+
+html[data-glass='on'] .glass-field::placeholder {
+  color: var(--color-ink-4);
+}
+
+/* 下拉箭头：改用 CSS 类而不是 Tailwind 任意值 bg-[url(...)]。
+   那条 data URI 里含空格与引号，Tailwind 的类名扫描切不干净，
+   规则根本没生成（实测 backgroundImage = none，箭头一直是隐形的）。
+   这里放在样式表里，% 编码齐全，浏览器一定能解析。 */
+html[data-glass='on'] .glass-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 12px 12px;
+  cursor: pointer;
 }
 
 /* —— prefers-reduced-transparency 降级 ——
@@ -487,11 +581,25 @@ html[data-glass='on'] .tile-shell:hover {
   html[data-glass='on'] .glass-topbar,
   html[data-glass='on'] .glass-topbar-chips,
   html[data-glass='on'] .glass-card,
-  html[data-glass='on'] .tile-shell {
+  html[data-glass='on'] .glass-sheet {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background: var(--color-surface);
     border-color: var(--line) !important;
     box-shadow: none !important;
+  }
+
+  /* 磁贴单独处理：常态就是「无壳」，降级时不能给实色底，
+     否则等于把刚撤掉的背景又加回来。hover 仍要给实色 —— 
+     这是唯一能给到「当前选中哪个磁贴」的视觉线索，去掉就完全没法辨识。 */
+  html[data-glass='on'] .tile-shell {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html[data-glass='on'] .tile-shell:hover {
+    background: var(--color-surface) !important;
+    border-color: var(--line) !important;
   }
 }
