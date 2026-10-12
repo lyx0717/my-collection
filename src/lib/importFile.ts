@@ -1,4 +1,3 @@
-import Papa from 'papaparse'
 import type { Collection, ParsedImportBookmark } from '../types'
 import { parseNetscape } from './netscape'
 import { parseTags } from './tags'
@@ -134,7 +133,9 @@ function parseJson(text: string): Omit<ParsedImport, 'format'> {
   throw new Error('JSON 里没有找到书签数组')
 }
 
-function parseCsv(text: string): Omit<ParsedImport, 'format'> {
+/** papaparse 只在导入 CSV 时动态加载，不进首屏主包 */
+async function parseCsv(text: string): Promise<Omit<ParsedImport, 'format'>> {
+  const { default: Papa } = await import('papaparse')
   const result = Papa.parse<Record<string, string>>(text.trim(), {
     header: true,
     skipEmptyLines: true,
@@ -168,14 +169,14 @@ export async function parseImportFile(file: File): Promise<ParsedImport> {
     return { ...parseNetscape(text), format: 'Netscape HTML' }
   }
   if (name.endsWith('.csv')) {
-    return { ...parseCsv(text), format: 'CSV' }
+    return { ...(await parseCsv(text)), format: 'CSV' }
   }
   // 默认按 JSON 解析，失败则尝试 CSV（部分浏览器导出文件名无扩展名）
   try {
     return { ...parseJson(text), format: 'JSON' }
   } catch (jsonErr) {
     try {
-      return { ...parseCsv(text), format: 'CSV' }
+      return { ...(await parseCsv(text)), format: 'CSV' }
     } catch {
       throw new Error(
         jsonErr instanceof Error ? jsonErr.message : '无法识别文件格式，请选择浏览器导出的 HTML/JSON/CSV',

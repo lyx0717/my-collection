@@ -70,6 +70,7 @@ export default function Favicon({ domain, title, faviconUrl, size = 'md', classN
           src={src}
           alt=""
           loading="lazy"
+          decoding="async"
           onError={handleError}
           className={IMG_CLS}
         />

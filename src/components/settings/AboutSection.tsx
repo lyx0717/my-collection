@@ -43,8 +43,13 @@ export default function AboutSection({ onReset, onClear }: Props) {
           </button>
         </div>
         <p className="mt-4 text-[11.5px] leading-5 text-ink3">
-          本地数据键名 mybookmarks:v2，仅存在于当前浏览器。清除站点数据前，请先导出 JSON；也可用导出文件替换
+          本地数据键名 mybookmarks:v4，仅存在于当前浏览器。清除站点数据前，请先导出 JSON；也可用导出文件替换
           src/data/seed.ts 后重新部署，把数据固化进仓库。
+        </p>
+        <p className="mt-2 text-[11.5px] leading-5 text-ink3">
+          隐私说明：书签库始终只保存在你的浏览器里，不会上传到任何服务器。唯一的外部请求有两类 ——
+          ① 添加书签时的「自动补全」会把该条 URL 发送到 api.microlink.io 获取标题、描述与封面（获取失败不影响保存，也可手动填写）；
+          ② 展示图标时会直接访问对应站点的 /favicon.ico。
         </p>
       </div>
     </section>
