@@ -2,7 +2,9 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    # Pages 跟随 new-UI 分支上线（UI 重构阶段的主工作分支）；
+    # 若要回到 main，把这里改回 [main] 并 push 即可。
+    branches: [new-UI]
   workflow_dispatch:
 
 permissions:
