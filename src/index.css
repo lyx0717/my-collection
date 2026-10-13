@@ -443,8 +443,11 @@ html[data-glass='on'] .glass-chrome,
 html[data-glass='on'] .glass-topbar {
   background-color: var(--glass-bg);
   border-color: var(--glass-border) !important;
-  backdrop-filter: var(--glass-blur-nav);
+  /* -webkit- 必须写在标准写法前面：lightningcss 把两者视为同一属性、
+     同规则内后者胜，标准写法放后面才能在产物里活下来。
+     顺序反了会被压缩成只剩 -webkit- 形态 —— Chrome 不认它，模糊整体失效。 */
   -webkit-backdrop-filter: var(--glass-blur-nav);
+  backdrop-filter: var(--glass-blur-nav);
   box-shadow: var(--glass-highlight), var(--glass-shadow);
 }
 
@@ -457,8 +460,8 @@ html[data-glass='on'] .glass-topbar-chips {
      （实测 computed backgroundImage = none）。 */
   background-color: var(--glass-bg-nav);
   border-color: var(--glass-border-nav);
-  backdrop-filter: var(--glass-blur-panel);
   -webkit-backdrop-filter: var(--glass-blur-panel);
+  backdrop-filter: var(--glass-blur-panel);
   /* 不叠 --glass-highlight：胶囊本身已是半透明玻璃，再加顶部高光会显脏 */
   box-shadow: var(--glass-shadow-nav);
 }
@@ -520,8 +523,8 @@ html[data-glass='on'] .tile-shell:hover {
 html[data-glass='on'] .glass-sheet {
   background-color: var(--glass-bg-sheet);
   border: 1px solid var(--glass-border-sheet);
-  backdrop-filter: var(--glass-blur-sheet);
   -webkit-backdrop-filter: var(--glass-blur-sheet);
+  backdrop-filter: var(--glass-blur-sheet);
   box-shadow: var(--glass-highlight), var(--glass-shadow-sheet);
 }
 
