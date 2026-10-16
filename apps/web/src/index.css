@@ -47,7 +47,6 @@
   --accent-soft: rgba(10, 132, 255, 0.1);
   --accent-ring: rgba(10, 132, 255, 0.18);
   --accent-shadow: rgba(10, 132, 255, 0.22);
-  --star: #ff9f0a;
   --danger: #ff3b30;
   --danger-ink: #d70015;
   --success: #34c759;
@@ -164,7 +163,6 @@
   --accent-soft: rgba(10, 132, 255, 0.18);
   --accent-ring: rgba(10, 132, 255, 0.3);
   --accent-shadow: rgba(10, 132, 255, 0.28);
-  --star: #ff9f0a;
   --danger: #ff453a;
   --danger-ink: #ff6961;
   --success: #30d158;
@@ -246,7 +244,6 @@
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
-  --color-star: var(--star);
   --color-danger: var(--danger);
   --color-danger-ink: var(--danger-ink);
   --color-success: var(--success);

@@ -1,9 +1,10 @@
 # 我的书签 · Bookmarks
 
-个人书签收藏网站：**存得快、找得到、点得开**。精致卡片风的高效率书签库，数据保存在浏览器本地，部署在 GitHub Pages。
+个人书签收藏网站：**存得快、找得到、点得开**。精致卡片风的高效率书签库，**按账号登录、数据存在自己的服务器上**。
 
-- 技术栈：React 18 + Vite + TypeScript + Tailwind CSS v4 + React Router（Hash 模式）
-- 在线地址：<https://lyx0717.github.io/my-collection/>
+- 前端：React 18 + Vite + TypeScript + Tailwind CSS v4 + React Router（Hash 模式）
+- 后端：Fastify + PostgreSQL（`apps/api`）
+- 旧版（纯浏览器本地存储）的静态站仍由 `new-UI` 分支维护：<https://lyx0717.github.io/my-collection/>
 
 ## 功能
 
@@ -23,11 +24,11 @@
 - **玻璃为唯一材质**：iOS System Material 规范 —— backdrop 高斯模糊 16px + saturate 180%、
   半透明白底 68%、1px 半透明白描边、20px 大圆角、极淡柔和阴影；
   浅色主题与深色主题各自一套低饱和配色，无噪点纹理、无氛围光晕、无发光效果
-- 库内筛选：标题、域名、描述、标签、URL 多词「且」匹配；`⌘K / Ctrl+K` 或 `/` 聚焦
+- 库内筛选：标题、域名、描述、URL 多词「且」匹配；`⌘K / Ctrl+K` 或 `/` 聚焦
 - 顶部互联网搜索引擎：百度 / 必应 / Google / 自定义（`%s` 占位）
 - 按分组 / 域名筛选；筛选状态写入 URL
 - 排序：最新收录 / 最早收录 / 标题 A→Z
-- **批量操作**（列表视图）：多选后移动分组、加标签、删除
+- **批量操作**（列表视图）：多选后移动分组、删除
 - **同域名批量归类**：按域名筛选后一键把该域名书签移入分组
 - 没有分组的书签直接出现在「全部」里，不单列视图
 - favicon：展示时按域名解析（历史图标 → 站点 `/favicon.ico` → 名称首字徽章），不依赖抓取额度
@@ -37,7 +38,7 @@
 **添加书签**
 
 - 粘贴 / 输入链接后自动通过 Microlink 抓取标题、描述、封面、图标（免费 25 次/天；失败静默降级为手填）
-- 相同 URL 自动判重，可选择仍要保存
+- 相同 URL 自动判重：已收藏过会拦住，并给出「去编辑它」的出路
 
 **书签小工具（bookmarklet）**
 
@@ -48,53 +49,72 @@
 - **外观**：浅色 / 深色 / 跟随系统（界面固定为玻璃风格，不可切换）
 - **数据**：导入浏览器 HTML、iTab `.itabdata`、JSON/CSV；导出 JSON / Netscape HTML
 - **分组管理**：新建 / 编辑 / 删除 / 拖拽排序（首页导航只读，这里是唯一的分组管理入口）
-- 标签管理；恢复内置数据 / 清空全部
+- 清空全部数据
 
 设置页顶部为通栏固定导航 + 悬浮文字胶囊分段控件，与首页分组导航同一套视觉语言。
 
 ## 数据存在哪？
 
-localStorage 键名 `mybookmarks:v4`，**仅保存在当前浏览器**。
+PostgreSQL，按 `user_id` 隔离 —— 每条 SQL 都带 `WHERE user_id = $1`，且该参数一律取自会话、不信任请求体。
 
-- 换电脑 / 清缓存前：设置页 **导出 JSON**，新环境再 **导入**
-- 想把数据固化进仓库：用导出的 JSON 替换 `src/data/seed.ts` 后重新部署（首次无本地数据时会加载 seed）
-- 本项目**不提供云同步**，备份请靠导出或 git
+- 换设备：登录同一账号即可看到全部数据
+- 备份：设置页 **导出 JSON**，或直接 `pg_dump`
+- 从旧版迁过来：本机若有旧的 `mybookmarks:v4`，首次登录且账号书库为空时首页会出现导入横幅；
+  **只有服务端确认写入成功才清除本地数据**，失败会原样保留
+- 主题 / 视图 / 搜索引擎属于设备偏好，仍然存在 localStorage，与账号无关
 
 ## 本地开发
 
-需要 Node.js 18+ 与 pnpm。仓库是 pnpm workspace（`apps/web` 前端、`apps/api` 后端、`packages/shared` 共享类型）：
+需要 Node.js 18+、pnpm，以及一个本地 PostgreSQL（`dev/docker-compose.yml` 用 Docker 起；装了 Homebrew 的也可以直接 `brew install postgresql@16`）。
 
 ```bash
+cp .env.example .env   # 按需改数据库连接串
 pnpm install
-pnpm dev:web   # 只起前端开发服务器
-pnpm dev:api   # 只起后端（阶段 C 后可用）
-pnpm dev       # 前后端一起起
-pnpm build     # 类型检查 + 生产构建
-pnpm test      # 纯函数单测
+
+pnpm db:up             # 起本地 Postgres（Docker）
+pnpm migrate           # 建表
+pnpm dev               # 同时起前端(5173) 与后端(3000)
+
+pnpm test              # 单测；后端集成测试连不上库时会自动跳过
+pnpm typecheck         # 三个包一起类型检查
+pnpm build             # 生产构建
 ```
+
+前端始终用相对路径请求 `/api/v1`，开发时由 Vite 代理到 3000 —— 浏览器视角始终同源，
+所以既不需要 CORS，也不需要任何 `VITE_*` 环境变量。
 
 ## 部署
 
-GitHub Pages 跟随 **`new-UI`** 分支自动构建发布（`.github/workflows/deploy.yml`）。Hash 路由 + 相对路径，子路径刷新不 404。
+本分支（`feat/backend`）的目标是部署到自己的服务器（nginx 同源提供前端静态文件 + 反代 `/api`）。
+**服务器部署整体后置**，先把本地跑通再统一处理。
 
-> 分支说明：`feat/backend` 是长期独立分支，用于增加后端与用户系统，**不合并回 `main` / `new-UI`**；后端与自建服务器部署都在该分支上进行。
+旧版静态站仍由 `new-UI` 分支跟随 GitHub Pages 自动发布（`.github/workflows/deploy.yml`），与本分支互不影响。
+
+> 分支说明：`feat/backend` 是长期独立分支，**不合并回 `main` / `new-UI`**。
 
 ## 目录结构
 
 ```
 apps/web/                        # 前端（React + Vite）
 ├── index.html
-├── vite.config.ts
+├── vite.config.ts               # base: './'；开发时把 /api 代理到 3000
 └── src/
-    ├── types.ts                 # 再导出 packages/shared 的领域类型
-    ├── data/seed.ts             # 内置真实书签（可替换；按需懒加载）
-    ├── store/                   # BookmarksContext / AppearanceContext
-    ├── lib/                     # url、netscape、importFile、appearance…
+    ├── types.ts                 # 再导出 packages/shared 的领域类型 + 前端专有类型
+    ├── store/                   # AuthContext / BookmarksContext / AppearanceContext
+    ├── lib/                     # api、url、netscape、importFile、localStore…
     ├── hooks/
-    ├── components/
-    └── pages/                   # HomePage、SettingsPage
+    ├── components/              # 含 RequireAuth、LocalMigrationBanner
+    └── pages/                   # HomePage、LoginPage、SettingsPage
+
+apps/api/                        # 后端（Fastify + PostgreSQL）
+├── migrations/                  # 纯 SQL 迁移 + runner
+└── src/
+    ├── app.ts  index.ts  config.ts  errors.ts
+    ├── db.ts                    # 连接池 + query + withTransaction
+    ├── auth.ts                  # scrypt 哈希 + 会话 + requireAuth 钩子
+    ├── validate.ts
+    └── routes/                  # auth / bookmarks / collections
 
 packages/shared/                 # 前后端共享的领域类型与 URL 工具
-apps/api/                        # 后端（Fastify + PostgreSQL）
-dev/                             # 本地开发用 docker-compose（Postgres）
+dev/docker-compose.yml           # 本地开发用 Postgres
 ```

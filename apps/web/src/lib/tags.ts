@@ -11,7 +11,3 @@ export function parseTags(text: string): string[] {
   }
   return result
 }
-
-export function tagsToText(tags: string[]): string {
-  return tags.join('，')
-}

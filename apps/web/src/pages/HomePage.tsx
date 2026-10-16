@@ -33,6 +33,7 @@ import DomainBatchBar from '../components/DomainBatchBar'
 import SortableBookmarks from '../components/SortableBookmarks'
 import EmptyState from '../components/EmptyState'
 import ConfirmDialog from '../components/ConfirmDialog'
+import LocalMigrationBanner from '../components/LocalMigrationBanner'
 
 const VIEW_KEY = 'mybookmarks:view'
 
@@ -172,6 +173,8 @@ export default function HomePage() {
 
       {/* pt-6：与吸顶胶囊保持舒适间距（胶囊自身 py-3 已占 12px） */}
       <main className="mx-auto max-w-6xl px-4 pt-6 pb-24 sm:px-6">
+          {/* 老版本旧档还在这台机器的 localStorage 里时的导入入口 */}
+          <LocalMigrationBanner />
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <h1 className="text-[22px] font-bold tracking-[-0.01em]">{contextTitle}</h1>
             <span className="text-[12.5px] text-ink3">
@@ -341,7 +344,7 @@ export default function HomePage() {
               ) : (
                 <EmptyState
                   title="没有匹配的书签"
-                  hint="换个关键词，或清空当前的分组与标签筛选。"
+                  hint="换个关键词，或清空当前的分组筛选。"
                   action={
                     hasActiveFilter ? (
                       <div className="flex flex-wrap items-center justify-center gap-3">
@@ -349,24 +352,13 @@ export default function HomePage() {
                           onClick={() =>
                             updateParams((p) => {
                               p.delete('q')
-                              p.delete('tag')
                               p.delete('d')
                               p.delete('c')
-                              p.delete('star')
-                              p.delete('none')
                             })
                           }
                           className="inline-flex h-10 items-center rounded-lg bg-accent px-4 text-[13px] font-semibold text-white hover:bg-accent-ink"
                         >
                           清除筛选
-                        </button>
-                        <button
-                          onClick={() => updateParams((p) => {
-                            p.delete('q'); p.delete('tag'); p.delete('d'); p.delete('c'); p.delete('star'); p.delete('none')
-                          })}
-                          className="inline-flex h-10 items-center rounded-lg border border-line2 bg-surface px-4 text-[13px] font-medium text-ink2 hover:bg-surface-2"
-                        >
-                          查看全部书签
                         </button>
                       </div>
                     ) : undefined
