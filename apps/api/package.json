@@ -1,0 +1,29 @@
+{
+  "name": "@my-collection/api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "我的书签 · 后端（Fastify + PostgreSQL）",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsup",
+    "migrate": "tsx migrations/run.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@my-collection/shared": "workspace:*",
+    "fastify": "^5.2.0",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "~5.7.2",
+    "vitest": "^3.0.0"
+  }
+}
