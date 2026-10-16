@@ -1,0 +1,18 @@
+{
+  "name": "@my-collection/shared",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "前后端共享的领域类型与 URL 工具",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./url": "./src/url.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.2"
+  }
+}

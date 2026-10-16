@@ -15,6 +15,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@my-collection/shared": "workspace:*",
     "lucide-react": "^0.469.0",
     "motion": "^14.0.0",
     "papaparse": "^5.7.0",

@@ -1,36 +1,9 @@
-export interface Bookmark {
-  id: string
-  url: string
-  title: string
-  /** 手动排序序号（全局顺序，0 开始；缺省按数组位置补齐） */
-  order?: number
-  description?: string
-  /** 规范化域名，去 www，用于图标/筛选/去重 */
-  domain: string
-  faviconUrl?: string
-  cover?: string
-  /** undefined = 未分组；未分组书签归入「全部」，不再有独立视图 */
-  collectionId?: string
-  createdAt: string
-  updatedAt: string
-}
+// 领域类型与 API 契约来自 packages/shared，这里再导出，
+// 使既有 `from '../types'` 的导入点（30 处）无需改动。
+// 用 export type *：编译期完全擦除，不会把 shared 的运行时值带进产物。
+export type * from '@my-collection/shared/types'
 
-export interface Collection {
-  id: string
-  name: string
-  /** lucide 图标名（见 lib/collectionIcons.ts）。缺省时按名称 hash 稳定取一个。 */
-  icon?: string
-  order: number
-}
-
-export interface StoreShape {
-  version: 4
-  bookmarks: Bookmark[]
-  collections: Collection[]
-}
-
-/** 新建/编辑表单提交的数据 */
-export type BookmarkInput = Omit<Bookmark, 'id' | 'createdAt' | 'updatedAt' | 'domain'>
+// —— 以下为前端专有类型（UI 概念，后端不需要）——
 
 export type ViewMode = 'list' | 'grid' | 'tile'
 export type SortMode = 'desc' | 'asc' | 'az'
@@ -42,6 +15,7 @@ export type SortMode = 'desc' | 'asc' | 'az'
  */
 export type Scope = { type: 'all' } | { type: 'collection'; id: string }
 
+/** 导入解析的中间态；与入库的 Bookmark 不同，这里保留 tags 供推断分组 */
 export interface ParsedImportBookmark {
   url: string
   title: string
