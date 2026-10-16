@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import type { Bookmark, BookmarkDraft, Collection } from '@my-collection/shared/types'
 import { dedupeKey, extractDomain, isValidUrl, normalizeUrl } from '@my-collection/shared/url'
 import { requireAuth } from '../auth'
-import { query, withTransaction } from '../db'
+import { query, stripNulls, withTransaction } from '../db'
 import { badRequest, conflict, notFound } from '../errors'
 import { obj, optStr, optUuid, str, uuid, uuidArray } from '../validate'
 
@@ -10,6 +10,13 @@ import { obj, optStr, optUuid, str, uuid, uuidArray } from '../validate'
 const COLS = `id, url, title, description, domain,
   favicon_url AS "faviconUrl", cover, collection_id AS "collectionId",
   sort_order AS "order", created_at AS "createdAt", updated_at AS "updatedAt"`
+
+/** 这几个字段在库里可为 NULL，去掉以对齐前端「可选字段」的语义 */
+const toBookmark = (row: Bookmark): Bookmark =>
+  stripNulls(row, ['description', 'faviconUrl', 'cover', 'collectionId'])
+
+/** 分组只有 icon 一个可选字段，就地处理，不为此另开模块 */
+const toCollection = (row: Collection): Collection => stripNulls(row, ['icon'])
 
 /** 把请求体读成一条待入库的书签；url 在这里归一化 */
 function readDraft(raw: Record<string, unknown>): BookmarkDraft {
@@ -89,7 +96,7 @@ async function insertDrafts(userId: string, drafts: BookmarkDraft[]): Promise<Bo
      RETURNING ${COLS}`,
     params,
   )
-  return inserted.rows
+  return inserted.rows.map(toBookmark)
 }
 
 export default async function bookmarkRoutes(app: FastifyInstance): Promise<void> {
@@ -106,7 +113,10 @@ export default async function bookmarkRoutes(app: FastifyInstance): Promise<void
         [req.userId],
       ),
     ])
-    return { bookmarks: bookmarks.rows, collections: collections.rows }
+    return {
+      bookmarks: bookmarks.rows.map(toBookmark),
+      collections: collections.rows.map(toCollection),
+    }
   })
 
   // 设置页的「清空全部数据」
@@ -153,7 +163,7 @@ export default async function bookmarkRoutes(app: FastifyInstance): Promise<void
         ],
       )
       if (!updated.rows[0]) throw notFound('书签不存在')
-      return { bookmark: updated.rows[0] }
+      return { bookmark: toBookmark(updated.rows[0]) }
     },
   )
 
@@ -183,8 +193,8 @@ export default async function bookmarkRoutes(app: FastifyInstance): Promise<void
 
     await withTransaction(async (client) => {
       await client.query(
-        `UPDATE bookmarks b SET sort_order = v.ord - 1, updated_at = now()
-         FROM (SELECT id, ordinality AS ord FROM unnest($1::uuid[]) WITH ORDINALITY AS t(id, ord)) v
+        `UPDATE bookmarks b SET sort_order = (v.ord - 1)::int, updated_at = now()
+         FROM unnest($1::uuid[]) WITH ORDINALITY AS v(id, ord)
          WHERE b.id = v.id AND b.user_id = $2`,
         [orderedIds, req.userId],
       )

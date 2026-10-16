@@ -65,13 +65,13 @@ PostgreSQL，按 `user_id` 隔离 —— 每条 SQL 都带 `WHERE user_id = $1`�
 
 ## 本地开发
 
-需要 Node.js 18+、pnpm，以及一个本地 PostgreSQL（`dev/docker-compose.yml` 用 Docker 起；装了 Homebrew 的也可以直接 `brew install postgresql@16`）。
+需要 Node.js 18+、pnpm，以及一个本地 PostgreSQL。
 
 ```bash
 cp .env.example .env   # 按需改数据库连接串
 pnpm install
 
-pnpm db:up             # 起本地 Postgres（Docker）
+pnpm db:up             # 起本地 Postgres
 pnpm migrate           # 建表
 pnpm dev               # 同时起前端(5173) 与后端(3000)
 
@@ -79,6 +79,28 @@ pnpm test              # 单测；后端集成测试连不上库时会自动跳�
 pnpm typecheck         # 三个包一起类型检查
 pnpm build             # 生产构建
 ```
+
+**本地 Postgres 两种起法，任选其一：**
+
+- **Docker** —— `pnpm db:up` 走 `dev/docker-compose.yml`。
+- **Homebrew** —— 装好 `postgresql@16` 后用它自己的命令。注意该 formula 是 keg-only，
+  `psql` / `pg_ctl` 不在 PATH 里，要么写全路径，要么自己把
+  `/opt/homebrew/opt/postgresql@16/bin` 加进 PATH：
+
+  ```bash
+  PG=/opt/homebrew/opt/postgresql@16/bin
+  $PG/pg_ctl -D /opt/homebrew/var/postgresql@16 start   # 起
+  $PG/pg_ctl -D /opt/homebrew/var/postgresql@16 stop    # 停
+  ```
+
+  首次使用需要初始化数据目录并建库：
+
+  ```bash
+  PG=/opt/homebrew/opt/postgresql@16/bin
+  $PG/initdb -D /opt/homebrew/var/postgresql@16 -E UTF8 --locale=C
+  $PG/psql -d postgres -c "CREATE ROLE mybook LOGIN PASSWORD 'mybook'"
+  $PG/psql -d postgres -c "CREATE DATABASE mybook OWNER mybook"
+  ```
 
 前端始终用相对路径请求 `/api/v1`，开发时由 Vite 代理到 3000 —— 浏览器视角始终同源，
 所以既不需要 CORS，也不需要任何 `VITE_*` 环境变量。

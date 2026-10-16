@@ -1,11 +1,14 @@
 import type { FastifyInstance } from 'fastify'
 import type { Collection } from '@my-collection/shared/types'
 import { requireAuth } from '../auth'
-import { query, withTransaction } from '../db'
+import { query, stripNulls, withTransaction } from '../db'
 import { badRequest, conflict, notFound } from '../errors'
 import { obj, optStr, str, uuid, uuidArray } from '../validate'
 
 const COLS = `id, name, icon, sort_order AS "order"`
+
+/** icon 在库里可为 NULL，去掉以对齐前端「可选字段」的语义 */
+const toCollection = (row: Collection): Collection => stripNulls(row, ['icon'])
 
 export default async function collectionRoutes(app: FastifyInstance): Promise<void> {
   app.post('/collections', { onRequest: requireAuth }, async (req, reply) => {
@@ -26,7 +29,7 @@ export default async function collectionRoutes(app: FastifyInstance): Promise<vo
        RETURNING ${COLS}`,
       [req.userId, name, icon ?? null],
     )
-    return reply.code(201).send({ collection: created.rows[0] })
+    return reply.code(201).send({ collection: toCollection(created.rows[0]) })
   })
 
   app.patch<{ Params: { id: string } }>(
@@ -51,7 +54,7 @@ export default async function collectionRoutes(app: FastifyInstance): Promise<vo
         [req.userId, id, name, icon ?? null],
       )
       if (!updated.rows[0]) throw notFound('分组不存在')
-      return { collection: updated.rows[0] }
+      return { collection: toCollection(updated.rows[0]) }
     },
   )
 
@@ -80,8 +83,8 @@ export default async function collectionRoutes(app: FastifyInstance): Promise<vo
 
     await withTransaction(async (client) => {
       await client.query(
-        `UPDATE collections c SET sort_order = v.ord - 1
-         FROM (SELECT id, ordinality AS ord FROM unnest($1::uuid[]) WITH ORDINALITY AS t(id, ord)) v
+        `UPDATE collections c SET sort_order = (v.ord - 1)::int
+         FROM unnest($1::uuid[]) WITH ORDINALITY AS v(id, ord)
          WHERE c.id = v.id AND c.user_id = $2`,
         [orderedIds, req.userId],
       )
@@ -118,7 +121,7 @@ export default async function collectionRoutes(app: FastifyInstance): Promise<vo
         )
         collections.push(created.rows[0])
       }
-      return { collections }
+      return { collections: collections.map(toCollection) }
     })
   })
 }

@@ -33,3 +33,13 @@ export async function withTransaction<T>(fn: (client: pg.PoolClient) => Promise<
     client.release()
   }
 }
+
+/**
+ * pg 把 SQL NULL 映射成 null，而前端类型用「可选字段」表达同一件事。
+ * 这里把指定的空值键删掉，让响应形状与 Bookmark / Collection 类型一致。
+ */
+export function stripNulls<T extends object>(row: T, keys: readonly string[]): T {
+  const raw = row as unknown as Record<string, unknown>
+  for (const key of keys) if (raw[key] === null) delete raw[key]
+  return row
+}
