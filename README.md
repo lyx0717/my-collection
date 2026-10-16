@@ -54,7 +54,7 @@
 
 ## 数据存在哪？
 
-localStorage 键名 `mybookmarks:v2`，**仅保存在当前浏览器**。
+localStorage 键名 `mybookmarks:v4`，**仅保存在当前浏览器**。
 
 - 换电脑 / 清缓存前：设置页 **导出 JSON**，新环境再 **导入**
 - 想把数据固化进仓库：用导出的 JSON 替换 `src/data/seed.ts` 后重新部署（首次无本地数据时会加载 seed）
@@ -62,29 +62,39 @@ localStorage 键名 `mybookmarks:v2`，**仅保存在当前浏览器**。
 
 ## 本地开发
 
-需要 Node.js 18+：
+需要 Node.js 18+ 与 pnpm。仓库是 pnpm workspace（`apps/web` 前端、`apps/api` 后端、`packages/shared` 共享类型）：
 
 ```bash
 pnpm install
-pnpm dev       # 开发服务器
-pnpm build     # 类型检查 + 生产构建到 dist/
-pnpm preview   # 预览生产构建
+pnpm dev:web   # 只起前端开发服务器
+pnpm dev:api   # 只起后端（阶段 C 后可用）
+pnpm dev       # 前后端一起起
+pnpm build     # 类型检查 + 生产构建
 pnpm test      # 纯函数单测
 ```
 
 ## 部署
 
-推送到 `main` 即自动构建发布到 GitHub Pages（`.github/workflows/deploy.yml`）。Hash 路由 + 相对路径，子路径刷新不 404。
+GitHub Pages 跟随 **`new-UI`** 分支自动构建发布（`.github/workflows/deploy.yml`）。Hash 路由 + 相对路径，子路径刷新不 404。
+
+> 分支说明：`feat/backend` 是长期独立分支，用于增加后端与用户系统，**不合并回 `main` / `new-UI`**；后端与自建服务器部署都在该分支上进行。
 
 ## 目录结构
 
 ```
-src/
-├── types.ts
-├── data/seed.ts                 # 内置真实书签（可替换；按需懒加载）
-├── store/                       # BookmarksContext / AppearanceContext
-├── lib/                         # url、netscape、importFile、appearance…
-├── hooks/
-├── components/
-└── pages/                       # HomePage、SettingsPage
+apps/web/                        # 前端（React + Vite）
+├── index.html
+├── vite.config.ts
+└── src/
+    ├── types.ts                 # 再导出 packages/shared 的领域类型
+    ├── data/seed.ts             # 内置真实书签（可替换；按需懒加载）
+    ├── store/                   # BookmarksContext / AppearanceContext
+    ├── lib/                     # url、netscape、importFile、appearance…
+    ├── hooks/
+    ├── components/
+    └── pages/                   # HomePage、SettingsPage
+
+packages/shared/                 # 前后端共享的领域类型与 URL 工具
+apps/api/                        # 后端（Fastify + PostgreSQL）
+dev/                             # 本地开发用 docker-compose（Postgres）
 ```
