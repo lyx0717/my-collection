@@ -1,0 +1,11 @@
+# 构建上下文（仓库根）：node_modules / dist / 本地 .env 都不进镜像
+node_modules
+**/node_modules
+**/dist
+.git
+.env
+.env.*
+!.env.example
+.workbuddy-ai
+.playwright-cli
+*.pem

@@ -1,0 +1,32 @@
+# 后端镜像：builder（全量 workspace，tsup 构建 + tsx 跑迁移）→ runtime（只留 prod 依赖 + dist）
+# shared 是 TS 源码无构建产物，tsup 已用 noExternal 打进 dist；fastify/pg 等保持 external，
+# 所以 runtime 仍需 node_modules，用 pnpm --prod 装依赖图。
+
+FROM node:22-alpine AS builder
+WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+
+# 先只拷 package.json 让依赖层可缓存
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json ./
+COPY apps/web/package.json apps/web/
+COPY apps/api/package.json apps/api/
+COPY packages/shared/package.json packages/shared/
+RUN pnpm install --frozen-lockfile --filter "@my-collection/api..."
+
+COPY packages/shared/ packages/shared/
+COPY apps/api/ apps/api/
+RUN pnpm --filter @my-collection/api build
+
+FROM node:22-alpine AS runtime
+WORKDIR /app
+COPY --from=builder /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/apps/web/package.json apps/web/
+COPY --from=builder /app/apps/api/package.json apps/api/
+COPY --from=builder /app/packages/shared/package.json packages/shared/
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate && \
+    pnpm install --frozen-lockfile --prod --filter "@my-collection/api..."
+
+COPY --from=builder /app/apps/api/dist apps/api/dist
+WORKDIR /app/apps/api
+ENV NODE_ENV=production
+CMD ["node", "dist/index.js"]
