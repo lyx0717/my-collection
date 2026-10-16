@@ -11,7 +11,7 @@ import {
   verifyPassword,
 } from '../auth'
 import { query } from '../db'
-import { conflict, unauthenticated } from '../errors'
+import { badRequest, conflict, unauthenticated } from '../errors'
 import { email, obj, password } from '../validate'
 
 export default async function authRoutes(app: FastifyInstance): Promise<void> {
@@ -78,7 +78,9 @@ export default async function authRoutes(app: FastifyInstance): Promise<void> {
       [req.userId],
     )
     const row = found.rows[0]
-    if (!row || !verifyPassword(current, row.password_hash)) throw unauthenticated('当前密码不正确')
+    // 当前密码不对是「输入错」不是「没登录」：身份已由 requireAuth 确认，
+    // 返回 401 会让前端 api.ts 把用户当会话失效静默踢下线，看不到原因
+    if (!row || !verifyPassword(current, row.password_hash)) throw badRequest('当前密码不正确')
 
     await query('UPDATE users SET password_hash = $1 WHERE id = $2', [hashPassword(next), req.userId])
     // 改密后清掉该用户全部会话，强制重新登录

@@ -89,11 +89,59 @@ describe.skipIf(!ready)('API 集成', () => {
     expect(res.statusCode).toBe(400)
   })
 
+  it('错误响应形状是 { error: { code, message } }（前端 api.ts 依赖此契约）', async () => {
+    const res = await call('POST', '/auth/register', {
+      payload: { email: `y${run}@test.local`, password: '123' },
+    })
+    const body = res.json() as {
+      error?: { code?: string; message?: string }
+      statusCode?: number
+    }
+    expect(body.error?.code).toBe('VALIDATION')
+    expect(body.error?.message).toBe('密码至少 6 位')
+    // 曾经因为 setErrorHandler 注册在 await register 之后而失效，
+    // 错误退回 Fastify 默认形状（顶层 statusCode/error/message），前端只能显示兜底文案
+    expect(body.statusCode).toBeUndefined()
+  })
+
   it('密码错误返回 401', async () => {
     const res = await call('POST', '/auth/login', {
       payload: { email: mailA, password: 'wrong-password' },
     })
     expect(res.statusCode).toBe(401)
+  })
+
+  it('改密：当前密码不对返回 400（不是 401，避免前端误判会话失效）', async () => {
+    const res = await call('PATCH', '/auth/password', {
+      token: tokenA,
+      payload: { currentPassword: 'wrong-password', newPassword: 'password-a2' },
+    })
+    expect(res.statusCode).toBe(400)
+  })
+
+  it('改密成功后该用户全部会话失效', async () => {
+    const other = await call('POST', '/auth/login', {
+      payload: { email: mailA, password: passA },
+    })
+    expect(other.statusCode).toBe(200)
+    const otherToken = tokenOf(other)
+
+    const changed = await call('PATCH', '/auth/password', {
+      token: tokenA,
+      payload: { currentPassword: passA, newPassword: 'password-a2' },
+    })
+    expect(changed.statusCode).toBe(204)
+
+    const withOldToken = await call('GET', '/auth/me', { token: tokenA })
+    expect(withOldToken.statusCode).toBe(401)
+    const withOtherToken = await call('GET', '/auth/me', { token: otherToken })
+    expect(withOtherToken.statusCode).toBe(401)
+
+    const relogin = await call('POST', '/auth/login', {
+      payload: { email: mailA, password: 'password-a2' },
+    })
+    expect(relogin.statusCode).toBe(200)
+    tokenA = tokenOf(relogin)
   })
 
   it('新建书签时服务端负责归一化', async () => {
