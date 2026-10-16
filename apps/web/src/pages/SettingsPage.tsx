@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { ArrowLeft, Folder, HardDrive, Info, Palette } from 'lucide-react'
 import { useBookmarks } from '../store/BookmarksContext'
+import { ApiError } from '../lib/api'
 import { useToast } from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
 import CollectionModal from '../components/CollectionModal'
@@ -14,15 +15,10 @@ import type { Collection } from '../types'
 
 type Section = 'appearance' | 'data' | 'collections' | 'about'
 
-type ConfirmState =
-  | null
-  | 'reset'
-  | 'clear'
-  | { collection: Collection }
+type ConfirmState = null | 'clear' | { collection: Collection }
 
 export default function SettingsPage() {
-  const { collections, addCollection, renameCollection, removeCollection, resetToSeed, clearAll } =
-    useBookmarks()
+  const { collections, addCollection, renameCollection, removeCollection, clearAll } = useBookmarks()
   const toast = useToast()
   const [section, setSection] = useState<Section>('appearance')
   const [confirm, setConfirm] = useState<ConfirmState>(null)
@@ -37,13 +33,18 @@ export default function SettingsPage() {
     { key: 'about', label: '关于', icon: <Info size={16} strokeWidth={1.8} /> },
   ]
 
-  const submitCollection = (name: string, icon?: string) => {
-    if (collectionModal?.mode === 'edit') {
-      renameCollection(collectionModal.collection.id, name, icon)
-      toast(`分组「${name}」已更新`)
-    } else {
-      addCollection(name, icon)
-      toast(`分组「${name}」已创建`)
+  // 等服务端确认后再提示，避免「先报成功、后失败」的错位
+  const submitCollection = async (name: string, icon?: string) => {
+    try {
+      if (collectionModal?.mode === 'edit') {
+        await renameCollection(collectionModal.collection.id, name, icon)
+        toast(`分组「${name}」已更新`)
+      } else {
+        await addCollection(name, icon)
+        toast(`分组「${name}」已创建`)
+      }
+    } catch (err) {
+      toast(err instanceof ApiError ? err.message : '操作失败，请重试', 'err')
     }
   }
 
@@ -108,37 +109,23 @@ export default function SettingsPage() {
             onCreate={() => setCollectionModal({ mode: 'create' })}
             onDelete={(col) => setConfirm({ collection: col })}
           />
-          <AboutSection
-            onReset={() => setConfirm('reset')}
-            onClear={() => setConfirm('clear')}
-          />
+          <AboutSection onClear={() => setConfirm('clear')} />
         </div>
       </div>
 
-      {confirm === 'reset' && (
-        <ConfirmDialog
-          title="恢复为示例数据？"
-          message="当前浏览器里的全部书签与分组将被内置书签数据覆盖（来自 seed.ts）。建议先导出 JSON 备份。"
-          confirmText="恢复示例"
-          danger
-          onConfirm={() => {
-            void resetToSeed()
-            setConfirm(null)
-            toast('已恢复为内置书签数据')
-          }}
-          onCancel={() => setConfirm(null)}
-        />
-      )}
       {confirm === 'clear' && (
         <ConfirmDialog
           title="清空全部数据？"
-          message="所有书签和分组都会被删除，且无法撤销。建议先导出 JSON 备份。"
+          message="账号下的所有书签和分组都会被删除，且无法撤销。建议先导出 JSON 备份。"
           confirmText="全部清空"
           danger
           onConfirm={() => {
-            clearAll()
             setConfirm(null)
-            toast('已清空全部数据')
+            clearAll()
+              .then(() => toast('已清空全部数据'))
+              .catch((err: unknown) =>
+                toast(err instanceof ApiError ? err.message : '清空失败，请重试', 'err'),
+              )
           }}
           onCancel={() => setConfirm(null)}
         />
@@ -150,7 +137,7 @@ export default function SettingsPage() {
           confirmText="删除分组"
           danger
           onConfirm={() => {
-            removeCollection(confirm.collection.id)
+            void removeCollection(confirm.collection.id)
             setConfirm(null)
             toast(`分组「${confirm.collection.name}」已删除`)
           }}

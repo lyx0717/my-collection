@@ -1,7 +1,9 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Bookmark, Settings } from 'lucide-react'
+import { Bookmark, LogOut, Settings } from 'lucide-react'
 import EngineSearchBox from './EngineSearchBox'
 import ThemeToggle from './ThemeToggle'
+import { useAuth } from '../store/AuthContext'
 
 /**
  * 顶部通栏导航（fixed，贴边通栏）。
@@ -14,15 +16,31 @@ import ThemeToggle from './ThemeToggle'
  * 放在顶栏会离上下文太远（用户要「加书签」时，视线在卡片区，不在顶栏）。
  * 现在它与多选、视图切换同在内容工具条右侧，见 HomePage。
  *
- * 不做滚动响应：曾按 scrollY > 24 收起站名标题并过渡底色，
- * 但通栏本身是 fixed、背景已是玻璃层，滚动时唯一的变化就是标题消失，
- * 代价（头部锚点跳变）大于收益。现在标题常驻、底色恒定。
- *
  * 高度固定 56px（h-14）：下方 sticky 分组导航以 top-14 吸顶，
  * 若顶栏高度可变，两者之间会露出缝隙。
  */
 export default function DockBar() {
   const { pathname } = useLocation()
+  const { user, logout } = useAuth()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // 点击别处或按 Esc 关掉账号菜单
+  useEffect(() => {
+    if (!menuOpen) return
+    const onPointerDown = (e: PointerEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [menuOpen])
 
   return (
     <header className="glass-chrome fixed inset-x-0 top-0 z-40 h-14 border-b px-4 sm:px-6">
@@ -59,6 +77,41 @@ export default function DockBar() {
           >
             <Settings size={16} />
           </Link>
+
+          {/* 账号：显示登录邮箱的首字母，点开是邮箱 + 退出登录 */}
+          <div ref={menuRef} className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-label="账号"
+              aria-expanded={menuOpen}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-soft text-[12.5px] font-bold text-accent-ink transition-colors hover:bg-accent/20"
+            >
+              {(user?.email ?? '?').charAt(0).toUpperCase()}
+            </button>
+
+            {menuOpen && (
+              <div className="glass-sheet animate-pop absolute top-11 right-0 z-50 w-[210px] rounded-[14px] p-1.5">
+                <p
+                  className="truncate px-3 py-2 text-[12px] text-ink3"
+                  title={user?.email}
+                >
+                  {user?.email ?? '未登录'}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    void logout()
+                  }}
+                  className="flex w-full items-center gap-2 rounded-[10px] px-3 py-2 text-[13px] text-ink2 transition-colors hover:bg-surface-2 hover:text-danger"
+                >
+                  <LogOut size={14} />
+                  退出登录
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

@@ -11,6 +11,7 @@ import type { Bookmark } from '../types'
 import { useBookmarks } from '../store/BookmarksContext'
 import { useToast } from './Toast'
 import { fetchMetadata } from '../lib/metadata'
+import { ApiError } from '../lib/api'
 import { extractDomain, isValidUrl, normalizeUrl } from '../lib/url'
 import Favicon from './Favicon'
 
@@ -18,6 +19,8 @@ interface BookmarkModalProps {
   editing?: Bookmark | null
   preset?: { url?: string; title?: string }
   fromBookmarklet?: boolean
+  /** 撞到重复链接时的出路：交回上层去打开那条书签的编辑弹窗 */
+  onEditDuplicate?: (bookmark: Bookmark) => void
   onClose: () => void
 }
 
@@ -27,6 +30,7 @@ export default function BookmarkModal({
   editing,
   preset,
   fromBookmarklet,
+  onEditDuplicate,
   onClose,
 }: BookmarkModalProps) {
   const { collections, addBookmark, updateBookmark, findDuplicate } = useBookmarks()
@@ -41,7 +45,7 @@ export default function BookmarkModal({
 
   const [fetchStatus, setFetchStatus] = useState<FetchStatus>('idle')
   const [urlError, setUrlError] = useState('')
-  const [forceSave, setForceSave] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const fetchedFor = useRef<string>('')
   const titleTouched = useRef(Boolean(editing || preset?.title))
@@ -96,7 +100,6 @@ export default function BookmarkModal({
   const onUrlChange = (raw: string) => {
     setUrl(raw)
     setUrlError('')
-    setForceSave(false)
     window.clearTimeout(fetchDebounce.current)
     const target = normalizeUrl(raw)
     const prev = normalizeUrl(initialUrl)
@@ -123,20 +126,16 @@ export default function BookmarkModal({
     }
   }, [onClose])
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault()
     const finalUrl = normalizeUrl(url)
     if (!isValidUrl(finalUrl)) {
       setUrlError('请输入以 http:// 或 https:// 开头的有效链接')
       return
     }
-    if (duplicate && !forceSave) {
-      setForceSave(true)
-      return
-    }
-
-    // 分组只在设置页创建，这里直接用当前选中的那个
-    const finalCollectionId = collectionId
+    // 服务端对 (user_id, dedupe_key) 建了唯一索引，重复提交必然 409，
+    // 所以这里直接拦住 —— 上一版的「仍然保存」已经没有意义了。
+    if (duplicate) return
 
     const payload = {
       url: finalUrl,
@@ -144,17 +143,24 @@ export default function BookmarkModal({
       description: description.trim() || undefined,
       faviconUrl,
       cover,
-      collectionId: finalCollectionId || undefined,
+      collectionId: collectionId || undefined,
     }
 
-    if (editing) {
-      updateBookmark(editing.id, payload)
-      toast(`已保存对「${payload.title}」的修改`)
-    } else {
-      addBookmark(payload)
-      toast(`「${payload.title}」已收藏`)
+    setSaving(true)
+    try {
+      if (editing) {
+        await updateBookmark(editing.id, payload)
+        toast(`已保存对「${payload.title}」的修改`)
+      } else {
+        await addBookmark(payload)
+        toast(`「${payload.title}」已收藏`)
+      }
+      onClose()
+    } catch (err) {
+      toast(err instanceof ApiError ? err.message : '保存失败，请重试', 'err')
+    } finally {
+      setSaving(false)
     }
-    onClose()
   }
 
   // glass-field：内凹玻璃，与外层面板同一材质（实色框贴在玻璃上会割裂）。
@@ -257,18 +263,20 @@ export default function BookmarkModal({
             </div>
           )}
 
-          {duplicate && !forceSave && (
+          {duplicate && (
             <div className="flex items-start gap-2.5 rounded-[11px] border border-warn-border bg-warn-soft px-3.5 py-2.5">
               <AlertTriangle size={15} className="mt-0.5 shrink-0 text-warn-ink" />
               <div className="text-[12px] leading-5 text-warn-text">
                 已收藏过相同链接：「{duplicate.title}」
-                <button
-                  type="button"
-                  onClick={() => setForceSave(true)}
-                  className="ml-1 font-semibold underline underline-offset-2 hover:text-warn-ink"
-                >
-                  仍然保存
-                </button>
+                {onEditDuplicate && (
+                  <button
+                    type="button"
+                    onClick={() => onEditDuplicate(duplicate)}
+                    className="ml-1 font-semibold underline underline-offset-2 hover:text-warn-ink"
+                  >
+                    去编辑它
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -359,9 +367,12 @@ export default function BookmarkModal({
             </button>
             <button
               type="submit"
-              className="h-9 rounded-[10px] bg-accent px-5 text-[13px] font-semibold text-white transition-colors hover:bg-accent-ink disabled:opacity-50"
+              disabled={Boolean(duplicate) || saving}
+              title={duplicate ? '这条链接已经收藏过了' : undefined}
+              className="flex h-9 items-center gap-1.5 rounded-[10px] bg-accent px-5 text-[13px] font-semibold text-white transition-colors hover:bg-accent-ink disabled:opacity-50"
             >
-              {editing ? '保存修改' : duplicate && !forceSave ? '仍要保存' : '保存书签'}
+              {saving && <Loader2 size={13} className="animate-spin" />}
+              {editing ? '保存修改' : '保存书签'}
             </button>
           </div>
         </div>

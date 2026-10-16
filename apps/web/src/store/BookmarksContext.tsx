@@ -8,43 +8,30 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { Bookmark, BookmarkInput, Collection, StoreShape } from '../types'
-import { uid } from '../lib/id'
+import type { Bookmark, BookmarkDraft, BookmarkInput, Collection } from '../types'
 import { dedupeKey, extractDomain } from '../lib/url'
 import { exportNetscape } from '../lib/netscape'
-import { CURRENT_VERSION, migrateV2ToV4, migrateV3ToV4, type LegacyBookmark } from '../lib/migrate'
+import { api } from '../lib/api'
+import { useAuth } from './AuthContext'
 
-const STORAGE_KEY = 'mybookmarks:v4'
-/** 按版本从新到旧尝试迁移 */
-const LEGACY_KEYS: Array<{ key: string; version: 3 | 2 }> = [
-  { key: 'mybookmarks:v3', version: 3 },
-  { key: 'mybookmarks:v2', version: 2 },
-]
-const LEGACY_SYNC_KEY = 'mybookmarks:sync-config'
-
-const EMPTY_STORE: StoreShape = { version: CURRENT_VERSION, bookmarks: [], collections: [] }
-
-/** 书签按 order 排序；无 order 的旧数据按当前数组位置补 order */
-function withBookmarkOrder(data: StoreShape): StoreShape {
-  const bmMissing = data.bookmarks.some((bm) => typeof bm.order !== 'number')
-  const bookmarks = data.bookmarks
-    .map((bm, i) => (typeof bm.order === 'number' ? bm : { ...bm, order: i }))
-    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-  const colMissing = data.collections.some((c) => typeof c.order !== 'number')
-  const collections = data.collections
-    .map((c, i) => (typeof c.order === 'number' ? c : { ...c, order: i }))
-    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-  return bmMissing || colMissing ? { ...data, bookmarks, collections } : data
+interface LibraryResponse {
+  bookmarks: Bookmark[]
+  collections: Collection[]
 }
 
-/** 按 id 顺序重写 order（紧凑、稳定） */
+export interface BulkAddResult {
+  created: number
+  skipped: number
+}
+
+/** 按 id 顺序重写 order（分组只有一层，不需要可见子集那套） */
 function reorderByIds<T extends { id: string; order?: number }>(
   items: T[],
   orderedIds: string[],
 ): T[] {
-  const rank = new Map(orderedIds.map((id, i) => [id, i]))
+  const rank = new Map(orderedIds.map((id, index) => [id, index]))
   return [...items]
-    .map((it) => (rank.has(it.id) ? { ...it, order: rank.get(it.id)! } : it))
+    .map((item) => (rank.has(item.id) ? { ...item, order: rank.get(item.id)! } : item))
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 }
 
@@ -56,457 +43,323 @@ function reorderVisibleInGlobal<T extends { id: string; order?: number }>(
   items: T[],
   orderedVisibleIds: string[],
 ): T[] {
-  const byId = new Map(items.map((it) => [it.id, it]))
-  const visibleSet = new Set(orderedVisibleIds)
+  const byId = new Map(items.map((item) => [item.id, item]))
+  const visible = new Set(orderedVisibleIds)
   const sorted = [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
   const slots: number[] = []
-  sorted.forEach((it, i) => {
-    if (visibleSet.has(it.id)) slots.push(i)
+  sorted.forEach((item, index) => {
+    if (visible.has(item.id)) slots.push(index)
   })
   const next = [...sorted]
-  orderedVisibleIds.forEach((id, i) => {
+  orderedVisibleIds.forEach((id, index) => {
     const item = byId.get(id)
-    if (item && i < slots.length) next[slots[i]] = item
+    if (item && index < slots.length) next[slots[index]] = item
   })
-  return next.map((it, i) => ({ ...it, order: i }))
+  return next.map((item, index) => ({ ...item, order: index }))
 }
 
-function isBookmark(v: unknown): v is Bookmark {
-  if (typeof v !== 'object' || v === null) return false
-  const b = v as Record<string, unknown>
-  return (
-    typeof b.id === 'string' &&
-    typeof b.url === 'string' &&
-    /^https?:\/\//i.test(b.url) &&
-    typeof b.title === 'string' &&
-    typeof b.createdAt === 'string'
-  )
-}
-
-function isStore(v: unknown): v is StoreShape {
-  if (typeof v !== 'object' || v === null) return false
-  const s = v as Record<string, unknown>
-  return (
-    s.version === CURRENT_VERSION &&
-    Array.isArray(s.bookmarks) &&
-    s.bookmarks.every(isBookmark) &&
-    Array.isArray(s.collections)
-  )
-}
-
-function persistLocal(data: StoreShape) {
-  const text = JSON.stringify(data)
-  localStorage.setItem(STORAGE_KEY, text)
-  return new Blob([text]).size
-}
-
-/**
- * 读取本地数据，必要时执行版本迁移。
- *
- * v3 → v4：解散「影音」并入「生活」，生活 / 影音里的境外站点抽入「科学」（原「网络」）。
- * v2 → v4：先按标签语义归组再落位。
- * 迁移成功的判定标准是「数据条数不减少」—— 宁可让个别书签落入未分组，
- * 也不能因为规则没覆盖到而丢书签。
- */
-function loadLocal(): StoreShape | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      const parsed: unknown = JSON.parse(raw)
-      if (isStore(parsed)) return parsed
-    }
-  } catch {
-    // 损坏时回落内置数据
-  }
-
-  // 依次尝试迁移旧档
-  for (const { key, version } of LEGACY_KEYS) {
-    const migrated = migrateLegacy(key, version)
-    if (migrated) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated))
-      return migrated
-    }
-  }
-  return null
-}
-
-function migrateLegacy(key: string, version: 3 | 2): StoreShape | null {
-  try {
-    const legacyRaw = localStorage.getItem(key)
-    if (!legacyRaw) return null
-    const legacy: unknown = JSON.parse(legacyRaw)
-    if (typeof legacy !== 'object' || legacy === null) return null
-    const old = legacy as {
-      version?: unknown
-      bookmarks?: unknown
-      collections?: unknown
-    }
-    if (old.version !== version || !Array.isArray(old.bookmarks) || !Array.isArray(old.collections))
-      return null
-
-    const before = old.bookmarks.length
-    const migrated =
-      version === 3
-        ? migrateV3ToV4({
-            version: 3,
-            bookmarks: old.bookmarks as Bookmark[],
-            collections: old.collections as Collection[],
-          })
-        : migrateV2ToV4({
-            version: 2,
-            bookmarks: old.bookmarks as LegacyBookmark[],
-            collections: old.collections as Collection[],
-          })
-    // 条数对不上说明迁移丢数据，宁可不动旧数据
-    return migrated.bookmarks.length === before ? migrated : null
-  } catch {
-    return null
-  }
-}
-
-export interface NewBookmarkDraft {
-  url: string
-  title: string
-  description?: string
-  faviconUrl?: string
-  cover?: string
-  collectionId?: string
-  createdAt?: string
-}
-
-interface BookmarksContextValue {
+export interface BookmarksContextValue {
   bookmarks: Bookmark[]
   collections: Collection[]
-  seedLoading: boolean
-  addBookmark: (input: BookmarkInput) => Bookmark
-  updateBookmark: (id: string, patch: Partial<BookmarkInput>) => void
-  removeBookmark: (id: string) => void
-  bulkAdd: (drafts: NewBookmarkDraft[]) => number
+  /** 登录后拉取书库期间为 true */
+  loading: boolean
+  addBookmark: (input: BookmarkInput) => Promise<Bookmark>
+  updateBookmark: (id: string, patch: Partial<BookmarkInput>) => Promise<void>
+  removeBookmark: (id: string) => Promise<void>
+  bulkAdd: (drafts: BookmarkDraft[]) => Promise<BulkAddResult>
+  bulkUpdate: (ids: string[], patch: Partial<BookmarkInput>) => Promise<void>
+  bulkRemove: (ids: string[]) => Promise<void>
   findDuplicate: (url: string, exceptId?: string) => Bookmark | undefined
-  addCollection: (name: string, icon?: string) => Collection
-  renameCollection: (id: string, name: string, icon?: string) => void
-  removeCollection: (id: string) => void
-  mergeCollections: (incoming: Collection[]) => void
-  bulkUpdate: (ids: string[], patch: Partial<BookmarkInput>) => void
-  bulkRemove: (ids: string[]) => void
-  reorderBookmarks: (orderedIds: string[]) => void
-  reorderCollections: (orderedIds: string[]) => void
-  replaceAll: (data: StoreShape) => void
-  resetToSeed: () => Promise<void>
-  clearAll: () => void
+  addCollection: (name: string, icon?: string) => Promise<Collection>
+  renameCollection: (id: string, name: string, icon?: string) => Promise<void>
+  removeCollection: (id: string) => Promise<void>
+  /** 导入时按名称批量建分组，返回（新建的 + 已存在的）分组供建「文件夹名 → id」映射 */
+  bulkCreateCollections: (names: string[]) => Promise<Collection[]>
+  reorderBookmarks: (orderedIds: string[]) => Promise<void>
+  reorderCollections: (orderedIds: string[]) => Promise<void>
+  clearAll: () => Promise<void>
   downloadJson: () => void
   downloadNetscape: () => void
-  storageBytes: number
 }
 
 const BookmarksContext = createContext<BookmarksContextValue | null>(null)
 
 export function BookmarksProvider({ children }: { children: ReactNode }) {
-  const initial = useRef(loadLocal())
-  const [store, setStore] = useState<StoreShape>(() =>
-    initial.current ? withBookmarkOrder(initial.current) : EMPTY_STORE,
-  )
-  const [seedLoading, setSeedLoading] = useState(() => initial.current === null)
-  const [storageBytes, setStorageBytes] = useState(0)
-  const storeRef = useRef(store)
-  storeRef.current = store
+  const { status } = useAuth()
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
+  const [collections, setCollections] = useState<Collection[]>([])
+  const [loading, setLoading] = useState(false)
 
-  // 清理已下线的云同步残留配置
+  // 乐观更新的回滚快照 + 闭包里读最新状态用。
+  // 每次 render 后同步，所以回调里读到的永远是最新一份。
+  const stateRef = useRef({ bookmarks, collections })
+  stateRef.current = { bookmarks, collections }
+
   useEffect(() => {
-    try {
-      localStorage.removeItem(LEGACY_SYNC_KEY)
-    } catch {
-      // ignore
+    if (status !== 'authenticated') {
+      // 登出即清空，避免换账号后看到上一个账号的数据
+      setBookmarks([])
+      setCollections([])
+      setLoading(false)
+      return
     }
-  }, [])
-
-  // 首次使用 / 本地数据损坏时，懒加载内置书签
-  useEffect(() => {
-    if (!seedLoading) return
     let cancelled = false
-    void import('../data/seed').then(({ SEED_DATA }) => {
-      if (cancelled) return
-      const seeded = withBookmarkOrder(structuredClone(SEED_DATA))
-      setStore(seeded)
-      setStorageBytes(persistLocal(seeded))
-      setSeedLoading(false)
-    })
+    setLoading(true)
+    void api
+      .get<LibraryResponse>('/library')
+      .then((data) => {
+        if (cancelled) return
+        setBookmarks(data.bookmarks)
+        setCollections(data.collections)
+      })
+      .catch(() => {
+        // 401 已由 api 层统一转成未登录状态，这里不重复提示
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
     return () => {
       cancelled = true
     }
-  }, [seedLoading])
+  }, [status])
 
-  useEffect(() => {
-    if (seedLoading) return
-    setStorageBytes(persistLocal(store))
-  }, [store, seedLoading])
-
-  const commit = useCallback((updater: (s: StoreShape) => StoreShape) => {
-    setStore((prev) => updater(prev))
-  }, [])
-
-  const addBookmark = useCallback(
-    (input: BookmarkInput): Bookmark => {
-      const now = new Date().toISOString()
-      const bm: Bookmark = {
-        id: uid(),
-        ...input,
-        domain: extractDomain(input.url),
-        createdAt: now,
-        updatedAt: now,
+  /**
+   * 乐观更新：先改本地再发请求，失败整份回滚。
+   * 只用于改动局部、且不需要服务端返回值的操作（改 / 删 / 排序）。
+   */
+  const optimistic = useCallback(
+    async (apply: () => void, send: () => Promise<unknown>): Promise<void> => {
+      const before = stateRef.current
+      apply()
+      try {
+        await send()
+      } catch (err) {
+        setBookmarks(before.bookmarks)
+        setCollections(before.collections)
+        throw err
       }
-      commit((s) => {
-        const maxOrder = s.bookmarks.reduce((m, b) => Math.max(m, b.order ?? 0), -1)
-        return { ...s, bookmarks: [...s.bookmarks, { ...bm, order: maxOrder + 1 }] }
-      })
-      return bm
     },
-    [commit],
+    [],
   )
 
+  // —— 书签 ——
+
+  /** 新增等服务端权威结果：需要它生成的 id、归一化后的 url 与 order */
+  const addBookmark = useCallback(async (input: BookmarkInput): Promise<Bookmark> => {
+    const res = await api.post<{ bookmark: Bookmark }>('/bookmarks', input)
+    setBookmarks((prev) => [...prev, res.bookmark])
+    return res.bookmark
+  }, [])
+
   const updateBookmark = useCallback(
-    (id: string, patch: Partial<BookmarkInput>) => {
-      commit((s) => ({
-        ...s,
-        bookmarks: s.bookmarks.map((bm) =>
-          bm.id === id
-            ? {
-                ...bm,
-                ...patch,
-                domain: patch.url ? extractDomain(patch.url) : bm.domain,
-                updatedAt: new Date().toISOString(),
-              }
-            : bm,
-        ),
-      }))
-    },
-    [commit],
+    (id: string, patch: Partial<BookmarkInput>) =>
+      optimistic(
+        () =>
+          setBookmarks((prev) =>
+            prev.map((item) =>
+              item.id === id
+                ? { ...item, ...patch, domain: patch.url ? extractDomain(patch.url) : item.domain }
+                : item,
+            ),
+          ),
+        () => api.patch(`/bookmarks/${id}`, patch),
+      ),
+    [optimistic],
   )
 
   const removeBookmark = useCallback(
-    (id: string) => {
-      commit((s) => {
-        const rest = s.bookmarks.filter((bm) => bm.id !== id)
-        return { ...s, bookmarks: rest.map((bm, i) => ({ ...bm, order: i })) }
-      })
-    },
-    [commit],
+    (id: string) =>
+      optimistic(
+        () => setBookmarks((prev) => prev.filter((item) => item.id !== id)),
+        () => api.del(`/bookmarks/${id}`),
+      ),
+    [optimistic],
   )
 
-  /** 拖拽后按新顺序持久化 */
-  const reorderBookmarks = useCallback(
-    (orderedIds: string[]) => {
-      commit((s) => ({ ...s, bookmarks: reorderVisibleInGlobal(s.bookmarks, orderedIds) }))
-    },
-    [commit],
-  )
-
-  const reorderCollections = useCallback(
-    (orderedIds: string[]) => {
-      commit((s) => ({ ...s, collections: reorderByIds(s.collections, orderedIds) }))
-    },
-    [commit],
-  )
-
-  const findDuplicate = useCallback(
-    (url: string, exceptId?: string) => {
-      const key = dedupeKey(url)
-      return store.bookmarks.find((bm) => bm.id !== exceptId && dedupeKey(bm.url) === key)
-    },
-    [store.bookmarks],
-  )
-
-  const bulkAdd = useCallback(
-    (drafts: NewBookmarkDraft[]) => {
-      const now = new Date().toISOString()
-      const base =
-        storeRef.current.bookmarks.reduce((m, b) => Math.max(m, b.order ?? 0), -1) + 1
-      const newItems: Bookmark[] = drafts.map((d, i) => ({
-        id: uid(),
-        url: d.url,
-        title: d.title,
-        description: d.description,
-        faviconUrl: d.faviconUrl,
-        cover: d.cover,
-        collectionId: d.collectionId,
-        domain: extractDomain(d.url),
-        createdAt: d.createdAt ?? now,
-        updatedAt: now,
-        order: base + i,
-      }))
-      commit((s) => ({ ...s, bookmarks: [...s.bookmarks, ...newItems] }))
-      return newItems.length
-    },
-    [commit],
-  )
-
-  const addCollection = useCallback(
-    (name: string, icon?: string) => {
-      const created: Collection = {
-        id: uid('col'),
-        name,
-        icon,
-        order: storeRef.current.collections.length,
-      }
-      commit((s) => ({ ...s, collections: [...s.collections, created] }))
-      return created
-    },
-    [commit],
-  )
-
-  const renameCollection = useCallback(
-    (id: string, name: string, icon?: string) => {
-      commit((s) => ({
-        ...s,
-        collections: s.collections.map((c) =>
-          c.id === id ? { ...c, name, ...(icon !== undefined ? { icon } : {}) } : c,
-        ),
-      }))
-    },
-    [commit],
-  )
-
-  const removeCollection = useCallback(
-    (id: string) => {
-      commit((s) => ({
-        ...s,
-        version: CURRENT_VERSION,
-        collections: s.collections.filter((c) => c.id !== id),
-        bookmarks: s.bookmarks.map((bm) =>
-          bm.collectionId === id ? { ...bm, collectionId: undefined } : bm,
-        ),
-      }))
-    },
-    [commit],
-  )
-
-  const mergeCollections = useCallback(
-    (incoming: Collection[]) => {
-      commit((s) => {
-        const have = new Set(s.collections.map((c) => c.id))
-        const merged = [...s.collections]
-        incoming.forEach((c, i) => {
-          if (!have.has(c.id)) {
-            merged.push({ ...c, order: c.order ?? s.collections.length + i })
-            have.add(c.id)
-          }
-        })
-        return { ...s, collections: merged }
-      })
-    },
-    [commit],
-  )
+  const bulkAdd = useCallback(async (drafts: BookmarkDraft[]): Promise<BulkAddResult> => {
+    const res = await api.post<{ created: number; skipped: number; bookmarks: Bookmark[] }>(
+      '/bookmarks/bulk',
+      { drafts },
+    )
+    // 以服务端返回为准：被跳过的重复项不会出现在 bookmarks 里
+    setBookmarks((prev) => [...prev, ...res.bookmarks])
+    return { created: res.created, skipped: res.skipped }
+  }, [])
 
   const bulkUpdate = useCallback(
     (ids: string[], patch: Partial<BookmarkInput>) => {
-      const idSet = new Set(ids)
-      commit((s) => ({
-        ...s,
-        bookmarks: s.bookmarks.map((bm) =>
-          idSet.has(bm.id)
-            ? {
-                ...bm,
-                ...patch,
-                domain: patch.url ? extractDomain(patch.url) : bm.domain,
-                updatedAt: new Date().toISOString(),
-              }
-            : bm,
-        ),
-      }))
+      const target = new Set(ids)
+      return optimistic(
+        () =>
+          setBookmarks((prev) =>
+            prev.map((item) => (target.has(item.id) ? { ...item, ...patch } : item)),
+          ),
+        () => api.patch('/bookmarks/bulk', { ids, patch }),
+      )
     },
-    [commit],
+    [optimistic],
   )
 
   const bulkRemove = useCallback(
     (ids: string[]) => {
-      const idSet = new Set(ids)
-      commit((s) => {
-        const rest = s.bookmarks.filter((bm) => !idSet.has(bm.id))
-        return { ...s, bookmarks: rest.map((bm, i) => ({ ...bm, order: i })) }
-      })
+      const target = new Set(ids)
+      return optimistic(
+        () => setBookmarks((prev) => prev.filter((item) => !target.has(item.id))),
+        () => api.post('/bookmarks/bulk-delete', { ids }),
+      )
     },
-    [commit],
+    [optimistic],
   )
 
-  const replaceAll = useCallback((data: StoreShape) => commit(() => withBookmarkOrder(data)), [commit])
-
-  const resetToSeed = useCallback(async () => {
-    const { SEED_DATA } = await import('../data/seed')
-    commit(() => withBookmarkOrder(structuredClone(SEED_DATA)))
-  }, [commit])
-
-  const clearAll = useCallback(
-    () => commit(() => ({ version: CURRENT_VERSION, bookmarks: [], collections: [] })),
-    [commit],
+  const reorderBookmarks = useCallback(
+    (orderedIds: string[]) => {
+      // 服务端要求提交全量顺序，先把可见子集展开成全局顺序
+      const next = reorderVisibleInGlobal(stateRef.current.bookmarks, orderedIds)
+      return optimistic(
+        () => setBookmarks(next),
+        () => api.put('/bookmarks/order', { orderedIds: next.map((item) => item.id) }),
+      )
+    },
+    [optimistic],
   )
 
+  const findDuplicate = useCallback((url: string, exceptId?: string) => {
+    const key = dedupeKey(url)
+    return stateRef.current.bookmarks.find(
+      (item) => item.id !== exceptId && dedupeKey(item.url) === key,
+    )
+  }, [])
+
+  // —— 分组 ——
+
+  const addCollection = useCallback(async (name: string, icon?: string): Promise<Collection> => {
+    const res = await api.post<{ collection: Collection }>('/collections', { name, icon })
+    setCollections((prev) => [...prev, res.collection])
+    return res.collection
+  }, [])
+
+  const renameCollection = useCallback(
+    (id: string, name: string, icon?: string) =>
+      optimistic(
+        () =>
+          setCollections((prev) =>
+            prev.map((item) => (item.id === id ? { ...item, name, icon } : item)),
+          ),
+        () => api.patch(`/collections/${id}`, { name, icon }),
+      ),
+    [optimistic],
+  )
+
+  const removeCollection = useCallback(
+    (id: string) =>
+      optimistic(
+        () => {
+          setCollections((prev) => prev.filter((item) => item.id !== id))
+          // 服务端是 ON DELETE SET NULL，本地同步置空，避免留下悬空的 collectionId
+          setBookmarks((prev) =>
+            prev.map((item) =>
+              item.collectionId === id ? { ...item, collectionId: undefined } : item,
+            ),
+          )
+        },
+        () => api.del(`/collections/${id}`),
+      ),
+    [optimistic],
+  )
+
+  const bulkCreateCollections = useCallback(async (names: string[]): Promise<Collection[]> => {
+    const res = await api.post<{ collections: Collection[] }>('/collections/bulk', { names })
+    setCollections((prev) => {
+      const have = new Set(prev.map((item) => item.id))
+      return [...prev, ...res.collections.filter((item) => !have.has(item.id))]
+    })
+    return res.collections
+  }, [])
+
+  const reorderCollections = useCallback(
+    (orderedIds: string[]) => {
+      const next = reorderByIds(stateRef.current.collections, orderedIds)
+      return optimistic(
+        () => setCollections(next),
+        () => api.put('/collections/order', { orderedIds: next.map((item) => item.id) }),
+      )
+    },
+    [optimistic],
+  )
+
+  // —— 整库 ——
+
+  const clearAll = useCallback(async () => {
+    await api.del('/library')
+    setBookmarks([])
+    setCollections([])
+  }, [])
+
+  // 导出直接从内存生成，不必再请求服务端
   const downloadJson = useCallback(() => {
-    const blob = new Blob([JSON.stringify(store, null, 2)], { type: 'application/json' })
+    const { bookmarks: list, collections: groups } = stateRef.current
+    const blob = new Blob([JSON.stringify({ version: 4, bookmarks: list, collections: groups }, null, 2)], {
+      type: 'application/json',
+    })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
     a.download = `mybookmarks-${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     URL.revokeObjectURL(a.href)
-  }, [store])
+  }, [])
 
   const downloadNetscape = useCallback(() => {
-    const blob = new Blob([exportNetscape(store.bookmarks, store.collections)], {
-      type: 'text/html;charset=utf-8',
-    })
+    const { bookmarks: list, collections: groups } = stateRef.current
+    const blob = new Blob([exportNetscape(list, groups)], { type: 'text/html;charset=utf-8' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
     a.download = `bookmarks-${new Date().toISOString().slice(0, 10)}.html`
     a.click()
     URL.revokeObjectURL(a.href)
-  }, [store])
+  }, [])
 
   const value = useMemo<BookmarksContextValue>(
     () => ({
-      bookmarks: store.bookmarks,
-      collections: store.collections,
-      seedLoading,
+      bookmarks,
+      collections,
+      loading,
       addBookmark,
       updateBookmark,
       removeBookmark,
       bulkAdd,
+      bulkUpdate,
+      bulkRemove,
       findDuplicate,
       addCollection,
       renameCollection,
       removeCollection,
-      mergeCollections,
-      bulkUpdate,
-      bulkRemove,
+      bulkCreateCollections,
       reorderBookmarks,
       reorderCollections,
-      replaceAll,
-      resetToSeed,
       clearAll,
       downloadJson,
       downloadNetscape,
-      storageBytes,
     }),
     [
-      store,
-      seedLoading,
+      bookmarks,
+      collections,
+      loading,
       addBookmark,
       updateBookmark,
       removeBookmark,
       bulkAdd,
+      bulkUpdate,
+      bulkRemove,
       findDuplicate,
       addCollection,
       renameCollection,
       removeCollection,
-      mergeCollections,
-      bulkUpdate,
-      bulkRemove,
+      bulkCreateCollections,
       reorderBookmarks,
       reorderCollections,
-      replaceAll,
-      resetToSeed,
       clearAll,
       downloadJson,
       downloadNetscape,
-      storageBytes,
     ],
   )
 

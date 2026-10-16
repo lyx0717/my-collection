@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
-import { Download, FileUp, Upload } from 'lucide-react'
+import { Download, FileUp, Loader2, Upload } from 'lucide-react'
 import { useBookmarks } from '../../store/BookmarksContext'
+import { ApiError } from '../../lib/api'
 import { useToast } from '../Toast'
 import Favicon from '../Favicon'
 import { parseImportFile, type ParsedImport } from '../../lib/importFile'
@@ -17,13 +18,14 @@ interface PreviewEntry extends ParsedImportBookmark {
 }
 
 export default function DataSection() {
-  const { bookmarks, collections, bulkAdd, addCollection, mergeCollections, downloadJson, downloadNetscape } =
+  const { bookmarks, collections, bulkAdd, bulkCreateCollections, downloadJson, downloadNetscape } =
     useBookmarks()
   const toast = useToast()
   const fileRef = useRef<HTMLInputElement>(null)
   const [parsed, setParsed] = useState<ParsedImport | null>(null)
   const [preview, setPreview] = useState<PreviewEntry[] | null>(null)
   const [parsing, setParsing] = useState(false)
+  const [importing, setImporting] = useState(false)
   const [dragging, setDragging] = useState(false)
 
   const existingKeys = useMemo(
@@ -40,32 +42,30 @@ export default function DataSection() {
         return
       }
       setParsed(result)
+      // 分组 id 由服务端生成，备份里的 id 无法沿用 ——
+      // 所以先把备份分组按 id 反查出名称，再统一按「名称」落到已有分组或新建。
       const incomingCols = result.collections ?? []
+      const backupNameById = new Map(incomingCols.map((c) => [c.id, c.name]))
       const colByName = new Map(collections.map((c) => [c.name, c.id]))
-      incomingCols.forEach((c) => {
-        if (!colByName.has(c.name)) colByName.set(c.name, c.id)
-      })
-      const validIds = new Set([
-        ...collections.map((c) => c.id),
-        ...incomingCols.map((c) => c.id),
-      ])
+
       setPreview(
         result.bookmarks.map((b) => {
           const key = dedupeKey(b.url)
-          // 归组优先级：备份自带 id > 文件夹同名 > 由标签语义推断 > 保持未分组。
+          // 归组优先级：文件夹名 / 备份分组名 > 已有同名分组 > 由标签语义推断 > 未分组。
           // 外部来源（Chrome / Edge / iTab）大多只带 TAGS，靠标签推断才能落对位置
+          const folderName =
+            b.collectionName ?? (b.collectionId ? backupNameById.get(b.collectionId) : undefined)
           const guess = groupForTags(b.tags)
-          const target =
-            b.collectionId && validIds.has(b.collectionId)
-              ? b.collectionId
-              : b.collectionName
-                ? colByName.get(b.collectionName) ?? '__new'
-                : guess && validIds.has(guess)
-                  ? guess
-                  : ''
+          const target = folderName
+            ? (colByName.get(folderName) ?? '__new')
+            : guess && colByName.has(guess)
+              ? colByName.get(guess)!
+              : ''
           return {
             ...b,
             key,
+            // 统一用解析出的文件夹名：下面的「文件夹映射到分组」与导入都依赖它
+            collectionName: folderName,
             duplicate: existingKeys.has(key),
             selected: !existingKeys.has(key),
             target,
@@ -94,44 +94,60 @@ export default function DataSection() {
   const selectedCount = preview?.filter((p) => p.selected && !p.duplicate).length ?? 0
   const dupCount = preview?.filter((p) => p.duplicate).length ?? 0
 
-  const confirmImport = () => {
+  const confirmImport = async () => {
     if (!preview) return
-    if (parsed?.collections?.length) mergeCollections(parsed.collections)
-    const folderToCol = new Map<string, string>()
-    for (const folder of folderOptions) {
-      const target = preview.find((p) => p.collectionName === folder)?.target ?? ''
-      if (target === '__new') {
-        const created = addCollection(folder)
-        folderToCol.set(folder, created.id)
-      } else if (target) {
-        folderToCol.set(folder, target)
+    setImporting(true)
+    try {
+      // 分组 id 由服务端生成，所以先按名称批量建组拿到映射，再提交书签
+      const newFolders = folderOptions.filter(
+        (folder) => (preview.find((p) => p.collectionName === folder)?.target ?? '') === '__new',
+      )
+      const created = newFolders.length ? await bulkCreateCollections(newFolders) : []
+      const folderToCol = new Map<string, string>()
+      for (const folder of newFolders) {
+        const hit = created.find((c) => c.name === folder)
+        if (hit) folderToCol.set(folder, hit.id)
       }
+      for (const folder of folderOptions) {
+        const target = preview.find((p) => p.collectionName === folder)?.target ?? ''
+        if (target && target !== '__new') folderToCol.set(folder, target)
+      }
+
+      const drafts = preview
+        .filter((p) => p.selected && !p.duplicate)
+        .map((p) => ({
+          url: p.url,
+          title: p.title,
+          description: p.description,
+          collectionId:
+            p.target && p.target !== '__new'
+              ? p.target
+              : p.collectionName
+                ? folderToCol.get(p.collectionName)
+                : undefined,
+          createdAt: p.createdAt,
+        }))
+
+      const result = await bulkAdd(drafts)
+      toast(
+        result.skipped > 0
+          ? `导入 ${result.created} 条，跳过 ${result.skipped} 条重复`
+          : `成功导入 ${result.created} 条书签`,
+      )
+      setPreview(null)
+      setParsed(null)
+    } catch (err) {
+      toast(err instanceof ApiError ? err.message : '导入失败，请重试', 'err')
+    } finally {
+      setImporting(false)
     }
-    const drafts = preview
-      .filter((p) => p.selected && !p.duplicate)
-      .map((p) => ({
-        url: p.url,
-        title: p.title,
-        description: p.description,
-        collectionId:
-          p.target && p.target !== '__new'
-            ? p.target
-            : p.collectionName
-              ? folderToCol.get(p.collectionName)
-              : undefined,
-        createdAt: p.createdAt,
-      }))
-    bulkAdd(drafts)
-    toast(`成功导入 ${drafts.length} 条书签`)
-    setPreview(null)
-    setParsed(null)
   }
 
   return (
     <section id="sec-data" className="scroll-mt-24">
       <SectionTitle
         title="数据导入导出"
-        desc="书签保存在当前浏览器本地。清缓存、换电脑前请先导出 JSON 备份。"
+        desc="书签保存在你的账号云端，换设备登录同一账号即可看到。"
       />
       <div className="glass-card rounded-[20px] border border-line2/60 p-5">
         <div
@@ -270,12 +286,16 @@ export default function DataSection() {
                 取消
               </button>
               <button
-                onClick={confirmImport}
-                disabled={selectedCount === 0}
+                onClick={() => void confirmImport()}
+                disabled={selectedCount === 0 || importing}
                 className="flex h-9 items-center gap-1.5 rounded-[10px] bg-accent px-4 text-[13px] font-semibold text-white hover:bg-accent-ink disabled:opacity-40"
               >
-                <FileUp size={14} />
-                导入 {selectedCount} 条
+                {importing ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <FileUp size={14} />
+                )}
+                {importing ? '正在导入…' : `导入 ${selectedCount} 条`}
               </button>
             </div>
           </div>

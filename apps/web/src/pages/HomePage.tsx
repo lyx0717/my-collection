@@ -37,7 +37,7 @@ import ConfirmDialog from '../components/ConfirmDialog'
 const VIEW_KEY = 'mybookmarks:view'
 
 export default function HomePage() {
-  const { bookmarks, collections, seedLoading, removeBookmark, bulkUpdate, bulkRemove, reorderBookmarks } =
+  const { bookmarks, collections, loading, removeBookmark, bulkUpdate, bulkRemove, reorderBookmarks } =
     useBookmarks()
   const toast = useToast()
   const [params, setParams] = useSearchParams()
@@ -130,7 +130,7 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, params])
 
-  if (seedLoading) {
+  if (loading) {
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-3 bg-canvas text-ink3">
         <Loader2 size={26} className="animate-spin text-accent" />
@@ -288,7 +288,7 @@ export default function HomePage() {
                 count={visible.length}
                 collections={collections}
                 onMove={(collectionId) => {
-                  bulkUpdate(
+                  void bulkUpdate(
                     visible.map((b) => b.id),
                     { collectionId },
                   )
@@ -307,7 +307,7 @@ export default function HomePage() {
                 onSelectAll={toggleSelectAll}
                 onClear={exitBatch}
                 onMove={(collectionId) => {
-                  bulkUpdate([...selectedIds], { collectionId })
+                  void bulkUpdate([...selectedIds], { collectionId })
                   exitBatch()
                 }}
                 onDelete={() => setBatchDeleteOpen(true)}
@@ -378,7 +378,7 @@ export default function HomePage() {
                 ids={visibleIds}
                 view={view}
                 disabled={!dragEnabled}
-                onReorder={(orderedIds) => reorderBookmarks(orderedIds)}
+                onReorder={(orderedIds) => void reorderBookmarks(orderedIds)}
                 renderOverlay={(id) => {
                   const bm = visible.find((b) => b.id === id)
                   if (!bm) return null
@@ -454,7 +454,11 @@ export default function HomePage() {
       </main>
 
       {modal?.mode === 'add' && (
-        <BookmarkModal key="add" onClose={() => setModal(null)} />
+        <BookmarkModal
+          key="add"
+          onEditDuplicate={(b) => setModal({ mode: 'edit', bookmark: b })}
+          onClose={() => setModal(null)}
+        />
       )}
       {modal?.mode === 'edit' && (
         <BookmarkModal
@@ -479,7 +483,7 @@ export default function HomePage() {
           confirmText="删除"
           danger
           onConfirm={() => {
-            removeBookmark(deleting.id)
+            void removeBookmark(deleting.id)
             toast(`「${deleting.title}」已删除`)
             setDeleting(null)
           }}
@@ -494,7 +498,7 @@ export default function HomePage() {
           confirmText={`删除 ${selectedIds.size} 条`}
           danger
           onConfirm={() => {
-            bulkRemove([...selectedIds])
+            void bulkRemove([...selectedIds])
             setBatchDeleteOpen(false)
             exitBatch()
             toast(`已删除 ${selectedIds.size} 条书签`)

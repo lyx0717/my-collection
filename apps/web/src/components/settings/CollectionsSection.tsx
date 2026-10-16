@@ -99,7 +99,7 @@ export default function CollectionsSection({ onEdit, onCreate, onDelete }: Props
     const oldIndex = collections.findIndex((c) => c.id === active.id)
     const newIndex = collections.findIndex((c) => c.id === over.id)
     if (oldIndex === -1 || newIndex === -1) return
-    reorderCollections(arrayMove(collections, oldIndex, newIndex).map((c) => c.id))
+    void reorderCollections(arrayMove(collections, oldIndex, newIndex).map((c) => c.id))
   }
 
   return (
