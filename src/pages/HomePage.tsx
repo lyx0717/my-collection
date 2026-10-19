@@ -178,10 +178,14 @@ export default function HomePage() {
               {/* digits 传书签总数：筛选时计数在 0~总数之间跳，
                   按总数预留位数，99→100 这类进位也不会撑宽容器。 */}
               <CountUp value={visible.length} digits={String(bookmarks.length).length} /> 条
+              {/* 筛选时再给一个分母。计数只在标题旁出现一次 ——
+                  筛选框里曾经也放了一个，读起来像自动补全的候选数，已删。 */}
+              {hasActiveFilter && (
+                <span className="text-ink4"> / {bookmarks.length}</span>
+              )}
             </span>
               <BookmarkFilterInput
                 value={query}
-                count={visible.length}
                 onChange={(q) => updateParams((p) => (q ? p.set('q', q) : p.delete('q')))}
               />
               {/* 操作组：添加 / 多选 / 视图切换。
@@ -190,7 +194,7 @@ export default function HomePage() {
               <div className="ml-auto flex items-center gap-2.5">
                 <button
                   onClick={() => setModal({ mode: 'add' })}
-                  className="flex h-[34px] items-center gap-1.5 rounded-[12px] bg-accent px-3 text-[12.5px] font-semibold text-white shadow-[0_4px_12px_-5px_var(--accent-shadow)] transition-colors hover:bg-accent-ink"
+                  className="flex h-[34px] items-center gap-1.5 rounded-[10px] bg-accent px-3 text-[12.5px] font-semibold text-white shadow-[0_4px_12px_-5px_var(--accent-shadow)] transition-colors hover:bg-accent-ink"
                 >
                   <Plus size={14} strokeWidth={2.4} />
                   <span className="hidden sm:inline">添加书签</span>
@@ -238,14 +242,14 @@ export default function HomePage() {
                       aria-label={label}
                       title={batchMode ? '多选模式下不可切换视图' : label}
                       onClick={() => setView(mode)}
-                      className={`relative flex h-7 w-[30px] items-center justify-center rounded-[7px] ${
+                      className={`relative flex h-7 w-[30px] items-center justify-center rounded-[6px] ${
                         view === mode ? 'text-ink' : 'text-ink4'
                       }`}
                     >
                       {view === mode && (
                         <m.span
                           layoutId="view-pill"
-                          className="absolute inset-0 rounded-[7px] bg-surface shadow-[0_1px_3px_rgba(30,40,60,.12)]"
+                          className="absolute inset-0 rounded-[6px] bg-surface shadow-[0_1px_3px_rgba(30,40,60,.12)]"
                           transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.9 }}
                         />
                       )}

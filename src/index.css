@@ -74,8 +74,15 @@
   --glass-bg: rgba(255, 255, 255, 0.68);
   --glass-bg-soft: rgba(255, 255, 255, 0.6);
   --glass-bg-hover: rgba(255, 255, 255, 0.82);
-  --glass-bg-card: rgba(255, 255, 255, 0.68);
-  --glass-bg-card-hover: rgba(255, 255, 255, 0.84);
+  /* —— 卡片材质：实底 + 冷灰描边 ——
+     曾经是 68% 白 + 1px 白描边：描边与卡底合成后几乎是同一个白（对比 ≈1.0:1），
+     卡片与页面浅灰底也只差 9 个色阶（≈1.08:1），一屏 45 张卡的边界全靠
+     0.06 的阴影撑着，扫读时眼睛要先找边。改成实白底 + 低透明度冷灰描边后，
+     边界靠明度差而不是靠光，符合「扫描成本优先」的取舍。 */
+  --glass-bg-card: #ffffff;
+  --glass-bg-card-hover: #ffffff;
+  --card-line: rgba(60, 60, 67, 0.09);
+  --card-line-hover: rgba(60, 60, 67, 0.18);
   /* 浮层（弹窗）专用：底更实，保证表单文字压得住背后内容 */
   --glass-bg-sheet: rgba(255, 255, 255, 0.78);
   --glass-border-sheet: rgba(255, 255, 255, 0.9);
@@ -189,8 +196,10 @@
   --glass-bg: rgba(28, 28, 30, 0.62);
   --glass-bg-soft: rgba(28, 28, 30, 0.54);
   --glass-bg-hover: rgba(44, 44, 46, 0.72);
-  --glass-bg-card: rgba(28, 28, 30, 0.62);
-  --glass-bg-card-hover: rgba(44, 44, 46, 0.75);
+  --glass-bg-card: #1c1c1e;
+  --glass-bg-card-hover: #1c1c1e;
+  --card-line: rgba(255, 255, 255, 0.18);
+  --card-line-hover: rgba(255, 255, 255, 0.28);
   /* 深色下的 logo 容器底要「白一点」而非「黑一点」——
      深色底上叠黑色几乎看不出边界，反而像块脏斑。
      用极淡的白作为抬升，与 iOS 深色材质里「浅色＝更靠前」的惯例一致。 */
@@ -466,10 +475,14 @@ html[data-glass='on'] .glass-topbar-chips {
   box-shadow: var(--glass-shadow-nav);
 }
 
-/* —— 卡片与磁贴：常态即玻璃 ——
-   底 68% 白 + 1px 白描边 + 极淡阴影。
-   hover 只做两件事：底色提到 84%、阴影略深。不加位移、不加发光，
-   iOS 的按钮反馈就是「亮一点」而已。
+/* —— 卡片与磁贴 ——
+   实白底 + 冷灰描边 + 极淡阴影。hover 只做两件事：描边加深、阴影略深。
+   不加位移、不加发光，iOS 的按钮反馈就是「亮一点」而已。
+
+   材质从「68% 白 + 1px 白描边」改成实底，是因为白描边与半透明卡底合成后
+   几乎是同一个白（对比 ≈1.0:1），卡与页面浅灰底也只差 9 个色阶 ——
+   一屏 45 张卡的边界因此糊成一片雾。改实白 + 冷灰描边后边界靠明度差，
+   hover 的信号（描边 + 阴影）反而比以前更清楚。
 
    刻意不加 backdrop-filter —— 这是本项目最大的一处性能取舍，原因：
    一屏 40+ 张卡片 = 40+ 个独立 backdrop 层。每帧滚动浏览器都要
@@ -479,18 +492,17 @@ html[data-glass='on'] .glass-topbar-chips {
    叠加卡片自身还有 transform 过渡（hover 上浮），等于每帧都在重建图层。
 
    而这里省掉模糊几乎不损失观感：卡片背后是 body 的极淡氛围底纹，
-   本来就没有可辨识的细节，模糊一张纯色 ≈ 什么都不做，
-   真正撑起「玻璃感」的是半透明底色 + 白描边 + 投影这三样，
-   它们全部保留。毛玻璃只留给真正有内容可折射的 chrome / 顶栏 / 胶囊。 */
+   本来就没有可辨识的细节，模糊一张纯色 ≈ 什么都不做。
+   毛玻璃只留给真正有内容可折射的 chrome / 顶栏 / 胶囊。 */
 html[data-glass='on'] .glass-card {
   background-color: var(--glass-bg-card);
-  border-color: var(--glass-border);
+  border-color: var(--card-line);
   box-shadow: var(--glass-shadow);
 }
 
 html[data-glass='on'] .glass-card:hover {
   background-color: var(--glass-bg-card-hover);
-  border-color: var(--glass-border-hover);
+  border-color: var(--card-line-hover);
   box-shadow: var(--glass-highlight), var(--glass-shadow-hover);
 }
 
@@ -506,7 +518,7 @@ html[data-glass='on'] .tile-shell {
 
 html[data-glass='on'] .tile-shell:hover {
   background-color: var(--glass-bg-card-hover);
-  border-color: var(--glass-border-hover);
+  border-color: var(--card-line-hover);
   box-shadow: var(--glass-highlight), var(--glass-shadow-hover);
 }
 

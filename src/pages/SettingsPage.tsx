@@ -1,18 +1,14 @@
-import { useState, type ReactNode } from 'react'
-import { ArrowLeft, Folder, HardDrive, Info, Palette } from 'lucide-react'
+import { useState } from 'react'
 import { useBookmarks } from '../store/BookmarksContext'
 import { useToast } from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
 import CollectionModal from '../components/CollectionModal'
-import CapsuleNav, { type CapsuleNavItem } from '../components/CapsuleNav'
-import ThemeToggle from '../components/ThemeToggle'
+import DockBar from '../components/DockBar'
 import AppearanceSection from '../components/settings/AppearanceSection'
 import DataSection from '../components/settings/DataSection'
 import CollectionsSection from '../components/settings/CollectionsSection'
 import AboutSection from '../components/settings/AboutSection'
 import type { Collection } from '../types'
-
-type Section = 'appearance' | 'data' | 'collections' | 'about'
 
 type ConfirmState =
   | null
@@ -24,18 +20,11 @@ export default function SettingsPage() {
   const { collections, addCollection, renameCollection, removeCollection, resetToSeed, clearAll } =
     useBookmarks()
   const toast = useToast()
-  const [section, setSection] = useState<Section>('appearance')
   const [confirm, setConfirm] = useState<ConfirmState>(null)
+
   const [collectionModal, setCollectionModal] = useState<
     { mode: 'create' } | { mode: 'edit'; collection: Collection } | null
   >(null)
-
-  const navItems: Array<{ key: Section; label: string; icon: ReactNode }> = [
-    { key: 'appearance', label: '外观', icon: <Palette size={16} strokeWidth={1.8} /> },
-    { key: 'data', label: '数据导入导出', icon: <HardDrive size={16} strokeWidth={1.8} /> },
-    { key: 'collections', label: '分组管理', icon: <Folder size={16} strokeWidth={1.8} /> },
-    { key: 'about', label: '关于', icon: <Info size={16} strokeWidth={1.8} /> },
-  ]
 
   const submitCollection = (name: string, icon?: string) => {
     if (collectionModal?.mode === 'edit') {
@@ -50,57 +39,30 @@ export default function SettingsPage() {
   return (
     // 同 HomePage：不加 bg-canvas，否则会盖住 body 下的氛围光层
     <div className="min-h-dvh">
-      {/* 顶部通栏 fixed，与首页 DockBar 同一形态 */}
-      <header className="glass-chrome fixed inset-x-0 top-0 z-40 flex h-14 items-center border-b px-4 sm:px-6">
-        <div className="mx-auto flex w-full max-w-6xl items-center gap-2.5">
-          <a
-            href="#/"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[12px] text-ink2 transition-colors hover:bg-surface-2 hover:text-accent"
-            aria-label="返回书签"
-          >
-            <ArrowLeft size={17} />
-          </a>
-          <h1 className="text-[15px] font-bold">设置</h1>
-          {/* 与首页 DockBar 同一套明暗切换，放在返回键与内容之间 ——
-              改主题时往往就在设置页里，不该还要退回首页才切得了。 */}
-          <div className="ml-auto">
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
-
-      {/* fixed 顶栏不占文档流，垫一段等高空白，
-          否则下方 sticky 导航会整体上移 56px、压住内容。 */}
+      {/* 顶栏直接复用首页的 DockBar。
+          曾经这里是第二套顶栏（← + 「设置」15px），于是首页顶栏给的
+          「确定的头部锚点」被自己推翻，两个页面的头部高度与对齐都不一样。
+          复用后 logo 同时承担「回首页」，搜索、明暗、设置的位置也保持一致。
+          h-14 通栏 fixed 不占文档流，下面垫一段等高空白。 */}
+      <DockBar />
       <div aria-hidden className="h-14" />
-
-      {/* 导航：与首页分组导航共用 CapsuleNav，宽度同样按内容自适应居中。
-          sticky top-14 让它吸在通栏顶栏下方。
-          pointer-events-none + 胶囊内 auto：这条 sticky 带通栏占满，
-          而胶囊只有内容宽度，两侧空白若参与命中测试会吃掉下层内容的点击。 */}
-      <div className="pointer-events-none sticky top-14 z-30 px-4 py-3 sm:px-6">
-        <CapsuleNav
-          ariaLabel="设置导航"
-          items={navItems.map<CapsuleNavItem>((n) => ({
-            key: n.key,
-            label: n.label,
-            icon: n.icon,
-            active: section === n.key,
-            onClick: () => {
-              setSection(n.key)
-              document.getElementById(`sec-${n.key}`)?.scrollIntoView({ behavior: 'smooth' })
-            },
-          }))}
-          maxWidth="min(700px, calc(100vw - 32px))"
-        />
-      </div>
 
       {/* 内容宽度收到 760px：iOS 设置页是分组列表（约 390~430pt），
           过宽的设置页会让人失去「这是一份清单」的认知。
-          pt-6 让首个区块与吸顶胶囊拉开距离。
           space-y-14 给每个模块标题与上一个模块留出 56px 呼吸位 ——
-          原来四个 section 直接相邻，标题紧贴上一块卡片的底边，看着像同一块内容。 */}
-      <div className="mx-auto max-w-[760px] px-4 pt-5 pb-20 sm:px-6">
-        <div className="space-y-14 pt-4">
+          原来四个 section 直接相邻，标题紧贴上一块卡片的底边，看着像同一块内容。
+
+          这里不放分区跳转胶囊：四个分区总共两屏，而分区标题就在正文里。
+          曾经在标题上方再放一条「外观 / 数据导入导出 / 分组管理 / 关于」胶囊，
+          同一组词在 100px 内出现两次，导航反而成了噪音。各区段的
+          scroll-mt 锚点保留着，深链仍然可用。 */}
+      <div className="mx-auto max-w-[760px] px-4 pt-10 pb-20 sm:px-6">
+        {/* 大标题：与首页 h1 同级（22px）。
+            曾经把「设置」塞在顶栏里只有 15px，比分区标题 20px 还小，
+            第一眼认不出自己在哪一页 —— 层级倒挂。现在用 iOS 的大标题形式，
+            分区标题降到 15px，两者各归其位。 */}
+        <h1 className="mb-10 text-[22px] font-bold tracking-[-0.01em]">设置</h1>
+        <div className="space-y-14">
           <AppearanceSection />
           <DataSection />
           <CollectionsSection

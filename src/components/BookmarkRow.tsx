@@ -72,7 +72,13 @@ function RowBody({
               <span className="shrink-0">{collectionName}</span>
             </>
           )}
+          {/* 日期跟在域名同一行。曾经它 w-12 孤零零挂在行尾，
+              行宽 820px、内容止于 230px，中间空着 600px —— 眼睛要横跨整行
+              才能把日期和这条书签对上。放进描述行后自然读成「站 · 分组 · 时间」。 */}
+          <span className="h-[3px] w-[3px] shrink-0 rounded-full bg-line2" />
+          <span className="shrink-0 tabular-nums">{shortDate(bookmark.createdAt)}</span>
         </div>
+
         {bookmark.description && (
           <p
             className="mt-0.5 truncate text-[12px] leading-5 text-ink3"
@@ -83,22 +89,18 @@ function RowBody({
         )}
       </div>
 
-      <span className="hidden w-12 shrink-0 text-right text-[12px] tabular-nums text-ink3 sm:block">
-        {shortDate(bookmark.createdAt)}
-      </span>
-
       <div className="flex shrink-0 items-center gap-0.5">
         <button
           onClick={() => onEdit(bookmark)}
           aria-label={`编辑 ${bookmark.title}`}
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-ink4 opacity-100 transition-opacity hover:bg-canvas hover:text-ink2 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
+          className="flex h-[30px] w-[30px] items-center justify-center rounded-md text-ink4 opacity-100 transition-opacity hover:bg-canvas hover:text-ink2 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
         >
           <Pencil size={14} />
         </button>
         <button
           onClick={() => onDelete(bookmark)}
           aria-label={`删除 ${bookmark.title}`}
-          className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-ink4 opacity-100 transition-opacity hover:bg-danger/10 hover:text-danger lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
+          className="flex h-[30px] w-[30px] items-center justify-center rounded-md text-ink4 opacity-100 transition-opacity hover:bg-danger/10 hover:text-danger lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100"
         >
           <Trash2 size={14} />
         </button>

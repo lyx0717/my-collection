@@ -73,14 +73,14 @@ function CollectionRow({
         <button
           aria-label={`编辑分组 ${col.name}`}
           onClick={onEdit}
-          className="flex h-7 w-7 items-center justify-center rounded-[9px] text-ink3 transition-colors hover:bg-surface-2 hover:text-ink"
+          className="flex h-7 w-7 items-center justify-center rounded-[6px] text-ink3 transition-colors hover:bg-surface-2 hover:text-ink"
         >
           <Pencil size={14} />
         </button>
         <button
           aria-label={`删除分组 ${col.name}`}
           onClick={onDelete}
-          className="flex h-7 w-7 items-center justify-center rounded-[9px] text-ink3 transition-colors hover:bg-surface-2 hover:text-danger"
+          className="flex h-7 w-7 items-center justify-center rounded-[6px] text-ink3 transition-colors hover:bg-surface-2 hover:text-danger"
         >
           <Trash2 size={14} />
         </button>
@@ -134,7 +134,7 @@ export default function CollectionsSection({ onEdit, onCreate, onDelete }: Props
 
         <button
           onClick={onCreate}
-          className="mt-3 flex h-10 w-full items-center justify-center gap-1.5 rounded-[13px] border border-dashed border-line2 text-[13px] font-medium text-ink2 transition-colors hover:border-accent hover:text-accent"
+          className="mt-3 flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-line2 text-[13px] font-medium text-ink2 transition-colors hover:border-accent hover:text-accent"
         >
           ＋ 新建分组
         </button>

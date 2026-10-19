@@ -30,9 +30,9 @@ export default function DockBar() {
         <Link
           to="/"
           aria-label="回到书签首页"
-          className="flex shrink-0 items-center gap-2 rounded-[13px] pr-1 pl-0.5 transition-opacity hover:opacity-80"
+          className="flex shrink-0 items-center gap-2 rounded-[10px] pr-1 pl-0.5 transition-opacity hover:opacity-80"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-[9px] bg-accent shadow-[0_4px_12px_-4px_var(--accent-shadow)]">
+          <span className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-accent shadow-[0_4px_12px_-4px_var(--accent-shadow)]">
             <Bookmark size={14} className="text-white" fill="white" />
           </span>
           {/* 移动端隐藏站名：窄屏横向空间紧张（搜索框 + 主题 + 设置已占满），
@@ -53,7 +53,7 @@ export default function DockBar() {
           <Link
             to="/settings"
             aria-label="设置"
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] text-ink2 transition-colors hover:bg-surface-2 hover:text-accent ${
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-ink2 transition-colors hover:bg-surface-2 hover:text-accent ${
               pathname === '/settings' ? 'bg-accent-soft text-accent' : ''
             }`}
           >

@@ -116,44 +116,52 @@ export default function BookmarkGridCard({
           onClick={() => onOpen(bookmark)}
           title={bookmark.title}
           className={`min-w-0 text-left leading-[1.35] font-semibold text-ink transition-colors hover:text-accent ${
-            compact ? 'line-clamp-1 text-[12.5px]' : 'line-clamp-2 text-[13.5px]'
+            compact ? 'line-clamp-1 text-[13.5px]' : 'line-clamp-2 text-[14.5px]'
           }`}
         >
           {bookmark.title}
         </button>
 
-        <div
-          className="mt-1 flex min-w-0 items-center gap-1.5"
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          <span className="min-w-0 flex-1 truncate text-[11px] text-ink3">{bookmark.domain}</span>
-          <span className="flex shrink-0 items-center gap-0.5 opacity-100 transition-opacity lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
-            <button
-              onClick={() => onEdit(bookmark)}
-              aria-label={`编辑 ${bookmark.title}`}
-              className="flex h-6 w-6 items-center justify-center rounded-md text-ink3 hover:bg-canvas hover:text-ink"
-            >
-              <Pencil size={compact ? 11.5 : 12.5} />
-            </button>
-            <button
-              onClick={() => onDelete(bookmark)}
-              aria-label={`删除 ${bookmark.title}`}
-              className="flex h-6 w-6 items-center justify-center rounded-md text-ink3 hover:bg-danger/10 hover:text-danger"
-            >
-              <Trash2 size={compact ? 11.5 : 12.5} />
-            </button>
-          </span>
+        <div className="mt-1 flex min-w-0 items-center">
+          <span className="min-w-0 flex-1 truncate text-[11.5px] text-ink3">{bookmark.domain}</span>
         </div>
 
         {bookmark.description && (
           <p
             title={bookmark.description}
-            className="mt-1 line-clamp-2 min-w-0 text-[11px] leading-[1.45] text-ink3"
+            className="mt-1 line-clamp-2 min-w-0 text-[12px] leading-[1.45] text-ink3"
           >
             {bookmark.description}
           </p>
         )}
       </div>
+
+      {/* 编辑 / 删除：绝对定位浮在卡片右上角，不占文字列布局。
+          曾经它们排在域名行里，opacity:0 只改绘制不改布局，白占 50px + 6px 间距，
+          143px 的文字列只剩 87px 给域名 —— 148 条里 36% 被截成半个词。
+          代价是 hover 时按钮会盖住标题尾端，这是「动作随悬停浮出」的常规取舍。
+
+          pointer-events：不可见时也要禁用命中 —— opacity:0 只是看不见，
+          那块 52×24 的区域照样能点中，用户会在卡片空白处莫名其妙打开编辑框。 */}
+      <span
+        className="absolute top-1.5 right-1.5 flex items-center gap-0.5 opacity-100 transition-opacity lg:pointer-events-none lg:opacity-0 lg:group-hover:pointer-events-auto lg:group-hover:opacity-100 lg:group-focus-within:pointer-events-auto lg:group-focus-within:opacity-100"
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={() => onEdit(bookmark)}
+          aria-label={`编辑 ${bookmark.title}`}
+          className="flex h-6 w-6 items-center justify-center rounded-md text-ink3 hover:bg-canvas hover:text-ink"
+        >
+          <Pencil size={compact ? 11.5 : 12.5} />
+        </button>
+        <button
+          onClick={() => onDelete(bookmark)}
+          aria-label={`删除 ${bookmark.title}`}
+          className="flex h-6 w-6 items-center justify-center rounded-md text-ink3 hover:bg-danger/10 hover:text-danger"
+        >
+          <Trash2 size={compact ? 11.5 : 12.5} />
+        </button>
+      </span>
     </article>
   )
 }
