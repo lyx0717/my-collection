@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "我的书签 · 个人书签收藏网站（本地存储，GitHub Pages）",
+  "description": "狗蛋书签 · 个人书签收藏网站（本地存储，GitHub Pages）",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

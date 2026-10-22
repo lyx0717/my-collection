@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Bookmark, Settings } from 'lucide-react'
+import { Settings } from 'lucide-react'
 import EngineSearchBox from './EngineSearchBox'
 import ThemeToggle from './ThemeToggle'
 
@@ -32,13 +32,16 @@ export default function DockBar() {
           aria-label="回到书签首页"
           className="flex shrink-0 items-center gap-2 rounded-[10px] pr-1 pl-0.5 transition-opacity hover:opacity-80"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-accent shadow-[0_4px_12px_-4px_var(--accent-shadow)]">
-            <Bookmark size={14} className="text-white" fill="white" />
-          </span>
+          {/* 站点 logo：狗蛋（512px 源图缩到 28px 展示，object-cover 裁边） */}
+          <img
+            src="./avatar.png"
+            alt=""
+            className="h-7 w-7 rounded-[10px] object-cover shadow-[0_4px_12px_-4px_var(--accent-shadow)]"
+          />
           {/* 移动端隐藏站名：窄屏横向空间紧张（搜索框 + 主题 + 设置已占满），
               此时图标本身足以表意，留着「我的书签」只会把搜索框挤窄。
               用项目的 sm 断点（≤640px 隐藏），与全站响应式口径一致。 */}
-          <span className="text-[14px] font-bold whitespace-nowrap max-sm:hidden">我的书签</span>
+          <span className="text-[14px] font-bold whitespace-nowrap max-sm:hidden">狗蛋书签</span>
         </Link>
 
         {/* 搜索框固定上限 380px（组件内 maxWidth），宽屏不撑满、窄屏自适应缩窄 */}
