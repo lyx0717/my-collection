@@ -173,6 +173,16 @@ export const SEED_DATA: StoreShape = {
       "order": 12
     },
     {
+      "id": "bm_f537ec9b-1ba0-419e-ba65-625ba13a3e43",
+      "url": "https://itab.link",
+      "title": "iTab 新标签页",
+      "domain": "itab.link",
+      "createdAt": "2026-09-18T00:31:00.000Z",
+      "updatedAt": "2026-09-20T02:31:05.008Z",
+      "collectionId": "col_tool",
+      "order": 13
+    },
+    {
       "id": "bm_7b5141d0-5052-4f7b-a3a7-1b65e4f81b42",
       "url": "https://pan.baidu.com/",
       "title": "百度网盘",
@@ -180,7 +190,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:45:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 13
+      "order": 14
     },
     {
       "id": "bm_3665ca0c-46ea-4256-97d2-e78a69fae682",
@@ -188,16 +198,6 @@ export const SEED_DATA: StoreShape = {
       "title": "阿里云盘",
       "domain": "aliyundrive.com",
       "createdAt": "2026-09-18T00:44:00.000Z",
-      "updatedAt": "2026-09-20T02:33:23.643Z",
-      "collectionId": "col_tool",
-      "order": 14
-    },
-    {
-      "id": "bm_a56753eb-ea0b-4664-82a4-c46d2b6bad5c",
-      "url": "https://www.123pan.com/",
-      "title": "123 云盘",
-      "domain": "123pan.com",
-      "createdAt": "2026-09-18T00:43:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
       "order": 15
@@ -273,11 +273,11 @@ export const SEED_DATA: StoreShape = {
       "order": 22
     },
     {
-      "id": "bm_f6e67c34-6cb2-4786-8fa9-98d8d62ae352",
-      "url": "http://liuyan.people.com.cn/forum/list?fid=4659",
-      "title": "领导留言板",
-      "domain": "liuyan.people.com.cn",
-      "createdAt": "2026-09-18T00:35:00.000Z",
+      "id": "bm_a56753eb-ea0b-4664-82a4-c46d2b6bad5c",
+      "url": "https://www.123pan.com/",
+      "title": "123 云盘",
+      "domain": "123pan.com",
+      "createdAt": "2026-09-18T00:43:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
       "order": 23
@@ -303,6 +303,16 @@ export const SEED_DATA: StoreShape = {
       "order": 25
     },
     {
+      "id": "bm_f6e67c34-6cb2-4786-8fa9-98d8d62ae352",
+      "url": "http://liuyan.people.com.cn/forum/list?fid=4659",
+      "title": "领导留言板",
+      "domain": "liuyan.people.com.cn",
+      "createdAt": "2026-09-18T00:35:00.000Z",
+      "updatedAt": "2026-09-20T02:33:23.643Z",
+      "collectionId": "col_tool",
+      "order": 26
+    },
+    {
       "id": "bm_3b2e50f1-942e-4c70-aef5-b73581b94f7a",
       "url": "https://cli.im/url",
       "title": "草料二维码",
@@ -310,35 +320,25 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:32:00.000Z",
       "updatedAt": "2026-09-20T02:31:05.008Z",
       "collectionId": "col_tool",
-      "order": 26
-    },
-    {
-      "id": "bm_f537ec9b-1ba0-419e-ba65-625ba13a3e43",
-      "url": "https://itab.link",
-      "title": "iTab 新标签页",
-      "domain": "itab.link",
-      "createdAt": "2026-09-18T00:31:00.000Z",
-      "updatedAt": "2026-09-20T02:31:05.008Z",
-      "collectionId": "col_tool",
       "order": 27
     },
     {
       "id": "bm_6da3c8f7-1ffa-485a-8c8d-301c2e79596c",
-      "url": "https://chat.deepseek.com",
+      "url": "https://deepseek.com",
       "title": "DeepSeek",
-      "domain": "chat.deepseek.com",
+      "domain": "deepseek.com",
       "createdAt": "2026-09-18T00:30:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "updatedAt": "2026-10-22T05:16:26.771Z",
       "collectionId": "col_ai",
       "order": 28
     },
     {
       "id": "bm_4c54a292-7834-41b0-b083-2cc9be511b04",
-      "url": "https://www.doubao.com/chat/?channel=hw_db_itab&source=hw_db_itab",
+      "url": "https://doubao.com",
       "title": "豆包",
       "domain": "doubao.com",
       "createdAt": "2026-09-18T00:29:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "updatedAt": "2026-10-22T06:11:03.734Z",
       "collectionId": "col_ai",
       "order": 29
     },
@@ -355,11 +355,11 @@ export const SEED_DATA: StoreShape = {
     },
     {
       "id": "bm_d5005df1-1de7-4949-b6f8-54cc102fdb54",
-      "url": "https://yuanbao.tencent.com/chat/naQivTmsDa",
+      "url": "https://yuanbao.tencent.com",
       "title": "腾讯元宝",
       "domain": "yuanbao.tencent.com",
       "createdAt": "2026-09-18T00:27:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "updatedAt": "2026-10-22T06:11:37.046Z",
       "collectionId": "col_ai",
       "order": 31
     },
@@ -374,16 +374,6 @@ export const SEED_DATA: StoreShape = {
       "order": 32
     },
     {
-      "id": "bm_4797a0af-7212-4a38-ba94-03dd0da7aea1",
-      "url": "https://yiyan.baidu.com",
-      "title": "文心一言",
-      "domain": "yiyan.baidu.com",
-      "createdAt": "2026-09-18T00:25:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_ai",
-      "order": 33
-    },
-    {
       "id": "bm_8d02c6f3-2d95-4601-8a2a-ffb20ffe1f30",
       "url": "https://aistudio.xiaomimimo.com",
       "title": "Xiaomi MiMo",
@@ -391,7 +381,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:24:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 34
+      "order": 33
     },
     {
       "id": "bm_8ad816a8-00e4-4954-b44d-34b792d1994a",
@@ -401,7 +391,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:23:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 35
+      "order": 34
     },
     {
       "id": "bm_ecc19b96-06be-432b-8b5c-2e3c46d9f832",
@@ -411,47 +401,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:22:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 36
-    },
-    {
-      "id": "bm_6827f34d-094f-4c97-9d69-ecc90cabaf60",
-      "url": "https://clawhub.ai/skills?sort=downloads",
-      "title": "ClawHub",
-      "domain": "clawhub.ai",
-      "createdAt": "2026-09-18T00:21:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_ai",
-      "order": 37
-    },
-    {
-      "id": "bm_8d9beb1f-e70a-474b-a476-6bebd5412949",
-      "url": "https://cn.clawhub-mirror.com",
-      "title": "ClawHub 中文镜像",
-      "domain": "cn.clawhub-mirror.com",
-      "createdAt": "2026-09-18T00:20:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_ai",
-      "order": 38
-    },
-    {
-      "id": "bm_567d136a-dab3-4779-ad03-2a901d7760bb",
-      "url": "https://skillhub.tencent.com",
-      "title": "腾讯 SkillHub",
-      "domain": "skillhub.tencent.com",
-      "createdAt": "2026-09-18T00:19:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_ai",
-      "order": 39
-    },
-    {
-      "id": "bm_e70a37aa-dffe-4adb-a1bf-40ca67bfeeb7",
-      "url": "https://openclaw101.dev/zh",
-      "title": "OpenClaw 101",
-      "domain": "openclaw101.dev",
-      "createdAt": "2026-09-18T00:18:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_ai",
-      "order": 40
+      "order": 35
     },
     {
       "id": "bm_426c49f0-182d-48fd-a4f8-1f7277027870",
@@ -461,7 +411,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:17:00.000Z",
       "updatedAt": "2026-09-20T02:37:12.789Z",
       "collectionId": "col_ai",
-      "order": 41
+      "order": 36
     },
     {
       "id": "bm_fdf6a1db-f932-42f2-be28-a5990f6b5d62",
@@ -469,6 +419,56 @@ export const SEED_DATA: StoreShape = {
       "title": "即梦 AI",
       "domain": "dis.csqixiang.cn",
       "createdAt": "2026-09-18T00:16:00.000Z",
+      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "collectionId": "col_ai",
+      "order": 37
+    },
+    {
+      "id": "bm_73366c14-dceb-42d4-b797-94ffe6c125c5",
+      "url": "https://github.com/",
+      "title": "GitHub",
+      "domain": "github.com",
+      "createdAt": "2026-09-17T23:59:00.000Z",
+      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "collectionId": "col_dev",
+      "order": 38
+    },
+    {
+      "id": "bm_f6ccafa8-59d7-4850-bd2e-663fe27c0602",
+      "url": "https://console.volcengine.com/ark/region:cn-beijing/overview",
+      "title": "火山方舟控制台",
+      "domain": "console.volcengine.com",
+      "createdAt": "2026-09-18T00:14:00.000Z",
+      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "collectionId": "col_ai",
+      "order": 39
+    },
+    {
+      "id": "bm_fb076564-5986-41d4-ac54-f4f45659b40e",
+      "url": "https://bailian.console.aliyun.com/cn-beijing/?tab=coding-plan#/efm/detail",
+      "title": "阿里云百炼",
+      "domain": "bailian.console.aliyun.com",
+      "createdAt": "2026-09-18T00:13:00.000Z",
+      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "collectionId": "col_ai",
+      "order": 40
+    },
+    {
+      "id": "bm_9fac025e-9ca2-4b63-80f7-44f28b4201df",
+      "url": "https://openrouter.ai",
+      "title": "OpenRouter",
+      "domain": "openrouter.ai",
+      "createdAt": "2026-09-18T00:12:00.000Z",
+      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "collectionId": "col_ai",
+      "order": 41
+    },
+    {
+      "id": "bm_6faf5cf6-19a2-40e2-8573-29b50d46f3f8",
+      "url": "https://app.tavily.com/home",
+      "title": "Tavily API",
+      "domain": "app.tavily.com",
+      "createdAt": "2026-09-18T00:11:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
       "order": 42
@@ -484,56 +484,6 @@ export const SEED_DATA: StoreShape = {
       "order": 43
     },
     {
-      "id": "bm_f6ccafa8-59d7-4850-bd2e-663fe27c0602",
-      "url": "https://console.volcengine.com/ark/region:cn-beijing/overview",
-      "title": "火山方舟控制台",
-      "domain": "console.volcengine.com",
-      "createdAt": "2026-09-18T00:14:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_ai",
-      "order": 44
-    },
-    {
-      "id": "bm_fb076564-5986-41d4-ac54-f4f45659b40e",
-      "url": "https://bailian.console.aliyun.com/cn-beijing/?tab=coding-plan#/efm/detail",
-      "title": "阿里云百炼",
-      "domain": "bailian.console.aliyun.com",
-      "createdAt": "2026-09-18T00:13:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_ai",
-      "order": 45
-    },
-    {
-      "id": "bm_9fac025e-9ca2-4b63-80f7-44f28b4201df",
-      "url": "https://openrouter.ai",
-      "title": "OpenRouter",
-      "domain": "openrouter.ai",
-      "createdAt": "2026-09-18T00:12:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_ai",
-      "order": 46
-    },
-    {
-      "id": "bm_6faf5cf6-19a2-40e2-8573-29b50d46f3f8",
-      "url": "https://app.tavily.com/home",
-      "title": "Tavily API",
-      "domain": "app.tavily.com",
-      "createdAt": "2026-09-18T00:11:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_ai",
-      "order": 47
-    },
-    {
-      "id": "bm_103cae21-451c-47f2-bd7c-fa5dd65c5b71",
-      "url": "https://makerworld.com.cn/zh",
-      "title": "MakerWorld",
-      "domain": "makerworld.com.cn",
-      "createdAt": "2026-09-18T00:10:00.000Z",
-      "updatedAt": "2026-09-20T02:32:12.792Z",
-      "collectionId": "col_dev",
-      "order": 48
-    },
-    {
       "id": "bm_71c9267d-c0d6-49f3-8880-8857b1c90c46",
       "url": "https://hermes-agent.nousresearch.com",
       "title": "Hermes Agent",
@@ -541,7 +491,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:09:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 49
+      "order": 44
     },
     {
       "id": "bm_bc49de7e-8491-4793-bf0d-9c6965b49b9a",
@@ -551,7 +501,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:08:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 50
+      "order": 45
     },
     {
       "id": "bm_b5e9af8e-e4c9-44f8-b172-f6fad27aa72e",
@@ -561,7 +511,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:07:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 51
+      "order": 46
     },
     {
       "id": "bm_affcecbb-7a60-4ca7-86c5-8ebcfc520a99",
@@ -571,7 +521,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:06:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 52
+      "order": 47
     },
     {
       "id": "bm_8f9baa7f-ebed-4b4a-91c0-e98d4d6beb47",
@@ -581,7 +531,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:05:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 53
+      "order": 48
     },
     {
       "id": "bm_4abf1905-ccf0-4254-8b8e-12041183f065",
@@ -591,7 +541,17 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:04:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 54
+      "order": 49
+    },
+    {
+      "id": "bm_103cae21-451c-47f2-bd7c-fa5dd65c5b71",
+      "url": "https://makerworld.com.cn/zh",
+      "title": "MakerWorld",
+      "domain": "makerworld.com.cn",
+      "createdAt": "2026-09-18T00:10:00.000Z",
+      "updatedAt": "2026-09-20T02:32:12.792Z",
+      "collectionId": "col_dev",
+      "order": 50
     },
     {
       "id": "bm_ab446c60-3102-4491-a962-ec2539575fac",
@@ -601,7 +561,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:03:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 55
+      "order": 51
     },
     {
       "id": "bm_73a98559-5ada-4aca-a8d6-679bd21de57b",
@@ -611,17 +571,17 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:02:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 56
+      "order": 52
     },
     {
       "id": "bm_6f520a72-9181-4d90-ae98-beaa4e6704e9",
-      "url": "https://developers.weixin.qq.com/miniprogram/dev/api/",
-      "title": "微信开放文档（小程序）",
+      "url": "https://developers.weixin.qq.com/miniprogram/dev/api",
+      "title": "微信开放文档",
       "domain": "developers.weixin.qq.com",
       "createdAt": "2026-09-18T00:01:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "updatedAt": "2026-10-22T06:16:59.910Z",
       "collectionId": "col_dev",
-      "order": 57
+      "order": 53
     },
     {
       "id": "bm_12c039a6-032d-4faa-a7b9-6a5db08e8314",
@@ -631,17 +591,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-18T00:00:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 58
-    },
-    {
-      "id": "bm_73366c14-dceb-42d4-b797-94ffe6c125c5",
-      "url": "https://github.com/",
-      "title": "GitHub",
-      "domain": "github.com",
-      "createdAt": "2026-09-17T23:59:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_dev",
-      "order": 59
+      "order": 54
     },
     {
       "id": "bm_97db5aa6-e1d7-4718-8505-4e9675e78780",
@@ -651,7 +601,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:58:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 60
+      "order": 55
     },
     {
       "id": "bm_d6d6d471-c62f-4460-8c14-c37aaade47e3",
@@ -661,7 +611,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:57:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 61
+      "order": 56
     },
     {
       "id": "bm_6f0f4a9e-e2ce-4644-9576-c7763b125f7e",
@@ -671,7 +621,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:56:00.000Z",
       "updatedAt": "2026-10-12T06:10:49.761Z",
       "collectionId": "col_dev",
-      "order": 62
+      "order": 57
     },
     {
       "id": "bm_a4eaf6b4-820c-44f6-a878-8689f11cc83a",
@@ -681,7 +631,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:55:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 63
+      "order": 58
     },
     {
       "id": "bm_b9cc7eb9-04fa-4699-8290-3a56db993648",
@@ -691,7 +641,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:54:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 64
+      "order": 59
     },
     {
       "id": "bm_565abd27-cad7-4efb-8b52-78a40728d05e",
@@ -701,7 +651,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:53:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 65
+      "order": 60
     },
     {
       "id": "bm_33da6ab7-a93e-495e-a8d3-0a0b7b1b44c6",
@@ -711,7 +661,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:52:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 66
+      "order": 61
     },
     {
       "id": "bm_78748d86-fcfa-4287-ad76-9e57a937d933",
@@ -721,7 +671,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:51:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 67
+      "order": 62
     },
     {
       "id": "bm_3da7c496-5916-4614-99a9-87070287b534",
@@ -731,7 +681,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:50:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 68
+      "order": 63
     },
     {
       "id": "bm_7c995891-1e99-4433-8e60-357b627b7309",
@@ -741,7 +691,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:49:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 69
+      "order": 64
     },
     {
       "id": "bm_f0e8b4f5-7ca4-4e14-855a-bfd639c67988",
@@ -751,7 +701,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:48:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 70
+      "order": 65
     },
     {
       "id": "bm_062ad1fd-0e6a-4adb-96a0-f2fc7c9556f5",
@@ -761,7 +711,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:47:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 71
+      "order": 66
     },
     {
       "id": "bm_71b02775-e145-4131-bfd7-5ab13f48306e",
@@ -771,7 +721,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:46:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 72
+      "order": 67
     },
     {
       "id": "bm_491581a5-01c1-4ae1-8cd2-53bf850e0626",
@@ -781,7 +731,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:45:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 73
+      "order": 68
     },
     {
       "id": "bm_3d4123ef-3d1d-4001-a401-ae25775217c6",
@@ -791,7 +741,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:44:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 74
+      "order": 69
     },
     {
       "id": "bm_2541d6c0-995e-4ed3-8d66-4e444c8efc82",
@@ -801,7 +751,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:43:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 75
+      "order": 70
     },
     {
       "id": "bm_5473df10-e7e6-4102-aff2-ac38222e1252",
@@ -811,7 +761,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:42:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 76
+      "order": 71
     },
     {
       "id": "bm_78077d4b-f4b1-47dd-925b-4f93ed3d202b",
@@ -821,17 +771,17 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:41:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 77
+      "order": 72
     },
     {
       "id": "bm_325720f7-69c2-46fa-b312-954d59ccf424",
-      "url": "https://es6.ruanyifeng.com/",
-      "title": "ES6 入门教程（阮一峰）",
+      "url": "https://es6.ruanyifeng.com",
+      "title": "ES6 教程(阮一峰)",
       "domain": "es6.ruanyifeng.com",
       "createdAt": "2026-09-17T23:40:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "updatedAt": "2026-10-22T06:17:18.923Z",
       "collectionId": "col_dev",
-      "order": 78
+      "order": 73
     },
     {
       "id": "bm_f45f98e7-6c3b-4442-b0ff-b483b75cdea3",
@@ -841,7 +791,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:39:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 79
+      "order": 74
     },
     {
       "id": "bm_a78019fa-99e0-4f10-a577-e32c40aeebc2",
@@ -851,7 +801,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:38:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 80
+      "order": 75
     },
     {
       "id": "bm_bdac4294-f14c-4438-8961-bbac333e479b",
@@ -861,7 +811,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:37:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 81
+      "order": 76
     },
     {
       "id": "bm_f6d3af08-23d2-4d6d-a86f-ff35bbd31a61",
@@ -871,7 +821,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:36:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 82
+      "order": 77
     },
     {
       "id": "bm_f134298d-d1bc-464b-8307-ae9595c79da5",
@@ -881,7 +831,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:34:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 83
+      "order": 78
     },
     {
       "id": "bm_e2f0e776-7895-4ea3-aa47-2ff227b46bdf",
@@ -891,7 +841,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:33:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 84
+      "order": 79
     },
     {
       "id": "bm_0294cdea-cc93-4bbf-8124-9905f93ce4c8",
@@ -901,7 +851,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:32:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 85
+      "order": 80
     },
     {
       "id": "bm_6b4370ec-c812-4b23-a3e4-e63a5f2a047f",
@@ -911,7 +861,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:31:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 86
+      "order": 81
     },
     {
       "id": "bm_f6f27f8b-2e28-40e7-8316-eddd394809c9",
@@ -921,7 +871,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:30:00.000Z",
       "updatedAt": "2026-09-20T02:31:05.008Z",
       "collectionId": "col_life",
-      "order": 87
+      "order": 82
     },
     {
       "id": "bm_ebc535cf-fcfe-44cc-b2bc-85ac51ae5e9e",
@@ -931,7 +881,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:25:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 88
+      "order": 83
     },
     {
       "id": "bm_d82f3424-9a60-4aaa-8ef0-ad7be9397ed0",
@@ -941,7 +891,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:24:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 89
+      "order": 84
     },
     {
       "id": "bm_74131ea1-cf47-4c49-b160-584922e6d480",
@@ -951,7 +901,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:22:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 90
+      "order": 85
     },
     {
       "id": "bm_31459edb-bec7-4e4f-8a85-0007cb35e5e0",
@@ -961,7 +911,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:20:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 91
+      "order": 86
     },
     {
       "id": "bm_fb7d2a7f-6c5b-4edd-b32d-3cc2678de557",
@@ -971,7 +921,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:19:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_dev",
-      "order": 92
+      "order": 87
     },
     {
       "id": "bm_85fef999-b1e9-4f4e-bfd5-133bbc597835",
@@ -981,7 +931,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:18:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 93
+      "order": 88
     },
     {
       "id": "bm_b6bf7621-1883-43a3-b468-fb922a2f0330",
@@ -991,7 +941,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:17:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 94
+      "order": 89
     },
     {
       "id": "bm_364568b0-ca06-4a19-ae01-f21e6e1651fa",
@@ -1001,7 +951,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:16:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 95
+      "order": 90
     },
     {
       "id": "bm_4c901965-9067-4374-a434-a2fcf28689bf",
@@ -1011,7 +961,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:15:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 96
+      "order": 91
     },
     {
       "id": "bm_b60cd6da-32b3-4fbd-acb6-1ba7a690ee6f",
@@ -1021,7 +971,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:14:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 97
+      "order": 92
     },
     {
       "id": "bm_4d6a1e6f-c79d-4f5d-81da-b573c7632ca6",
@@ -1031,7 +981,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:13:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 98
+      "order": 93
     },
     {
       "id": "bm_d5c74955-da4e-4e6a-8bc4-4a89fcb367e0",
@@ -1041,7 +991,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:12:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 99
+      "order": 94
     },
     {
       "id": "bm_0ed3cc5e-2df8-489e-a2be-e2ffc4cc8874",
@@ -1051,7 +1001,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:11:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 100
+      "order": 95
     },
     {
       "id": "bm_cfacac6c-d52d-4c6e-84b0-b76edd3072b4",
@@ -1061,7 +1011,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:10:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 101
+      "order": 96
     },
     {
       "id": "bm_4e439e0b-9ee3-409f-9402-1580d1921c6e",
@@ -1071,7 +1021,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:09:00.000Z",
       "updatedAt": "2026-09-20T02:37:52.579Z",
       "collectionId": "col_work",
-      "order": 102
+      "order": 97
     },
     {
       "id": "bm_a034f60d-4bb1-47bc-89c1-f133dac4caae",
@@ -1081,7 +1031,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:08:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 103
+      "order": 98
     },
     {
       "id": "bm_5cad0660-94ff-42e9-8dbc-56101f93f1f5",
@@ -1091,7 +1041,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:07:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 104
+      "order": 99
     },
     {
       "id": "bm_c19d9ee5-f74a-451f-ace4-15c109684e18",
@@ -1101,7 +1051,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:06:00.000Z",
       "updatedAt": "2026-09-20T06:08:48.231Z",
       "collectionId": "col_work",
-      "order": 105
+      "order": 100
     },
     {
       "id": "bm_0fa77182-54ef-4695-8e82-ea438dd6a2b5",
@@ -1111,7 +1061,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:05:00.000Z",
       "updatedAt": "2026-09-20T06:08:58.839Z",
       "collectionId": "col_work",
-      "order": 106
+      "order": 101
     },
     {
       "id": "bm_cc6c36f2-2101-44ce-ab67-0a8d3a9d733a",
@@ -1121,7 +1071,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:04:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 107
+      "order": 102
     },
     {
       "id": "bm_3b79f54d-3d48-49dd-a011-d34f7c7f5814",
@@ -1131,7 +1081,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:03:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 108
+      "order": 103
     },
     {
       "id": "bm_5ece2925-2160-47d6-b2e4-254b6f43b16b",
@@ -1141,7 +1091,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:02:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 109
+      "order": 104
     },
     {
       "id": "bm_2d8c0529-749d-47e5-926f-3691cf77aa21",
@@ -1151,7 +1101,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T23:01:00.000Z",
       "updatedAt": "2026-09-20T02:37:52.579Z",
       "collectionId": "col_work",
-      "order": 110
+      "order": 105
     },
     {
       "id": "bm_599a3b26-07a5-4552-9398-bf611f475ab3",
@@ -1161,7 +1111,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:59:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 111
+      "order": 106
     },
     {
       "id": "bm_3edc195f-ba5e-40c5-9a08-0cb95e8dab28",
@@ -1171,7 +1121,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:58:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_work",
-      "order": 112
+      "order": 107
     },
     {
       "id": "bm_b887d21d-1769-4d2b-95df-4b437750f1d8",
@@ -1181,7 +1131,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:57:00.000Z",
       "updatedAt": "2026-10-12T06:18:21.602Z",
       "collectionId": "col_work",
-      "order": 113,
+      "order": 108,
       "description": "SIM"
     },
     {
@@ -1192,7 +1142,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:56:00.000Z",
       "updatedAt": "2026-10-12T06:18:14.846Z",
       "collectionId": "col_work",
-      "order": 114,
+      "order": 109,
       "description": "Demo"
     },
     {
@@ -1203,7 +1153,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:55:00.000Z",
       "updatedAt": "2026-10-12T06:17:54.661Z",
       "collectionId": "col_work",
-      "order": 115,
+      "order": 110,
       "description": "生产"
     },
     {
@@ -1214,7 +1164,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:54:00.000Z",
       "updatedAt": "2026-10-12T06:22:03.604Z",
       "collectionId": "col_work",
-      "order": 116,
+      "order": 111,
       "description": "SIM"
     },
     {
@@ -1225,7 +1175,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:53:00.000Z",
       "updatedAt": "2026-10-12T06:17:33.471Z",
       "collectionId": "col_work",
-      "order": 117,
+      "order": 112,
       "description": "SIM"
     },
     {
@@ -1236,7 +1186,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:52:00.000Z",
       "updatedAt": "2026-10-12T06:17:24.506Z",
       "collectionId": "col_work",
-      "order": 118,
+      "order": 113,
       "description": "SIM"
     },
     {
@@ -1247,7 +1197,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:51:00.000Z",
       "updatedAt": "2026-09-20T02:29:58.169Z",
       "collectionId": "col_life",
-      "order": 119
+      "order": 114
     },
     {
       "id": "bm_463390d1-6e7b-4bae-adfa-de83e4eb3eda",
@@ -1257,7 +1207,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:50:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 120
+      "order": 115
     },
     {
       "id": "bm_83899fde-e88d-45b8-986d-2fe92a78909b",
@@ -1267,7 +1217,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:49:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 121
+      "order": 116
     },
     {
       "id": "bm_4b05ba0e-98b1-4523-bd36-01e887c2ca64",
@@ -1277,7 +1227,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:47:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 122
+      "order": 117
     },
     {
       "id": "bm_039c36a5-5071-4807-b8d2-f92a032288a0",
@@ -1287,7 +1237,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:46:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 123
+      "order": 118
     },
     {
       "id": "bm_33c10bce-8826-42f1-bc26-e807b5d6adc7",
@@ -1297,7 +1247,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:45:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 124
+      "order": 119
     },
     {
       "id": "bm_72826775-be00-4b08-92f8-976287414545",
@@ -1307,7 +1257,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:44:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 125
+      "order": 120
     },
     {
       "id": "bm_70af9b00-8c01-4ec3-a5fa-5e1f25360f20",
@@ -1317,7 +1267,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:43:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 126
+      "order": 121
     },
     {
       "id": "bm_8a9e4c98-61d9-4779-aeba-a761f56e030a",
@@ -1327,7 +1277,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:42:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 127
+      "order": 122
     },
     {
       "id": "bm_a7118dc9-27d9-4f36-81d9-95ae41327c13",
@@ -1337,7 +1287,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:41:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 128
+      "order": 123
     },
     {
       "id": "bm_9ed736e6-4d01-49b5-b983-3e4791aa6311",
@@ -1347,7 +1297,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:37:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_tool",
-      "order": 129
+      "order": 124
     },
     {
       "id": "bm_e15ab312-1c9c-4ec3-83d7-56ccee0ecdc5",
@@ -1357,7 +1307,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:34:00.000Z",
       "updatedAt": "2026-09-20T02:33:23.643Z",
       "collectionId": "col_life",
-      "order": 130
+      "order": 125
     },
     {
       "id": "bm_f73d4920-860e-403a-8045-d822fe11fdb7",
@@ -1367,7 +1317,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:33:00.000Z",
       "updatedAt": "2026-09-20T02:34:29.313Z",
       "collectionId": "col_sci",
-      "order": 131
+      "order": 126
     },
     {
       "id": "bm_bb78abb1-6794-4285-a2fe-9c70566863af",
@@ -1377,7 +1327,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:32:00.000Z",
       "updatedAt": "2026-09-20T02:34:29.313Z",
       "collectionId": "col_life",
-      "order": 132
+      "order": 127
     },
     {
       "id": "bm_f9b0ff0e-3650-447b-8b73-4c7b144caa0a",
@@ -1387,7 +1337,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:31:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 133
+      "order": 128
     },
     {
       "id": "bm_38ee1950-723b-4ac4-8a68-7bc0090acf89",
@@ -1397,7 +1347,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:30:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 134
+      "order": 129
     },
     {
       "id": "bm_47a94c25-b19d-4ec0-9335-44745e8298b8",
@@ -1407,7 +1357,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:29:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 135
+      "order": 130
     },
     {
       "id": "bm_acbded71-1169-4ad9-93f3-c23951229b91",
@@ -1417,7 +1367,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:28:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 136
+      "order": 131
     },
     {
       "id": "bm_0a382101-b639-45b2-9dc7-7b40ef4acb02",
@@ -1427,7 +1377,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:27:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 137
+      "order": 132
     },
     {
       "id": "bm_71cddd61-efb9-45a1-a728-3150f1699eac",
@@ -1437,7 +1387,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:26:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 138
+      "order": 133
     },
     {
       "id": "bm_e07fc300-18de-4d20-acd2-8f350bb8f757",
@@ -1447,7 +1397,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:25:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 139
+      "order": 134
     },
     {
       "id": "bm_8f91939d-2bc3-4d06-9c95-dfed77860c40",
@@ -1457,37 +1407,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:24:00.000Z",
       "updatedAt": "2026-09-20T02:34:45.563Z",
       "collectionId": "col_sci",
-      "order": 140
-    },
-    {
-      "id": "bm_bcd049f4-7e4f-4862-aee3-83728f185fd2",
-      "url": "https://gemini.google.com/",
-      "title": "Gemini",
-      "domain": "gemini.google.com",
-      "createdAt": "2026-09-17T22:23:00.000Z",
-      "updatedAt": "2026-09-18T07:40:18.183Z",
-      "collectionId": "col_ai",
-      "order": 141
-    },
-    {
-      "id": "bm_f77fced0-fba0-49ab-a400-8d7e77a2542a",
-      "url": "https://www.instagram.com/",
-      "title": "Instagram",
-      "domain": "instagram.com",
-      "createdAt": "2026-09-17T22:21:00.000Z",
-      "updatedAt": "2026-09-20T02:34:45.563Z",
-      "collectionId": "col_sci",
-      "order": 142
-    },
-    {
-      "id": "bm_002e87ef-eaff-4386-9215-beeacf2c094d",
-      "url": "https://x.com",
-      "title": "X (Twitter)",
-      "domain": "x.com",
-      "createdAt": "2026-09-17T22:20:00.000Z",
-      "updatedAt": "2026-09-20T02:34:45.563Z",
-      "collectionId": "col_sci",
-      "order": 143
+      "order": 135
     },
     {
       "id": "bm_1b721fec-4607-477b-9135-875f4a5e31cb",
@@ -1497,7 +1417,37 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:19:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 144
+      "order": 136
+    },
+    {
+      "id": "bm_f77fced0-fba0-49ab-a400-8d7e77a2542a",
+      "url": "https://www.instagram.com/",
+      "title": "Instagram",
+      "domain": "instagram.com",
+      "createdAt": "2026-09-17T22:21:00.000Z",
+      "updatedAt": "2026-09-20T02:34:45.563Z",
+      "collectionId": "col_sci",
+      "order": 137
+    },
+    {
+      "id": "bm_002e87ef-eaff-4386-9215-beeacf2c094d",
+      "url": "https://x.com",
+      "title": "X (Twitter)",
+      "domain": "x.com",
+      "createdAt": "2026-09-17T22:20:00.000Z",
+      "updatedAt": "2026-09-20T02:34:45.563Z",
+      "collectionId": "col_sci",
+      "order": 138
+    },
+    {
+      "id": "bm_bcd049f4-7e4f-4862-aee3-83728f185fd2",
+      "url": "https://gemini.google.com/",
+      "title": "Gemini",
+      "domain": "gemini.google.com",
+      "createdAt": "2026-09-17T22:23:00.000Z",
+      "updatedAt": "2026-09-18T07:40:18.183Z",
+      "collectionId": "col_ai",
+      "order": 139
     },
     {
       "id": "bm_dbf75dcb-fda7-4e56-8d53-04cba9d1e544",
@@ -1507,7 +1457,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:18:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_ai",
-      "order": 145
+      "order": 140
     },
     {
       "id": "bm_9ea42536-b270-4e0b-a6f8-c76fd5c68eff",
@@ -1517,7 +1467,7 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:17:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 146
+      "order": 141
     },
     {
       "id": "bm_fd926000-5e26-42b3-8b4f-338f84b30f45",
@@ -1527,7 +1477,40 @@ export const SEED_DATA: StoreShape = {
       "createdAt": "2026-09-17T22:16:00.000Z",
       "updatedAt": "2026-09-18T07:40:18.183Z",
       "collectionId": "col_sci",
-      "order": 147
+      "order": 142
+    },
+    {
+      "id": "bm_de84134a-250f-4a80-944f-40a74a682a30",
+      "url": "https://themoviedb.org/settings/api",
+      "title": "TMDB",
+      "description": "电影电视节目数据库",
+      "cover": "https://www.themoviedb.org/assets/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg",
+      "collectionId": "col_ai",
+      "domain": "themoviedb.org",
+      "createdAt": "2026-10-15T01:42:49.028Z",
+      "updatedAt": "2026-10-22T06:15:02.450Z",
+      "order": 143
+    },
+    {
+      "id": "bm_1dcf53c4-5ed8-4ddf-bc6c-3fb401e52295",
+      "url": "https://minireel.weppp.cyou:54267",
+      "title": "短剧",
+      "description": "各设备播放器都有",
+      "collectionId": "col_life",
+      "domain": "minireel.weppp.cyou",
+      "createdAt": "2026-10-16T03:13:07.013Z",
+      "updatedAt": "2026-10-16T03:14:09.936Z",
+      "order": 144
+    },
+    {
+      "id": "bm_ed082030-6ff9-4ec6-9b68-5110e0624d6a",
+      "url": "https://klingai.com",
+      "title": "可灵",
+      "collectionId": "col_ai",
+      "domain": "klingai.com",
+      "createdAt": "2026-10-22T06:14:26.981Z",
+      "updatedAt": "2026-10-22T06:14:36.977Z",
+      "order": 145
     }
   ]
 }
