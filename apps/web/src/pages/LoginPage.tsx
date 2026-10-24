@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Bookmark, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { ApiError } from '../lib/api'
 import { useAuth } from '../store/AuthContext'
 
@@ -39,10 +39,14 @@ export default function LoginPage() {
     <div className="flex min-h-dvh items-center justify-center px-4 py-10">
       <div className="glass-card w-full max-w-[380px] rounded-[20px] border p-7">
         <div className="mb-6 flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-accent shadow-[0_4px_12px_-4px_var(--accent-shadow)]">
-            <Bookmark size={15} className="text-white" fill="white" />
-          </span>
-          <span className="text-[15px] font-bold">我的书签</span>
+          <img
+            src="./avatar-112.png"
+            alt=""
+            width={32}
+            height={32}
+            className="h-8 w-8 rounded-[10px] object-cover shadow-[0_4px_12px_-4px_var(--accent-shadow)]"
+          />
+          <span className="text-[15px] font-bold">狗蛋书签</span>
         </div>
 
         <div className="mb-5 flex rounded-[10px] bg-segment p-[3px]">
