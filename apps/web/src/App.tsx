@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
+import ResetPage from './pages/ResetPage'
 import AddRouteGate from './components/AddRouteGate'
 import RequireAuth from './components/RequireAuth'
 
@@ -13,6 +14,8 @@ export default function App() {
     <>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        {/* 重置页必须放在 RequireAuth 之外：忘密码时本来就没登录态 */}
+        <Route path="/reset" element={<ResetPage />} />
         <Route
           path="/"
           element={

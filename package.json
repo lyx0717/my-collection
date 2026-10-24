@@ -14,5 +14,11 @@
     "migrate": "pnpm --filter @my-collection/api migrate",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck"
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-uri@3": "3.1.9",
+      "fast-uri@4": "4.2.3"
+    }
   }
 }

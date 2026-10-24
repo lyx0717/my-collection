@@ -8,6 +8,10 @@ import collectionRoutes from './routes/collections'
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
     logger: process.env.NODE_ENV === 'test' ? false : { level: 'info' },
+    // nginx 用 proxy_set_header 转发了 X-Real-IP / X-Forwarded-For。
+    // 不开 trustProxy 的话 req.ip 永远是 127.0.0.1，按 IP 限流会把所有用户算成同一个来源。
+    // 只在 127.0.0.1 前面挂反代（/opt/gateway/nginx），因此信任回环即可。
+    trustProxy: '127.0.0.1',
   })
 
   // 必须在任何 register 之前：Fastify 在路由注册时（after 回调里）就把上下文的

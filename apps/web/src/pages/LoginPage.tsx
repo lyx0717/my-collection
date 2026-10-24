@@ -112,6 +112,21 @@ export default function LoginPage() {
             ? '还没有账号？切到「注册」，只要邮箱和密码。'
             : '注册后即为登录状态，书签保存在你自己的服务器上。'}
         </p>
+
+        {/* 忘密码没有自助找回：本站不发邮件，链接要在服务器上生成。
+            折叠起来，不占主要视线。 */}
+        {mode === 'login' && (
+          <details className="mt-3 text-[11.5px] leading-5 text-ink3">
+            <summary className="cursor-pointer select-none hover:text-ink2">忘记密码？</summary>
+            <p className="mt-1.5">
+              在服务器上执行{' '}
+              <code className="rounded-[4px] bg-surface-2 px-1 py-0.5 font-mono text-[11px] text-ink2">
+                node dist/reset.js 你的邮箱
+              </code>{' '}
+              会得到一个 15 分钟内有效的重置链接。
+            </p>
+          </details>
+        )}
       </div>
     </div>
   )

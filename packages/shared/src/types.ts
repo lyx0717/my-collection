@@ -72,6 +72,7 @@ export type ErrorCode =
   | 'UNAUTHENTICATED'
   | 'NOT_FOUND'
   | 'CONFLICT'
+  | 'RATE_LIMITED'
   | 'INTERNAL'
 
 /** 统一错误响应体 */

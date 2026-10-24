@@ -19,4 +19,6 @@ export const config = {
   host: process.env.HOST ?? '127.0.0.1',
   // 纯 http 访问时必须为 false，否则浏览器不会保存 cookie，登录会静默失败
   cookieSecure: process.env.COOKIE_SECURE === 'true',
+  // 站点对外地址，只用于命令行工具拼重置链接（如 http://121.36.46.119）
+  publicBaseUrl: process.env.PUBLIC_BASE_URL?.replace(/\/$/, ''),
 }
