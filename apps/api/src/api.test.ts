@@ -236,6 +236,141 @@ describe.skipIf(!ready)('API 集成', () => {
     expect(library.json().collections).toHaveLength(0)
   })
 
+
+  describe('批量操作', () => {
+    // 独立用户，避免和前面的用例互相影响
+    const mailC = `c${run}@test.local`
+    let tokenC = ''
+    let colA = ''
+    /** 建一条书签并返回 id */
+    const mk = async (url: string, title: string): Promise<string> => {
+      const res = await call('POST', '/bookmarks', { token: tokenC, payload: { url, title } })
+      expect(res.statusCode).toBe(201)
+      // 响应体是 { bookmark: {...} }，别直接取 .id
+      return res.json().bookmark.id
+    }
+
+    beforeAll(async () => {
+      const reg = await call('POST', '/auth/register', { payload: { email: mailC, password: passA } })
+      tokenC = tokenOf(reg)
+      const col = await call('POST', '/collections', { token: tokenC, payload: { name: '待整理' } })
+      expect(col.statusCode).toBe(201)
+      colA = col.json().collection.id
+    })
+
+    it('批量移动到分组，id 全部生效', async () => {
+      const a = await mk('https://bulk1.example.com', '一')
+      const b = await mk('https://bulk2.example.com', '二')
+
+      const res = await call('PATCH', '/bookmarks/bulk', {
+        token: tokenC,
+        payload: { ids: [a, b], patch: { collectionId: colA } },
+      })
+      expect(res.statusCode).toBe(200)
+      expect(res.json().updated).toBe(2)
+
+      const lib = await call('GET', '/library', { token: tokenC })
+      const moved = lib.json().bookmarks.filter((x: { id: string }) => x.id === a || x.id === b)
+      expect(moved.every((x: { collectionId: string }) => x.collectionId === colA)).toBe(true)
+    })
+
+    it('collectionId 传 null 表示移出分组', async () => {
+      const a = await mk('https://bulk3.example.com', '三')
+      await call('PATCH', '/bookmarks/bulk', {
+        token: tokenC,
+        payload: { ids: [a], patch: { collectionId: colA } },
+      })
+
+      const res = await call('PATCH', '/bookmarks/bulk', {
+        token: tokenC,
+        payload: { ids: [a], patch: { collectionId: null } },
+      })
+      expect(res.statusCode).toBe(200)
+
+      const lib = await call('GET', '/library', { token: tokenC })
+      const item = lib.json().bookmarks.find((x: { id: string }) => x.id === a)
+      // 服务端用 stripNulls 把为 null 的可选字段整个删掉，所以移出分组后是 undefined 而非 null
+      expect(item.collectionId).toBeUndefined()
+      expect(item).not.toHaveProperty('collectionId')
+    })
+
+    it('批量删除', async () => {
+      const a = await mk('https://bulk4.example.com', '四')
+      const b = await mk('https://bulk5.example.com', '五')
+
+      const res = await call('POST', '/bookmarks/bulk-delete', { token: tokenC, payload: { ids: [a, b] } })
+      expect(res.statusCode).toBe(200)
+      expect(res.json().deleted).toBe(2)
+
+      const lib = await call('GET', '/library', { token: tokenC })
+      expect(lib.json().bookmarks.some((x: { id: string }) => x.id === a)).toBe(false)
+    })
+
+    it('批量更新只影响自己的书签，别人的 id 混进来不生效也不会报错', async () => {
+      const mine = await mk('https://bulk6.example.com', '六')
+      // museum 用 A 的书签 id（bookmarkId 是主用例建的）
+      const res = await call('PATCH', '/bookmarks/bulk', {
+        token: tokenC,
+        payload: { ids: [mine, bookmarkId], patch: { collectionId: colA } },
+      })
+      expect(res.statusCode).toBe(200)
+      expect(res.json().updated).toBe(1) // 只有自己的那条
+
+      // A 的那条完全没被动过
+      const aLib = await call('GET', '/library', { token: tokenA })
+      const aItem = aLib.json().bookmarks.find((x: { id: string }) => x.id === bookmarkId)
+      expect(aItem?.collectionId ?? null).toBeNull()
+    })
+
+    it('批量删除不会删掉别人的书签', async () => {
+      const before = await call('GET', '/library', { token: tokenA })
+      const aCount = before.json().bookmarks.length
+
+      const res = await call('POST', '/bookmarks/bulk-delete', {
+        token: tokenC,
+        payload: { ids: [bookmarkId] },
+      })
+      expect(res.statusCode).toBe(200)
+      expect(res.json().deleted).toBe(0)
+
+      const after = await call('GET', '/library', { token: tokenA })
+      expect(after.json().bookmarks.length).toBe(aCount)
+    })
+
+    it('移动到别人的分组会被拒绝', async () => {
+      const colB = await call('POST', '/collections', { token: tokenB, payload: { name: 'B 的分组' } })
+      expect(colB.statusCode).toBe(201)
+      const mine = await mk('https://bulk7.example.com', '七')
+
+      const res = await call('PATCH', '/bookmarks/bulk', {
+        token: tokenC,
+        payload: { ids: [mine], patch: { collectionId: colB.json().collection.id } },
+      })
+      expect(res.statusCode).toBe(404)
+    })
+
+    it('ids 不是合法 uuid 时返回 400', async () => {
+      const res = await call('POST', '/bookmarks/bulk-delete', {
+        token: tokenC,
+        payload: { ids: ['not-a-uuid'] },
+      })
+      expect(res.statusCode).toBe(400)
+    })
+
+    it('空数组不报错，但也不做任何事', async () => {
+      const res = await call('POST', '/bookmarks/bulk-delete', { token: tokenC, payload: { ids: [] } })
+      expect(res.statusCode).toBe(200)
+      expect(res.json().deleted).toBe(0)
+    })
+
+    it('未登录不能批量操作', async () => {
+      const del = await call('POST', '/bookmarks/bulk-delete', { payload: { ids: [bookmarkId] } })
+      expect(del.statusCode).toBe(401)
+      const mv = await call('PATCH', '/bookmarks/bulk', { payload: { ids: [bookmarkId], patch: {} } })
+      expect(mv.statusCode).toBe(401)
+    })
+  })
+
   it('登出后会话失效', async () => {
     expect((await call('POST', '/auth/logout', { token: tokenB })).statusCode).toBe(204)
     expect((await call('GET', '/auth/me', { token: tokenB })).statusCode).toBe(401)
