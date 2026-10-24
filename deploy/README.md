@@ -1,4 +1,8 @@
-# 生产部署（腾讯云轻量服务器）
+# 生产部署（腾讯云轻量服务器 · Docker Compose）
+
+> ⚠️ **本项目当前实际跑在华为云 Flexus（IP 121.36.46.119），用宿主机 systemd + nginx + PostgreSQL，不是本文件描述的 Docker 方案。**
+> 华为云那套的完整文档见 [`HUAWEI-CLOUD.md`](./HUAWEI-CLOUD.md)，一键脚本 `install-huawei.sh`。
+> 本文件保留的是早期的腾讯云 Docker 方案，仅作参考，与线上现状不一致。
 
 ## 拓扑
 
