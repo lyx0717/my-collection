@@ -46,16 +46,19 @@ export default function EngineSearchBox() {
   return (
     // 固定上限 380px：宽屏时不撑满整条顶栏（之前 flex-1 会一直拉到最右端，
     // 看着像被拉长的输入条）；窄屏时靠 w-full 自适应缩窄。
-    <div className="flex h-9 w-full min-w-0 max-w-[600px] items-center gap-1 rounded-[13px] border border-line bg-canvas/70 pl-2 pr-1 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_3px_var(--accent-ring)]">
-      {/* 引擎切换 */}
+    <div className="flex h-9 w-full min-w-0 max-w-[600px] items-center gap-1 rounded-[10px] border border-line bg-canvas/70 pl-2 pr-1 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_3px_var(--accent-ring)]">
+      {/* 引擎切换：只留 favicon + 箭头，引擎名交给输入框 placeholder。
+          曾经这里是「favicon + 中文名 + 箭头」≈90px，常驻顶栏第二显眼的位置，
+          而它一个月才切一次。名字并不丢失 —— placeholder 一直是
+          「搜网页：必应（回车打开）」，顺便还说明了回车这个动作。 */}
       <div className="relative shrink-0" ref={menuRef}>
         <button
           onClick={() => setMenuOpen((v) => !v)}
-          className="flex h-[28px] items-center gap-1.5 rounded-[9px] bg-surface/80 px-2 text-[12.5px] font-semibold text-ink2 shadow-[0_1px_2px_rgba(30,40,60,.06)] transition-colors hover:text-accent"
+          title={`搜索引擎：${active.name}`}
+          className="flex h-[28px] w-[34px] items-center justify-center gap-1 rounded-[6px] text-ink2 transition-colors hover:bg-surface hover:text-accent"
         >
           <Favicon domain={engineDomain(active)} title={active.name} size="sm" />
-          {active.name}
-          <ChevronDown size={13} className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown size={12} className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {menuOpen && (
@@ -155,7 +158,7 @@ export default function EngineSearchBox() {
         <button
           onClick={() => setQuery('')}
           aria-label="清空"
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[9px] text-ink3 hover:text-ink"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-ink3 hover:text-ink"
         >
           <X size={14} />
         </button>
@@ -163,7 +166,7 @@ export default function EngineSearchBox() {
         <button
           onClick={submit}
           aria-label="搜索"
-          className="flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-[9px] text-ink3 hover:bg-surface hover:text-accent"
+          className="flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-[6px] text-ink3 hover:bg-surface hover:text-accent"
         >
           <Search size={16} />
         </button>

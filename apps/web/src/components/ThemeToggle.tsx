@@ -29,7 +29,7 @@ export default function ThemeToggle({ className = '' }: { className?: string }) 
       onClick={() => setTheme(next)}
       aria-label={label}
       title={label}
-      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] text-ink2 transition-colors hover:bg-surface-2 hover:text-accent ${className}`}
+      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-ink2 transition-colors hover:bg-surface-2 hover:text-accent ${className}`}
     >
       <span className="relative flex h-4 w-4 items-center justify-center">
         <Sun

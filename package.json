@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "我的书签 · 前端(web) + 后端(api) workspace",
+  "description": "狗蛋书签 · 前端(web) + 后端(api) workspace",
   "scripts": {
     "dev": "pnpm -r --parallel dev",
     "dev:web": "pnpm --filter @my-collection/web dev",

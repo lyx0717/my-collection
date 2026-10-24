@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Bookmark, LogOut, Settings } from 'lucide-react'
+import { LogOut, Settings } from 'lucide-react'
 import EngineSearchBox from './EngineSearchBox'
 import ThemeToggle from './ThemeToggle'
 import { useAuth } from '../store/AuthContext'
@@ -48,15 +48,21 @@ export default function DockBar() {
         <Link
           to="/"
           aria-label="回到书签首页"
-          className="flex shrink-0 items-center gap-2 rounded-[13px] pr-1 pl-0.5 transition-opacity hover:opacity-80"
+          className="flex shrink-0 items-center gap-2 rounded-[10px] pr-1 pl-0.5 transition-opacity hover:opacity-80"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-[9px] bg-accent shadow-[0_4px_12px_-4px_var(--accent-shadow)]">
-            <Bookmark size={14} className="text-white" fill="white" />
-          </span>
+          {/* 站点 logo：狗蛋。用 112×112 版本（20KB），显示 28px、2x 屏也够清晰。
+              原图 512px/380KB 只在社交分享时才有意义，不必压进首屏。 */}
+          <img
+            src="./avatar-112.png"
+            alt=""
+            width={28}
+            height={28}
+            className="h-7 w-7 rounded-[10px] object-cover shadow-[0_4px_12px_-4px_var(--accent-shadow)]"
+          />
           {/* 移动端隐藏站名：窄屏横向空间紧张（搜索框 + 主题 + 设置已占满），
               此时图标本身足以表意，留着「我的书签」只会把搜索框挤窄。
               用项目的 sm 断点（≤640px 隐藏），与全站响应式口径一致。 */}
-          <span className="text-[14px] font-bold whitespace-nowrap max-sm:hidden">我的书签</span>
+          <span className="text-[14px] font-bold whitespace-nowrap max-sm:hidden">狗蛋书签</span>
         </Link>
 
         {/* 搜索框固定上限 380px（组件内 maxWidth），宽屏不撑满、窄屏自适应缩窄 */}
@@ -71,7 +77,7 @@ export default function DockBar() {
           <Link
             to="/settings"
             aria-label="设置"
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] text-ink2 transition-colors hover:bg-surface-2 hover:text-accent ${
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-ink2 transition-colors hover:bg-surface-2 hover:text-accent ${
               pathname === '/settings' ? 'bg-accent-soft text-accent' : ''
             }`}
           >
