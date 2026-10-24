@@ -157,6 +157,32 @@ FROM login_attempts WHERE NOT succeeded
 GROUP BY email, ip ORDER BY 失败次数 DESC LIMIT 20;"
 ```
 
+## 批量操作
+
+前端：切到**列表视图**（右上角三横线图标）→ 点「多选」→ 勾选条目 → 用「移动到分组…」或「删除」。
+
+注意多选按钮**只在列表视图出现**。网格/磁贴视图的卡片上没有复选框锚点，硬加会逼出新的交互形态，所以没做。
+
+后端接口（越权防护在 SQL 的 `user_id = $1` 条件里，不是应用层判断）：
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| `PATCH` | `/bookmarks/bulk` | `{ids: string[], patch: {collectionId: string \| null}}`，null = 移出分组 |
+| `POST` | `/bookmarks/bulk-delete` | `{ids: string[]}` |
+
+两个接口都返回受影响行数（`updated` / `deleted`），**不属于自己的 id 会被静默忽略**，不报错也不生效。
+「移动到别人的分组」则直接 404（`assertOwnCollection` 校验）。
+
+验证方式：
+
+```bash
+# 换成自己的 cookie
+curl -b cookie.txt -X PATCH http://121.36.46.119/api/v1/bookmarks/bulk \
+  -H 'Content-Type: application/json' \
+  -d '{"ids":["<id1>","<id2>"],"patch":{"collectionId":"<分组id>"}}'
+# → {"updated":2}
+```
+
 ## 发布新版本
 
 前端与后端产物准备好后（本地 `pnpm build`），同步到服务器的对应目录：
@@ -334,3 +360,27 @@ systemctl restart mybook-api                        → active
 
 **注意**：回滚后端到旧版本时，`login_attempts` / `password_resets` 两张表留着无害（旧代码不读），
 但**回滚前端后 `/reset` 路由不存在**，重置链接会 404。
+
+## 补充：批量操作线上验证（2026-10-24 15:45）
+
+```
+PATCH  /bookmarks/bulk {ids:[3条], patch:{collectionId:<分组>}}  → 200 {"updated":3}
+GET    /library                                                  → 3 条全部归属该分组
+PATCH  /bookmarks/bulk {ids:[3条], patch:{collectionId:null}}     → 200 {"updated":3}
+GET    /library                                                  → 3 条 collectionId 字段消失（无分组）
+POST   /bookmarks/bulk-delete {ids:[2条]}                         → 200 {"deleted":2}
+GET    /library                                                  → 剩 1 条
+
+跨用户越权（账号 B 拿账号 A 的书签 id）
+POST   /bookmarks/bulk-delete {ids:[<A的id>]}                     → 200 {"deleted":0}
+GET    /library（A 视角）                                         → 1 条，一条没少
+PATCH  /bookmarks/bulk 移动到 B 自己以外的分组                     → 404
+
+前端（Playwright 实测 1280×900）
+  列表视图点「多选」                                              → 出现批量条「已选 0 / 3」
+  勾选 2 项                                                       → 「已选 2 / 3」，行高亮
+  「移动到分组…」下拉                                             → 含各分组 + 「移出分组（回到全部）」
+  多选期间视图切换按钮                                            → 禁用，title=「多选模式下不可切换视图」
+```
+
+测试账号已全部清理，`users` 只剩真实账号 1 个（149 条书签 / 6 个分组）。
