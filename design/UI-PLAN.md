@@ -7,7 +7,7 @@
 ```
 固定顶栏（通栏 h-14）        ← Logo / 搜索引擎(≤380px) / 设置
   ↓ 文档流垫 56px
-二级导航（sticky 悬浮胶囊）   ← 首页=分组，设置页=分区，二者共用 CapsuleNav
+二级导航（sticky 悬浮胶囊）   ← 首页=分组，设置页=文字分段
   ↓
 内容工具条                   ← 标题 / 计数 / 筛选 / 添加 / 多选 / 视图切换
 内容区（max-w-6xl）
@@ -51,7 +51,7 @@
 | 文件 | 职责 |
 |---|---|
 | `components/DockBar.tsx` | 固定顶栏（无 prop） |
-| `components/CapsuleNav.tsx` | 悬浮胶囊导航，首页与设置页共用 |
+| `components/CapsuleNav.tsx` | 悬浮胶囊导航（首页分组导航用） |
 | `components/GroupNav.tsx` | 分组导航，组装 CapsuleNav 的 items |
 | `lib/collectionIcons.tsx` | 24 枚 lucide 候选 + `iconForCollection()` hash 分配 |
 | `lib/appearance.ts` | 主题三态（无 GlassMode） |
