@@ -13,8 +13,7 @@
 - 顶部通栏固定导航（Logo / 搜索引擎 / 设置），搜索框固定上限 380px，宽屏不撑满
 - **「添加书签」按钮位于内容工具条右侧**，与多选、视图切换同组
   （顶栏离内容上下文太远，用户要加书签时视线在卡片区）
-- **二级导航为悬浮固定胶囊**（sticky 吸在顶栏下方），宽度按内容自适应并居中；
-  首页分组导航与设置页导航**共用同一个 `CapsuleNav` 组件**，形态完全一致
+- **二级导航为悬浮固定胶囊**（sticky 吸在顶栏下方），宽度按内容自适应并居中；首页分组导航用带图标的 `CapsuleNav`
 - **导航材质与卡片分层**：导航底色更实（浅 0.82 / 深 0.82）、描边更亮、投影更重，
   保证悬浮控件从内容里立得住
 - **分组图标为 lucide SVG**（24 枚候选，设置页可视化选择），
@@ -40,9 +39,9 @@
 - 粘贴 / 输入链接后自动通过 Microlink 抓取标题、描述、封面、图标（免费 25 次/天；失败静默降级为手填）
 - 相同 URL 自动判重：已收藏过会拦住，并给出「去编辑它」的出路
 
-**书签小工具（bookmarklet）**
+**深链添加**
 
-设置页有可拖到浏览器书签栏的按钮，在任意网页一键收藏。
+`#/add?u=<url>&t=<title>` 可在任意页面拉起添加弹窗（登录后自动回到该深链）。
 
 **设置页**
 
@@ -77,7 +76,7 @@ pnpm dev               # 同时起前端(5173) 与后端(3000)
 
 pnpm test              # 单测；后端集成测试连不上库时会自动跳过
 pnpm typecheck         # 三个包一起类型检查
-pnpm build             # 生产构建
+pnpm -r build          # 生产构建（web → apps/web/dist，api → apps/api/dist）
 ```
 
 **本地 Postgres 两种起法，任选其一：**
@@ -107,12 +106,16 @@ pnpm build             # 生产构建
 
 ## 部署
 
-本分支（`feat/backend`）的目标是部署到自己的服务器（nginx 同源提供前端静态文件 + 反代 `/api`）。
-**服务器部署整体后置**，先把本地跑通再统一处理。
+线上跑在**华为云 Flexus 应用服务器**（<http://121.36.46.119>）：宿主机 nginx 同源提供前端静态文件 + 反代 `/api`，
+后端由 systemd 托管，数据库是同机的 PostgreSQL。完整运维手册见
+[`deploy/HUAWEI-CLOUD.md`](./deploy/HUAWEI-CLOUD.md)。
 
 旧版静态站仍由 `new-UI` 分支跟随 GitHub Pages 自动发布（`.github/workflows/deploy.yml`），与本分支互不影响。
 
-> 分支说明：`feat/backend` 是长期独立分支，**不合并回 `main` / `new-UI`**。
+> `deploy/README.md` + `Dockerfile.*` / `docker-compose.yml` / `deploy.sh` 是早期的腾讯云 Docker 方案，
+> 与线上现状不一致，仅作参考。
+
+> 分支说明：`feat/backend` 是后端长期独立分支；UI 合并版在 `feat/new-ui-merge`（当前线上代码来源）。
 
 ## 目录结构
 
@@ -139,4 +142,6 @@ apps/api/                        # 后端（Fastify + PostgreSQL）
 
 packages/shared/                 # 前后端共享的领域类型与 URL 工具
 dev/docker-compose.yml           # 本地开发用 Postgres
+design/                          # UI-PLAN（界面规范）/ DARK-MODE（主题机制）/ MOTION（动效基线）
+deploy/                          # HUAWEI-CLOUD.md 为线上手册
 ```
