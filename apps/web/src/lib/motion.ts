@@ -1,4 +1,4 @@
-import type { Transition, Variants } from 'motion/react'
+import type { Variants } from 'motion/react'
 
 /**
  * 全站动效基线（见 design/MOTION.md）。
@@ -40,14 +40,6 @@ export const EASE_CSS: { out: string; inOut: string; soft: string } = {
   soft: 'cubic-bezier(0.34, 0.14, 0.22, 1)',
 }
 
-/**
- * 拖拽落位：一次柔和回弹，不弹两下。
- * 初版 stiffness 420 太脆 —— 落位像「弹射」，这里降到 260 让它「沉」回原位。
- */
-export const SPRING: Transition = { type: 'spring', stiffness: 260, damping: 30, mass: 1 }
-/** 拖拽跟手：仍然跟手，但降一档刚度，起点不那么窜 */
-export const SPRING_FOLLOW: Transition = { type: 'spring', stiffness: 520, damping: 42 }
-
 /** 错峰：间隔由 20ms 放到 34ms，一波铺开像「依次浮现」而不是「整块弹」 */
 export const STAGGER_LIMIT = 12
 export const STAGGER_STEP = 0.034
@@ -74,6 +66,3 @@ export const itemEnter: Variants = {
     transition: { duration: DUR[4], ease: EASE.out, delay: staggerDelay(i) },
   }),
 }
-
-/** hover 上浮：2px → 1.5px，配合 CSS 的 --dur-2 使用 */
-export const HOVER_LIFT = 'hover:-translate-y-[1.5px]'

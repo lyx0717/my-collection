@@ -17,8 +17,8 @@ function scopeIsActive(scope: Scope, target: Scope['type'], id?: string): boolea
 }
 
 /**
- * 分组导航：与设置页导航共用 CapsuleNav 组件，
- * 所以宽度自适应、居中方式、玻璃材质、图标排布、选中态都是同一套代码。
+ * 分组导航：组装 CapsuleNav 的 items，
+ * 宽度自适应、居中方式、玻璃材质、图标排布、选中态都复用同一套代码。
  *
  * 只做「点击切换作用域」—— 分组的增删改与排序全部收敛到设置页。
  * 导航区一旦挂上可编辑控件，误触成本远高于收益，

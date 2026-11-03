@@ -383,14 +383,6 @@ body {
     transform: translateY(0) scale(1);
   }
 }
-@keyframes drawer-in {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
 
 .animate-fade-in {
   animation: fade-in var(--dur-2) var(--ease-out) both;
@@ -400,9 +392,6 @@ body {
 }
 .animate-pop {
   animation: pop-in var(--dur-2) var(--ease-out) both;
-}
-.animate-drawer {
-  animation: drawer-in var(--dur-3) var(--ease-in-out) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

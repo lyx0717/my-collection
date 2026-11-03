@@ -6,7 +6,6 @@ export type * from '@my-collection/shared/types'
 // —— 以下为前端专有类型（UI 概念，后端不需要）——
 
 export type ViewMode = 'list' | 'grid' | 'tile'
-export type SortMode = 'desc' | 'asc' | 'az'
 
 /**
  * 分组导航的作用域。

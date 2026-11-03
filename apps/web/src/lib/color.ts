@@ -22,9 +22,3 @@ export function letterColor(domain: string): { bg: string; fg: string } {
   const i = hashString(domain) % BADGE_COUNT
   return { bg: `var(--logo-tile-bg)`, fg: `var(--badge-fg-${i})` }
 }
-
-/** 字母兜底：域名首字符（优先英文首字母） */
-export function domainLetter(domain: string): string {
-  const stripped = domain.replace(/^[0-9.]+/, '')
-  return (stripped[0] ?? '?').toUpperCase()
-}

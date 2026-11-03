@@ -39,7 +39,7 @@ import {
  *
  * 所有图标统一 strokeWidth 1.8，与设置页导航保持同一套线条重量。
  */
-export const COLLECTION_ICONS = [
+const COLLECTION_ICONS = [
   Folder,
   Bookmark,
   Home,
@@ -110,7 +110,7 @@ export const COLLECTION_ICON_NAMES = [
   'Plus',
 ] as const
 
-export type CollectionIconName = (typeof COLLECTION_ICON_NAMES)[number]
+type CollectionIconName = (typeof COLLECTION_ICON_NAMES)[number]
 
 function isIconName(v: unknown): v is CollectionIconName {
   return (
@@ -124,13 +124,8 @@ function indexOfName(v: unknown): number {
   return i === -1 ? 0 : i
 }
 
-/** 名字是否在候选池内 */
-export function hasCollectionIcon(v: unknown): v is CollectionIconName {
-  return isIconName(v)
-}
-
 /** 名字 → 组件（内部用；外部请用 renderCollectionIcon） */
-export function componentOf(name: CollectionIconName) {
+function componentOf(name: CollectionIconName) {
   return COLLECTION_ICONS[indexOfName(name)]
 }
 
