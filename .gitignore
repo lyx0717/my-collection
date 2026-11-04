@@ -27,9 +27,5 @@ dist-ssr
 # UI 评审产物（截图 + 报告，本地生成，可随时重跑）
 design/review-*/
 
-# 发布宣传素材（557MB，截图/视频/脚本，仅本地留存）
+# 发布宣传素材（成品 mp4 + 源工程，仅本地留存）
 promo/
-
-# 部署工作区里的真实口令文件
-deploy/.env
-deploy/.env.*.local

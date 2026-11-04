@@ -112,9 +112,6 @@ pnpm -r build          # 生产构建（web → apps/web/dist，api → apps/api
 
 旧版静态站仍由 `new-UI` 分支跟随 GitHub Pages 自动发布（`.github/workflows/deploy.yml`），与本分支互不影响。
 
-> `deploy/README.md` + `Dockerfile.*` / `docker-compose.yml` / `deploy.sh` 是早期的腾讯云 Docker 方案，
-> 与线上现状不一致，仅作参考。
-
 > 分支说明：`feat/backend` 是后端长期独立分支；UI 合并版在 `feat/new-ui-merge`（当前线上代码来源）。
 
 ## 目录结构
