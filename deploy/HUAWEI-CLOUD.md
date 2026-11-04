@@ -40,9 +40,11 @@
 /opt/gateway/nginx/
 ├── sites/
 │   ├── 00-default.conf          # default_server 兜底 404（未知 Host）
-│   └── my-collection.conf       # 本项目
+│   ├── my-collection.conf       # 本项目
+│   └── libretv.conf             # 另一个项目，共用网关，互不干扰
 └── snippets/
     ├── gzip.conf
+    ├── proxy_common.conf
     └── security-headers.conf
 
 /var/www/my-collection/          # 前端产物（nginx root）
@@ -57,6 +59,9 @@
 /var/log/gateway/                # 网关日志（按站点分文件）
 /etc/systemd/system/mybook-api.service
 ```
+
+网关配置在仓库里有一份逐字节镜像：`deploy/nginx/`（服务器整机重装时据此恢复，
+见下面「nginx 网关配置」一节）。
 
 ## 日常运维
 
@@ -204,6 +209,16 @@ ssh huawei-flexus 'systemctl restart mybook-api'
 ```
 
 **回滚**：把 `/var/www/.bak/my-collection-<时间戳>` 换回来，或 `systemctl restart` 旧版本。
+
+## nginx 网关配置
+
+站点配置在 `/opt/gateway/nginx/sites/my-collection.conf`，由 `/etc/nginx/nginx.conf`
+的 `include /opt/gateway/nginx/sites/*.conf;` 加载；`snippets/` 下的 gzip、
+proxy_common、security-headers 是整机多项目共用的。
+
+仓库 `deploy/nginx/` 保存了这些文件的**逐字节镜像**，服务器重装时据此恢复。
+同步方法、两个方向的操作、以及这份配置里每条 location 为什么这么写，
+见 [`deploy/nginx/README.md`](./nginx/README.md)。
 
 ## 环境变量
 

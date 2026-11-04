@@ -7,6 +7,7 @@ import CollectionModal from '../components/CollectionModal'
 import DockBar from '../components/DockBar'
 import AppearanceSection from '../components/settings/AppearanceSection'
 import DataSection from '../components/settings/DataSection'
+import BookmarkletSection from '../components/settings/BookmarkletSection'
 import CollectionsSection from '../components/settings/CollectionsSection'
 import AboutSection from '../components/settings/AboutSection'
 import type { Collection } from '../types'
@@ -70,6 +71,7 @@ export default function SettingsPage() {
         <div className="space-y-14">
           <AppearanceSection />
           <DataSection />
+          <BookmarkletSection />
           <CollectionsSection
             onEdit={(col) => setCollectionModal({ mode: 'edit', collection: col })}
             onCreate={() => setCollectionModal({ mode: 'create' })}
