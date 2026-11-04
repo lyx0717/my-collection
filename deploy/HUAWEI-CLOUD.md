@@ -185,16 +185,21 @@ curl -b cookie.txt -X PATCH http://121.36.46.119/api/v1/bookmarks/bulk \
 
 ## 发布新版本
 
-前端与后端产物准备好后（本地 `pnpm build`），同步到服务器的对应目录：
+前端与后端产物都在 `apps/` 下（仓库没有根级 `dist/`），后端代码没改时只发前端即可：
 
 ```bash
+# 本地构建
+pnpm -r build                      # → apps/web/dist/ + apps/api/dist/
+
 # 前端：先备份旧版再替换（rsync 会自动清理旧 hash 文件）
-ssh huawei-flexus 'mkdir -p /var/www/.bak && mv /var/www/my-collection /var/www/.bak/my-collection-$(date +%s)'
-rsync -az --delete dist/ huawei-flexus:/var/www/my-collection/
-ssh huawei-flexus 'chown -R root:www-data /var/www/my-collection && chmod -R 755 /var/www/my-collection'
+ssh huawei-flexus 'mkdir -p /var/www/.bak && mv /var/www/my-collection /var/www/.bak/my-collection-$(date +%Y%m%d-%H%M%S)'
+rsync -az --delete apps/web/dist/ huawei-flexus:/var/www/my-collection/
+ssh huawei-flexus 'chown -R root:www-data /var/www/my-collection \
+  && find /var/www/my-collection -type d -exec chmod 755 {} + \
+  && find /var/www/my-collection -type f -exec chmod 644 {} +'
 
 # 后端：替换 api/dist 后重启
-rsync -az --delete api/dist/ huawei-flexus:/opt/apps/my-collection/api/dist/
+rsync -az --delete apps/api/dist/ huawei-flexus:/opt/apps/my-collection/api/dist/
 ssh huawei-flexus 'systemctl restart mybook-api'
 ```
 
