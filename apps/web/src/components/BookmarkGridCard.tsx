@@ -1,6 +1,3 @@
-import { useSortable } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { Pencil, Trash2 } from 'lucide-react'
 import type { Bookmark } from '../types'
 import { letterColor } from '../lib/color'
 import { badgeText } from '../lib/badge'
@@ -9,10 +6,7 @@ import { useFaviconSrc } from '../hooks/useFavicon'
 interface BookmarkGridCardProps {
   bookmark: Bookmark
   compact?: boolean
-  sortable?: boolean
   onOpen: (bm: Bookmark) => void
-  onEdit: (bm: Bookmark) => void
-  onDelete: (bm: Bookmark) => void
 }
 
 /**
@@ -35,20 +29,17 @@ interface BookmarkGridCardProps {
  * · 标题 line-clamp-1/2、描述 line-clamp-2、域名 truncate，
  *   三层各自兜底，任何一层都不会把卡片顶高或顶宽；
  * · logo 固定尺寸且 shrink-0，不参与压缩，保证图形不变形。
+ *
+ * 纯浏览面：不提供编辑 / 删除 / 拖拽。网格一屏 20+ 张卡，hover 才浮出的
+ * 角标既盖住标题尾端，也把「扫」的页面变成一堆按钮；改书签的动作统一收在
+ * 列表视图 —— 那里一行一项，按钮有稳定的落点。
  */
 export default function BookmarkGridCard({
   bookmark,
   compact = false,
-  sortable = false,
   onOpen,
-  onEdit,
-  onDelete,
 }: BookmarkGridCardProps) {
   const { src, failed, handleError } = useFaviconSrc(bookmark.domain, bookmark.faviconUrl)
-  const { setNodeRef, transform, transition, isDragging, attributes, listeners } = useSortable({
-    id: bookmark.id,
-    disabled: !sortable,
-  })
 
   // 圆角两档统一 10px：logo 容器尺寸分档（视觉层级），圆角不分 ——
   // 同一屏里出现两种圆角会读成两种控件。
@@ -64,12 +55,7 @@ export default function BookmarkGridCard({
 
   return (
     <article
-      ref={setNodeRef}
-      style={sortable ? { transform: CSS.Transform.toString(transform), transition } : undefined}
-      className={`glass-card group relative flex touch-none items-start overflow-hidden rounded-[16px] border transition-[transform,box-shadow,border-color,background-color] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px] ${pad} ${gap} ${
-        isDragging ? 'z-10 opacity-70 ring-2 ring-accent/50' : ''
-      }`}
-      {...(sortable ? { ...attributes, ...listeners } : {})}
+      className={`glass-card group relative flex items-start overflow-hidden rounded-[16px] border transition-[transform,box-shadow,border-color,background-color] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px] ${pad} ${gap}`}
     >
       {/* 有封面时降为底层衬底：保留数据但压到几乎不抢视线。
           opacity-[0.16] + 遮罩渐变，保证上层文字始终可读。 */}
@@ -135,33 +121,6 @@ export default function BookmarkGridCard({
           </p>
         )}
       </div>
-
-      {/* 编辑 / 删除：绝对定位浮在卡片右上角，不占文字列布局。
-          曾经它们排在域名行里，opacity:0 只改绘制不改布局，白占 50px + 6px 间距，
-          143px 的文字列只剩 87px 给域名 —— 148 条里 36% 被截成半个词。
-          代价是 hover 时按钮会盖住标题尾端，这是「动作随悬停浮出」的常规取舍。
-
-          pointer-events：不可见时也要禁用命中 —— opacity:0 只是看不见，
-          那块 52×24 的区域照样能点中，用户会在卡片空白处莫名其妙打开编辑框。 */}
-      <span
-        className="absolute top-1.5 right-1.5 flex items-center gap-0.5 opacity-100 transition-opacity lg:pointer-events-none lg:opacity-0 lg:group-hover:pointer-events-auto lg:group-hover:opacity-100 lg:group-focus-within:pointer-events-auto lg:group-focus-within:opacity-100"
-        onPointerDown={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={() => onEdit(bookmark)}
-          aria-label={`编辑 ${bookmark.title}`}
-          className="flex h-6 w-6 items-center justify-center rounded-md text-ink3 hover:bg-canvas hover:text-ink"
-        >
-          <Pencil size={compact ? 11.5 : 12.5} />
-        </button>
-        <button
-          onClick={() => onDelete(bookmark)}
-          aria-label={`删除 ${bookmark.title}`}
-          className="flex h-6 w-6 items-center justify-center rounded-md text-ink3 hover:bg-danger/10 hover:text-danger"
-        >
-          <Trash2 size={compact ? 11.5 : 12.5} />
-        </button>
-      </span>
     </article>
   )
 }

@@ -13,16 +13,13 @@ import {
 import {
   SortableContext,
   arrayMove,
-  rectSortingStrategy,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import type { ViewMode } from '../types'
 import { DUR, EASE_CSS } from '../lib/motion'
 
 interface SortableBookmarksProps {
   ids: string[]
-  view: ViewMode
   disabled?: boolean
   onReorder: (orderedIds: string[]) => void
   /** 拖起时浮起的副本（由调用方按视图渲染） */
@@ -31,13 +28,14 @@ interface SortableBookmarksProps {
 }
 
 /**
- * 书签排序容器：三视图共用。
- * 列表用垂直策略，网格/磁贴用矩形策略。
+ * 列表视图的排序容器。
  * 拖拽激活距离 6px，避免与点击冲突。
+ *
+ * 网格 / 磁贴不排序：那两个视图是纯浏览面，卡片上既没有拖拽锚点，
+ * 也没有编辑 / 删除入口 —— 所有改动书签的动作统一收在列表视图。
  */
 export default function SortableBookmarks({
   ids,
-  view,
   disabled = false,
   onReorder,
   renderOverlay,
@@ -70,11 +68,7 @@ export default function SortableBookmarks({
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveId(null)}
     >
-      <SortableContext
-        items={ids}
-        strategy={view === 'list' ? verticalListSortingStrategy : rectSortingStrategy}
-        disabled={disabled}
-      >
+      <SortableContext items={ids} strategy={verticalListSortingStrategy} disabled={disabled}>
         {children}
       </SortableContext>
 

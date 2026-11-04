@@ -83,8 +83,9 @@ export default function HomePage() {
     exitBatch,
   } = useBatchSelection(visibleIds)
 
-  // 拖拽：全部/分组可用；搜索与域名筛选、批量多选时禁用
-  const dragEnabled = !batchMode && !searchFiltered
+  // 拖拽排序只在列表视图可用：网格 / 磁贴是纯浏览面，卡片上没有拖拽锚点，
+  // 也没有编辑 / 删除入口。搜索与域名筛选、批量多选时同样禁用。
+  const dragEnabled = view === 'list' && !batchMode && !searchFiltered
 
   const updateParams = (mutate: (p: URLSearchParams) => void) => {
     const next = new URLSearchParams(params)
@@ -372,7 +373,6 @@ export default function HomePage() {
             ) : (
               <SortableBookmarks
                 ids={visibleIds}
-                view={view}
                 disabled={!dragEnabled}
                 onReorder={(orderedIds) => void reorderBookmarks(orderedIds)}
                 renderOverlay={(id) => {
@@ -428,17 +428,13 @@ export default function HomePage() {
                         ) : view === 'tile' ? (
                           <BookmarkTile
                             bookmark={bm}
-                            sortable={dragEnabled}
                             onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
                           />
                         ) : (
                           <BookmarkGridCard
                             bookmark={bm}
                             compact
-                            sortable={dragEnabled}
                             onOpen={(b) => window.open(b.url, '_blank', 'noopener,noreferrer')}
-                            onEdit={(b) => setModal({ mode: 'edit', bookmark: b })}
-                            onDelete={(b) => setDeleting(b)}
                           />
                         )}
                       </m.div>

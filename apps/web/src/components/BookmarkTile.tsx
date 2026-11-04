@@ -1,5 +1,3 @@
-import { useSortable } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
 import type { Bookmark } from '../types'
 import { letterColor } from '../lib/color'
 import { badgeText } from '../lib/badge'
@@ -7,12 +5,13 @@ import { useFaviconSrc } from '../hooks/useFavicon'
 
 interface BookmarkTileProps {
   bookmark: Bookmark
-  sortable?: boolean
   onOpen: (bm: Bookmark) => void
 }
 
 /**
- * 极简磁贴：大图标 + 标题；支持拖拽排序；图标失败显示彩色文字徽章
+ * 极简磁贴：大图标 + 标题；图标失败显示彩色文字徽章
+ *
+ * 纯浏览面：不提供编辑 / 删除 / 拖拽（动作统一收在列表视图）。
  *
  * 常态「无壳」，hover 才浮出玻璃卡片 —— 底色 / 描边 / 投影全交给
  * .tile-shell 的 CSS 规则控制。这里不再写 hover:bg-surface、
@@ -21,26 +20,16 @@ interface BookmarkTileProps {
  * 保留 border（无 border-transparent）：常态要一条透明边占位，
  * 否则 hover 时边框从 0 突变到 1px，元素会横向抖一下。
  */
-export default function BookmarkTile({ bookmark, sortable = false, onOpen }: BookmarkTileProps) {
+export default function BookmarkTile({ bookmark, onOpen }: BookmarkTileProps) {
   const { src, failed, handleError } = useFaviconSrc(bookmark.domain, bookmark.faviconUrl)
   const color = letterColor(bookmark.domain)
-  const { setNodeRef, transform, transition, isDragging, attributes, listeners } = useSortable({
-    id: bookmark.id,
-    disabled: !sortable,
-  })
 
   return (
     <div
-      ref={setNodeRef}
-      style={sortable ? { transform: CSS.Transform.toString(transform), transition } : undefined}
-      className={`tile-shell group flex min-h-[100px] min-w-[80px] touch-none flex-col items-center gap-2 rounded-[12px] border px-2.5 py-4 text-center transition-[transform,background-color,border-color,box-shadow] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px] ${
-        isDragging ? 'z-10 opacity-70 ring-2 ring-accent/50' : ''
-      }`}
-      {...(sortable ? { ...attributes, ...listeners } : {})}
+      className="tile-shell group flex min-h-[100px] min-w-[80px] flex-col items-center gap-2 rounded-[12px] border px-2.5 py-4 text-center transition-[transform,background-color,border-color,box-shadow] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px]"
     >
       <button
         onClick={() => onOpen(bookmark)}
-        onPointerDown={(e) => e.stopPropagation()}
         title={bookmark.description ? `${bookmark.title}\n${bookmark.description}` : bookmark.title}
         aria-label={`打开 ${bookmark.title}`}
         className="relative flex h-14 w-14 items-center justify-center transition-transform group-hover:scale-105"
