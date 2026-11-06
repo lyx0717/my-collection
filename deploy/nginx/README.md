@@ -61,3 +61,5 @@ diff <(ssh huawei-flexus 'cat /opt/gateway/nginx/sites/my-collection.conf') \
   否则用户永远拿旧版本。
 - 限流 `limit_req zone=api burst=20 nodelay`，桶定义在 `/etc/nginx/nginx.conf`。
 - 这个 server **不是** `default_server`，未知 Host 的兜底 404 由 `00-default.conf` 承担。
+- `server_name` 目前只有 `121.36.46.119` 和 `my-collection.local`，全站只有 80：**域名、443、证书
+  都属于备案通过后的动作**，放回这里改完再同步（步骤见 `deploy/HUAWEI-CLOUD.md` 的「备案与域名」）。

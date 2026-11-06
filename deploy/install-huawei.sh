@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 华为云 Flexus 首次部署脚本（幂等：重复跑不会破坏已有数据）
-# 用法：./deploy/install.sh
+# 用法：./deploy/install-huawei.sh
 #
 # 前置：本机已配置 ssh 别名 huawei-flexus（~/.ssh/config），且部署包在 /tmp/mycol-deploy/
 set -euo pipefail
