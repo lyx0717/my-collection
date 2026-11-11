@@ -349,13 +349,17 @@ void main(){
   /* 画布比版位外扩 10px，最后 8px 羽化，让光晕在边界前自然归零而不是被切一刀 */
   float fe = min(min(fc.x, uCss.x - fc.x), min(fc.y, uCss.y - fc.y));
   aOut *= smoothstep(0.0, 8.0, fe);
-  outColor = vec4(clamp(col, 0.0, 1.0), clamp(aOut, 0.0, 1.0));
+  float aFinal = clamp(aOut, 0.0, 1.0);
+  /* 预乘输出（rgb 乘以自己 alpha），配合 premultipliedAlpha:true */
+  outColor = vec4(clamp(col, 0.0, 1.0) * aFinal, aFinal);
 }`;
 
 /* ------------------------------ renderer ------------------------------ */
 export function createGlassToggle ({ root, canvas, space, hit, initial = 0, onChange = () => {} }) {
+  /* 必须预乘：Safari 不认 premultipliedAlpha:false，会把 alpha=0 的像素颜色也糊到页面上
+     （画布变成一块矩形白底盖住后面的文字），Chrome 则按声明处理。统一走预乘两边都正确。 */
   const gl = canvas.getContext('webgl2', {
-    alpha: true, premultipliedAlpha: false, antialias: false, depth: false, stencil: false,
+    alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false,
     powerPreference: 'high-performance', preserveDrawingBuffer: false
   });
   if (!gl || gl.isContextLost()) throw new Error('WebGL2 is not available');
