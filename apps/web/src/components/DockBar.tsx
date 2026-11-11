@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { LogOut, Settings } from 'lucide-react'
 import EngineSearchBox from './EngineSearchBox'
-import ThemeToggle from './ThemeToggle'
+import GlassThemeToggle from './GlassThemeToggle'
 import { useAuth } from '../store/AuthContext'
 
 /**
@@ -73,7 +73,7 @@ export default function DockBar() {
         <div className="ml-auto flex shrink-0 items-center gap-1">
           {/* 明暗切换：高频操作，抬到顶栏一键可达，不必先进设置页。
               完整三态（浅色 / 深色 / 跟随系统）仍在设置页「外观」里。 */}
-          <ThemeToggle />
+          <GlassThemeToggle />
           <Link
             to="/settings"
             aria-label="设置"
