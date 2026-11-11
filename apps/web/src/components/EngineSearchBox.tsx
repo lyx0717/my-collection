@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, ChevronDown, Plus, Search, Trash2, X } from 'lucide-react'
 import { useSearchEngines } from '../hooks/useSearchEngines'
-import { engineDomain } from '../lib/engines'
+import { engineDomain, parseEngineUrl } from '../lib/engines'
 import Favicon from './Favicon'
 
 /** 顶部搜索引擎框：切换百度/必应/Google/自定义，回车新标签页打开结果 */
@@ -15,6 +15,13 @@ export default function EngineSearchBox() {
   const [query, setQuery] = useState('')
   const menuRef = useRef<HTMLDivElement>(null)
 
+  /** 网址输一半时不报错，只把成功识别结果实时显示出来 */
+  const parsed = useMemo(() => (newUrl.trim() ? parseEngineUrl(newUrl) : null), [newUrl])
+  const nameHint =
+    parsed?.ok && parsed.template.name
+      ? `引擎名称（留空默认「${parsed.template.name}」）`
+      : '引擎名称（可选）'
+
   useEffect(() => {
     if (!menuOpen) return
     const onDown = (e: MouseEvent) => {
@@ -27,15 +34,13 @@ export default function EngineSearchBox() {
   const submit = () => {
     const q = query.trim()
     if (!q) return
-    window.open(active.url.replace('%s', encodeURIComponent(q)), '_blank', 'noopener,noreferrer')
+    window.open(active.url.replace(/%s/g, encodeURIComponent(q)), '_blank', 'noopener,noreferrer')
   }
 
   const confirmAdd = () => {
-    if (!newName.trim()) return setError('请填写引擎名称')
-    if (!/^https?:\/\/.*/.test(newUrl.trim()) || !newUrl.includes('%s')) {
-      return setError('查询地址需以 http(s):// 开头，并包含 %s 占位符')
-    }
-    addEngine(newName, newUrl)
+    if (!parsed) return setError('请粘贴搜索后的网址')
+    if (!parsed.ok) return setError(parsed.error)
+    if (!addEngine(newName, newUrl)) return setError('添加失败，请检查链接')
     setNewName('')
     setNewUrl('')
     setError('')
@@ -62,7 +67,7 @@ export default function EngineSearchBox() {
         </button>
 
         {menuOpen && (
-          <div className="animate-pop absolute left-0 top-11 z-50 w-72 overflow-hidden rounded-2xl border border-line bg-surface p-1.5 shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)]">
+          <div className={`animate-pop absolute left-0 top-11 z-50 max-w-[calc(100vw-5rem)] overflow-hidden rounded-2xl border border-line bg-surface p-1.5 shadow-[0_24px_60px_-20px_rgba(30,40,60,.35)] ${adding ? 'w-[22rem]' : 'w-72'}`}>
             {engines.map((e) => (
               <div
                 key={e.id}
@@ -110,19 +115,43 @@ export default function EngineSearchBox() {
               <div className="mt-1 space-y-2 border-t border-line p-2.5">
                 <input
                   autoFocus
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="引擎名称，如：知乎"
-                  className="h-9 w-full rounded-lg border border-line px-2.5 text-[13px] outline-none focus:border-accent"
+                  value={newUrl}
+                  onChange={(e) => {
+                    setNewUrl(e.target.value)
+                    setError('')
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && confirmAdd()}
+                  placeholder="粘贴搜索后的网址"
+                  className="h-10 w-full rounded-lg border border-line px-2.5 text-[12px] outline-none focus:border-accent"
                 />
                 <input
-                  value={newUrl}
-                  onChange={(e) => setNewUrl(e.target.value)}
-                  placeholder="https://www.zhihu.com/search?q=%s"
-                  className="h-9 w-full rounded-lg border border-line px-2.5 text-[12px] outline-none focus:border-accent"
+                  value={newName}
+                  onChange={(e) => {
+                    setNewName(e.target.value)
+                    setError('')
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && confirmAdd()}
+                  placeholder={nameHint}
+                  className="h-9 w-full rounded-lg border border-line px-2.5 text-[13px] outline-none focus:border-accent"
                 />
-                {error && <p className="text-[11.5px] text-danger">{error}</p>}
-                <p className="text-[11px] leading-4 text-ink3">用 %s 代替关键词位置</p>
+                {error ? (
+                  <p className="text-[11.5px] leading-4 text-danger">{error}</p>
+                ) : parsed?.ok ? (
+                  <p
+                    className="flex items-start gap-1.5 text-[11px] leading-4 text-ink3"
+                    title={parsed.template.url}
+                  >
+                    <Check size={12} className="mt-0.5 shrink-0 text-accent" />
+                    <span className="min-w-0 truncate">
+                      已识别「{parsed.template.name}」
+                      {parsed.template.param ? `，关键词参数 ${parsed.template.param}` : '，使用 %s 占位'}
+                    </span>
+                  </p>
+                ) : (
+                  <p className="text-[11px] leading-4 text-ink3">
+                    在站内搜索后复制地址栏链接，会自动定位关键词；手写 %s 模板也兼容。
+                  </p>
+                )}
                 <div className="flex justify-end gap-2 pt-1">
                   <button
                     onClick={() => {

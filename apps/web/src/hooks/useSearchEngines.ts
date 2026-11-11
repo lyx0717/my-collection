@@ -4,6 +4,7 @@ import {
   engineId,
   loadActiveEngineId,
   loadEngines,
+  parseEngineUrl,
   saveActiveEngineId,
   saveCustomEngines,
   type SearchEngine,
@@ -20,11 +21,18 @@ export function useSearchEngines() {
     saveActiveEngineId(id)
   }, [])
 
+  /**
+   * 添加自定义引擎。url 既可以是搜索后的完整网址（自动识别关键词），
+   * 也可以是含 %s 的模板；name 留空时按域名自动取名。
+   */
   const addEngine = useCallback((name: string, url: string): SearchEngine | null => {
-    const trimmedName = name.trim()
-    const trimmedUrl = url.trim()
-    if (!trimmedName || !trimmedUrl.includes('%s')) return null
-    const engine: SearchEngine = { id: engineId(), name: trimmedName, url: trimmedUrl }
+    const parsed = parseEngineUrl(url)
+    if (!parsed.ok) return null
+    const engine: SearchEngine = {
+      id: engineId(),
+      name: name.trim() || parsed.template.name || '自定义',
+      url: parsed.template.url,
+    }
     const next = [...engines, engine]
     setEngines(next)
     saveCustomEngines(next)
