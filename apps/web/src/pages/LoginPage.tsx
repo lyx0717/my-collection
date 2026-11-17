@@ -4,14 +4,11 @@ import { Loader2 } from 'lucide-react'
 import { ApiError } from '../lib/api'
 import { useAuth } from '../store/AuthContext'
 
-type Mode = 'login' | 'register'
-
-/** 登录与注册合一：个人自用，两个表单字段完全一样，没必要拆成两页 */
+/** 登录与注册合一：账号不存在时服务端直接建号，前端只留一次提交 */
 export default function LoginPage() {
-  const { login, register } = useAuth()
+  const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -25,8 +22,7 @@ export default function LoginPage() {
     setError('')
     setBusy(true)
     try {
-      if (mode === 'login') await login(email.trim(), password)
-      else await register(email.trim(), password)
+      await login(email.trim(), password)
       navigate(from, { replace: true })
     } catch (err) {
       setError(err instanceof ApiError ? err.message : '网络异常，请稍后重试')
@@ -49,24 +45,6 @@ export default function LoginPage() {
           <span className="text-[15px] font-bold">狗蛋书签</span>
         </div>
 
-        <div className="mb-5 flex rounded-[10px] bg-segment p-[3px]">
-          {(['login', 'register'] as const).map((item) => (
-            <button
-              key={item}
-              type="button"
-              onClick={() => {
-                setMode(item)
-                setError('')
-              }}
-              className={`flex-1 rounded-[7px] py-1.5 text-[12.5px] font-medium transition-colors ${
-                mode === item ? 'bg-surface text-ink shadow-[0_1px_3px_rgba(30,40,60,.12)]' : 'text-ink3'
-              }`}
-            >
-              {item === 'login' ? '登录' : '注册'}
-            </button>
-          ))}
-        </div>
-
         <form onSubmit={submit} className="flex flex-col gap-3">
           <label className="flex flex-col gap-1.5">
             <span className="text-[12px] text-ink3">邮箱</span>
@@ -87,7 +65,7 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              autoComplete="current-password"
               required
               minLength={6}
               className="glass-field h-10 rounded-[10px] border px-3 text-[13.5px]"
@@ -103,30 +81,26 @@ export default function LoginPage() {
             className="mt-1 flex h-10 items-center justify-center gap-2 rounded-[10px] bg-accent text-[13.5px] font-semibold text-white transition-colors hover:bg-accent-ink disabled:opacity-60"
           >
             {busy && <Loader2 size={14} className="animate-spin" />}
-            {mode === 'login' ? '登录' : '注册并登录'}
+            登录
           </button>
         </form>
 
         <p className="mt-4 text-[11.5px] leading-5 text-ink3">
-          {mode === 'login'
-            ? '还没有账号？切到「注册」，只要邮箱和密码。'
-            : '注册后即为登录状态，书签保存在你自己的服务器上。'}
+          首次使用会自动创建账号，邮箱和密码要记住。
         </p>
 
         {/* 忘密码没有自助找回：本站不发邮件，链接要在服务器上生成。
             折叠起来，不占主要视线。 */}
-        {mode === 'login' && (
-          <details className="mt-3 text-[11.5px] leading-5 text-ink3">
-            <summary className="cursor-pointer select-none hover:text-ink2">忘记密码？</summary>
-            <p className="mt-1.5">
-              在服务器上执行{' '}
-              <code className="rounded-[4px] bg-surface-2 px-1 py-0.5 font-mono text-[11px] text-ink2">
-                node dist/reset.js 你的邮箱
-              </code>{' '}
-              会得到一个 15 分钟内有效的重置链接。
-            </p>
-          </details>
-        )}
+        <details className="mt-3 text-[11.5px] leading-5 text-ink3">
+          <summary className="cursor-pointer select-none hover:text-ink2">忘记密码？</summary>
+          <p className="mt-1.5">
+            在服务器上执行{' '}
+            <code className="rounded-[4px] bg-surface-2 px-1 py-0.5 font-mono text-[11px] text-ink2">
+              node dist/reset.js 你的邮箱
+            </code>{' '}
+            会得到一个 15 分钟内有效的重置链接。
+          </p>
+        </details>
       </div>
     </div>
   )

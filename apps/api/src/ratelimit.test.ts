@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { buildApp } from './app'
+import { SESSION_COOKIE } from './auth'
 import { pool } from './db'
 import { migrate } from './migrate'
 
@@ -23,6 +24,9 @@ describe.skipIf(!ready)('登录限流与密码重置', () => {
   let app: FastifyInstance
   const run = Date.now()
   const mail = `rl${run}@test.local`
+  const fresh = `fresh${run}@test.local`
+  // 拿 4 个已存在账号凑满 IP 维度的 20 次失败（每邮箱最多 5 次就会先被邮箱维度锁住）
+  const scans = Array.from({ length: 4 }, (_, i) => `scan${run}-${i}@test.local`)
   const pass = 'password-ok'
   // 注意：必须 ≥6 位，否则在校验层就 400 了，根本走不到限流逻辑
   const WRONG = 'wrong-password'
@@ -31,11 +35,14 @@ describe.skipIf(!ready)('登录限流与密码重置', () => {
     await migrate()
     app = await buildApp()
     await app.ready()
-    await app.inject({
-      method: 'POST',
-      url: '/api/v1/auth/register',
-      payload: { email: mail, password: pass },
-    })
+    for (const m of [mail, ...scans]) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/auth/register',
+        payload: { email: m, password: pass },
+      })
+      expect(res.statusCode).toBe(201)
+    }
   })
 
   beforeEach(async () => {
@@ -45,8 +52,8 @@ describe.skipIf(!ready)('登录限流与密码重置', () => {
   })
 
   afterAll(async () => {
-    await pool.query('DELETE FROM login_attempts WHERE email = $1', [mail])
-    await pool.query('DELETE FROM users WHERE email = $1', [mail])
+    await pool.query('DELETE FROM login_attempts WHERE email = ANY($1::text[])', [[mail, fresh, ...scans]])
+    await pool.query('DELETE FROM users WHERE email = ANY($1::text[])', [[mail, fresh, ...scans]])
     await app.close()
   })
 
@@ -59,13 +66,50 @@ describe.skipIf(!ready)('登录限流与密码重置', () => {
     })
 
   it('连续 5 次密码错误后，第 6 次被 429 拦下', async () => {
-    for (let i = 0; i < 5; i++) {
+    // 已存在账号的密码错误必须计入限流
+    expect((await login(WRONG)).statusCode).toBe(401)
+    const failed = await pool.query(
+      'SELECT count(*)::int AS n FROM login_attempts WHERE email = $1 AND succeeded = false',
+      [mail],
+    )
+    expect(failed.rows[0].n).toBe(1)
+
+    for (let i = 0; i < 4; i++) {
       const res = await login(WRONG)
       expect(res.statusCode).toBe(401)
     }
     const blocked = await login(WRONG)
     expect(blocked.statusCode).toBe(429)
     expect(blocked.json().error.code).toBe('RATE_LIMITED')
+  })
+
+  it('新邮箱首次登录直接建号并登录，且不算失败尝试', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/auth/login',
+      payload: { email: fresh, password: pass },
+      remoteAddress: '203.0.113.7',
+    })
+    expect(res.statusCode).toBe(200)
+
+    const raw = res.headers['set-cookie']
+    const first = Array.isArray(raw) ? raw[0] : String(raw ?? '')
+    const cookie = first.match(new RegExp(`${SESSION_COOKIE}=([^;]+)`))?.[1]
+    expect(cookie).toBeTruthy()
+
+    const me = await app.inject({
+      method: 'GET',
+      url: '/api/v1/auth/me',
+      cookies: { [SESSION_COOKIE]: cookie! },
+    })
+    expect(me.statusCode).toBe(200)
+    expect(me.json().user.email).toBe(fresh)
+
+    const failed = await pool.query(
+      'SELECT count(*)::int AS n FROM login_attempts WHERE email = $1 AND succeeded = false',
+      [fresh],
+    )
+    expect(failed.rows[0].n).toBe(0)
   })
 
   it('被锁期间即使密码正确也拒绝（否则锁定形同虚设）', async () => {
@@ -97,15 +141,16 @@ describe.skipIf(!ready)('登录限流与密码重置', () => {
 
   it('同一 IP 扫不同邮箱，累计 20 次后被 IP 维度拦下', async () => {
     const ip = '192.0.2.44'
-    // 每次用不同邮箱，避免撞到邮箱维度的 5 次阈值
-    for (let i = 0; i < 20; i++) {
-      const res = await app.inject({
-        method: 'POST',
-        url: '/api/v1/auth/login',
-        payload: { email: `scan${run}-${i}@test.local`, password: WRONG },
-        remoteAddress: ip,
-      })
-      expect(res.statusCode).toBe(401)
+    for (const m of scans) {
+      for (let i = 0; i < 5; i++) {
+        const res = await app.inject({
+          method: 'POST',
+          url: '/api/v1/auth/login',
+          payload: { email: m, password: WRONG },
+          remoteAddress: ip,
+        })
+        expect(res.statusCode).toBe(401)
+      }
     }
     const blocked = await login(pass, ip)
     expect(blocked.statusCode).toBe(429)

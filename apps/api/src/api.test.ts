@@ -25,6 +25,7 @@ describe.skipIf(!ready)('API 集成', () => {
   const run = Date.now()
   const mailA = `a${run}@test.local`
   const mailB = `b${run}@test.local`
+  const mailD = `d${run}@test.local`
   const passA = 'password-a'
   const passB = 'password-b'
   let tokenA = ''
@@ -57,12 +58,12 @@ describe.skipIf(!ready)('API 集成', () => {
 
   afterAll(async () => {
     if (!ready) return
-    await pool.query('DELETE FROM users WHERE email = ANY($1::text[])', [[mailA, mailB]])
+    await pool.query('DELETE FROM users WHERE email = ANY($1::text[])', [[mailA, mailB, mailD]])
     await app.close()
     await pool.end()
   })
 
-  it('注册后即为登录态', async () => {
+  it('注册接口仍可用：注册后即为登录态', async () => {
     const res = await call('POST', '/auth/register', { payload: { email: mailA, password: passA } })
     expect(res.statusCode).toBe(201)
     tokenA = tokenOf(res)
@@ -71,6 +72,17 @@ describe.skipIf(!ready)('API 集成', () => {
     const me = await call('GET', '/auth/me', { token: tokenA })
     expect(me.statusCode).toBe(200)
     expect(me.json().user.email).toBe(mailA)
+  })
+
+  it('新邮箱首次登录即建号并登录', async () => {
+    const res = await call('POST', '/auth/login', { payload: { email: mailD, password: passA } })
+    expect(res.statusCode).toBe(200)
+    const token = tokenOf(res)
+    expect(token).not.toBe('')
+
+    const me = await call('GET', '/auth/me', { token })
+    expect(me.statusCode).toBe(200)
+    expect(me.json().user.email).toBe(mailD)
   })
 
   it('未登录访问书库返回 401', async () => {
@@ -104,11 +116,19 @@ describe.skipIf(!ready)('API 集成', () => {
     expect(body.statusCode).toBeUndefined()
   })
 
-  it('密码错误返回 401', async () => {
+  it('已存在账号密码错误返回 401', async () => {
     const res = await call('POST', '/auth/login', {
       payload: { email: mailA, password: 'wrong-password' },
     })
     expect(res.statusCode).toBe(401)
+  })
+
+  it('已存在账号密码正确可以登录', async () => {
+    const res = await call('POST', '/auth/login', {
+      payload: { email: mailA, password: passA },
+    })
+    expect(res.statusCode).toBe(200)
+    expect(res.json().user.email).toBe(mailA)
   })
 
   it('改密：当前密码不对返回 400（不是 401，避免前端误判会话失效）', async () => {

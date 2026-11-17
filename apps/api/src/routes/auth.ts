@@ -35,6 +35,7 @@ export default async function authRoutes(app: FastifyInstance): Promise<void> {
     return reply.code(201).send({ user })
   })
 
+  // 登录即建号：首次出现的邮箱直接建号并登录，前端一次提交就能进站
   app.post('/auth/login', async (req, reply) => {
     const body = obj(req.body)
     const mail = email(body.email)
@@ -44,12 +45,28 @@ export default async function authRoutes(app: FastifyInstance): Promise<void> {
     // 先查限流再算 scrypt：被锁时服务端只花一次索引查询，不给攻击者烧 CPU
     await assertNotLocked(mail, ip)
 
-    const found = await query<AuthUser & { password_hash: string }>(
-      `SELECT id, email, created_at AS "createdAt", password_hash
-       FROM users WHERE lower(email) = $1`,
-      [mail],
-    )
-    const row = found.rows[0]
+    const selectUser = () =>
+      query<AuthUser & { password_hash: string }>(
+        `SELECT id, email, created_at AS "createdAt", password_hash
+         FROM users WHERE lower(email) = $1`,
+        [mail],
+      )
+
+    let row = (await selectUser()).rows[0]
+
+    if (!row) {
+      // 建号不写失败记录：新账号不该被算作「一次密码错误」
+      const created = await query<AuthUser & { password_hash: string }>(
+        `INSERT INTO users (email, password_hash) VALUES ($1, $2)
+         ON CONFLICT (lower(email)) DO NOTHING
+         RETURNING id, email, created_at AS "createdAt", password_hash`,
+        [mail, hashPassword(pass)],
+      )
+      row = created.rows[0]
+      // 并发首次提交时另一边先建了号：退回按普通登录校验密码
+      if (!row) row = (await selectUser()).rows[0]
+    }
+
     // 账号不存在与密码错误给同一句提示，不泄露邮箱是否注册过
     if (!row || !verifyPassword(pass, row.password_hash)) {
       // 账号不存在也记一笔，否则「哪个邮箱已注册」就能靠限流行为探测出来

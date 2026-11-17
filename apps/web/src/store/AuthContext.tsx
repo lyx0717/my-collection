@@ -16,7 +16,6 @@ interface AuthContextValue {
   user: AuthUser | null
   status: AuthStatus
   login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>
 }
@@ -61,12 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('authenticated')
   }, [])
 
-  const register = useCallback(async (email: string, password: string) => {
-    const res = await api.post<{ user: AuthUser }>('/auth/register', { email, password })
-    setUser(res.user)
-    setStatus('authenticated')
-  }, [])
-
   const logout = useCallback(async () => {
     try {
       await api.post('/auth/logout')
@@ -84,8 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, status, login, register, logout, changePassword }),
-    [user, status, login, register, logout, changePassword],
+    () => ({ user, status, login, logout, changePassword }),
+    [user, status, login, logout, changePassword],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
