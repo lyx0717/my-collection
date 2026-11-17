@@ -26,7 +26,10 @@
 | 悬浮控件描边 `--glass-border-nav` | `rgba(255,255,255,.95)` | `rgba(255,255,255,.2)` |
 | 悬浮控件阴影 `--glass-shadow-nav` | `0 8px 28px -10px rgba(15,20,35,.26)` | `0 10px 30px -10px rgba(0,0,0,.7)` |
 | 弹窗底 `--glass-bg-sheet` | `rgba(255,255,255,.78)` | `rgba(28,28,30,.82)` |
-| backdrop 模糊 `--glass-blur` | `blur(10px) saturate(180%)`；弹窗 `--glass-blur-sheet` 24px | 同 |
+| backdrop 模糊 `--glass-blur` | `blur(10px) saturate(163%) brightness(1.055)`；弹窗 `--glass-blur-sheet` 24px | 同 |
+| 环境色 tint `--glass-tint` | `rgba(244,231,212,.34)`（暖） | `rgba(48,64,76,.3)`（冷） |
+| 双色 rim `--glass-rim-a/b` | 左上 `rgba(196,228,255,.41)` / 右下 `rgba(255,224,190,.28)` | 左上 `rgba(200,225,255,.16)` / 右下 `rgba(255,215,175,.12)` |
+| 噪点 `--glass-noise` | 24px 灰噪点 PNG 平铺（均值 alpha ≈1.5%） | 同 |
 | 1px 亮描边 `--glass-border` | `rgba(255,255,255,.7)` | `rgba(255,255,255,.12)` |
 | 主色 `--accent` | `#0a84ff` | `#0a84ff` |
 | 圆角 | 行与弹窗 20px、网格卡 16px、磁贴 12px | 同 |

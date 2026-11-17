@@ -11,7 +11,6 @@ import {
   type RegionSample,
   type Theme,
 } from '../components/labs/softglass-common'
-import { SG_NOISE_PNG } from '../components/labs/softglass-noise'
 import { createSoftGlassRenderer, type RendererStatus, type SoftGlassRenderer } from '../components/labs/softglass-webgl'
 
 /* ==================================================================
@@ -457,7 +456,7 @@ const STYLE = `
   /* 第一层是环境色 tint，第二层是 1% 噪点（内联 base64 PNG，24px 平铺） */
   background-image:
     linear-gradient(var(--sg-tint), var(--sg-tint)),
-    url(data:image/png;base64,${SG_NOISE_PNG});
+    var(--glass-noise);
   background-size: auto, 24px 24px;
   background-repeat: repeat, repeat;
   box-shadow:
