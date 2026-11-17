@@ -118,22 +118,6 @@
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.6);
   --glass-ring: rgba(255, 255, 255, 0.5);
 
-  /* —— 柔光玻璃（A 方案，2026-11-17 起取代原来的「半透明白 + 单层高光」）——
-     取的是 #/labs/softglass 里 A 的材质：底色之上再叠三层，
-       1) 环境色 tint：一层暖色线性渐变，让玻璃「被环境染了一点色」
-       2) 双色 rim：左上冷白（--glass-rim-a）、右下暖白（--glass-rim-b），
-          这是柔光玻璃「有厚度」的来源，单层顶部高光做不出来
-       3) 1% 噪点：24px 内联 PNG 平铺（--glass-noise），磨砂颗粒感靠它
-     tint 是静态的（按页面基色给），不做逐帧/逐面采样 —— 采样要额外
-     canvas + drawImage，只有实验室页那种一次性场景值这份成本。 */
-  --glass-tint: rgba(244, 231, 212, 0.34);
-  --glass-rim-a: rgba(196, 228, 255, 0.41);
-  --glass-rim-b: rgba(255, 224, 190, 0.28);
-  --glass-rim:
-    inset 1px 1px 0.5px var(--glass-rim-a),
-    inset -1px -1px 0.5px var(--glass-rim-b);
-  --glass-noise: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAACEUlEQVR42m2VWW7lMAwEW5udY79jR7aW+Rh2UBESILClJ3FpFun0+XxuSUnS1v+/JOmN9RVPrqekFetb0nfs+96S9CWpS9o1XkoYn3Epx/8rqcXlHGdGrK94v+I32ylx75Y0alxa8bwkPXFox/53/FbCoJCZnXa8296QlLzZEF2OTB7IcMd7Q7Y+N7A/I7tmaaukCk0zDL3Q35dGGPE5y/EeTmeczzkOLURZoXONp7NzAVcYS1DAki5Ium2shteKglbIlJCFNU7I+ol1geNX0qSOgrEFKmzYF+3UgTkY770IomZEZUfmvR6HTUsDpqbHuJquxzYzyGmIxKnf4L3Euh+sc51iz5hXFnmC9QWmX5A2oDMjF+B4Ac0vYjL0zZBNoKWCFjt9UTuCMiWNDHkKyJjIZCL9DmcPcL3RBwOFV0WkCc4EIxc6u8Hphf7oAENoxlaBpSNYKFpB1yY4MUH7GI4L97uk4s0GehoMFgy/CmMd0iTAkdGEX5IaKfJMH5AgIQMW0+OhY+JWfBt++qYiSn5E9oHqgL4PCLrR6R3B+kzK0DJhhnQ4TEfR2zHWXasGrH8KnkOrghHQoPkEimy4DMkc8cS+i71JjaB1CT03oi9HJxPnRqMYghc7eUCSAfQmojOedFpRuwmZs79ozKAdfZGA78a64VM5oP+GbNsZONKCIk3UYB9fuhsza/8xrxLsjX9YtwL2E195gAAAAABJRU5ErkJggg==');
-
   /* —— 卡片内 logo 容器底色（网格视图用）——
      刻意做成**单色弱化底**而不是按域名取色：网格一屏 20+ 张卡，
      每张都按域名铺一个彩色块的话，正文区会被彻底淹没成万花筒，
@@ -238,11 +222,6 @@
   /* 深色的顶部高光要更淡，否则卡片上边缘会出现一条亮线（廉价感） */
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   --glass-ring: rgba(255, 255, 255, 0.1);
-  /* 深色下的柔光：tint 偏冷灰（页面底色是纯黑，暖色会发黄），
-     rim 压到 12–16% —— 深色上 40% 的白边会变成一圈塑料亮边。 */
-  --glass-tint: rgba(48, 64, 76, 0.30);
-  --glass-rim-a: rgba(200, 225, 255, 0.16);
-  --glass-rim-b: rgba(255, 215, 175, 0.12);
 
   /* 深色徽章：底为深色系统灰，前景低饱和 */
   --badge-bg-0: #2c2c2e; --badge-fg-0: #a8a8ad;
@@ -295,14 +274,14 @@
      iOS 的 System Material 是同一模糊半径 + 不同底色透明度，
      层级靠底色与描边表达，不靠模糊强度。
      saturate 180% 是 iOS 的 vibrancy 效果：让透过来的颜色略微鲜艳。 */
-  --glass-blur: blur(10px) saturate(163%) brightness(1.055);
-  --glass-blur-nav: blur(10px) saturate(163%) brightness(1.055);
-  --glass-blur-panel: blur(10px) saturate(163%) brightness(1.055);
-  --glass-blur-card: blur(10px) saturate(163%) brightness(1.055);
-  --glass-blur-tile: blur(10px) saturate(163%) brightness(1.055);
+  --glass-blur: blur(10px) saturate(180%);
+  --glass-blur-nav: blur(10px) saturate(180%);
+  --glass-blur-panel: blur(10px) saturate(180%);
+  --glass-blur-card: blur(10px) saturate(180%);
+  --glass-blur-tile: blur(10px) saturate(180%);
   /* 浮层专用：模糊半径更大。层级不靠模糊表达（见上方说明），
      这里加强只是为了压住背后频繁移动的内容，24px 足以化开。 */
-  --glass-blur-sheet: blur(24px) saturate(163%) brightness(1.055);
+  --glass-blur-sheet: blur(24px) saturate(180%);
 }
 
 /* 输入类元素统一去除默认 outline，焦点态用边框 + 光环表达 */
@@ -458,19 +437,13 @@ body {
 html[data-glass='on'] .glass-chrome,
 html[data-glass='on'] .glass-topbar {
   background-color: var(--glass-bg);
-  /* 柔光三层：噪点在顶、tint 线性层在下，底色仍是 background-color ——
-     不能改成 background 简写：变量里是裸 rgba()/url()，简写会把 rgba 当 image
-     层解析，整条背景直接失效（这个坑 2026-11 已踩过一次）。 */
-  background-image: var(--glass-noise), linear-gradient(var(--glass-tint), var(--glass-tint));
-  background-size: 24px 24px, auto;
-  background-repeat: repeat, no-repeat;
   border-color: var(--glass-border) !important;
   /* -webkit- 必须写在标准写法前面：lightningcss 把两者视为同一属性、
      同规则内后者胜，标准写法放后面才能在产物里活下来。
      顺序反了会被压缩成只剩 -webkit- 形态 —— Chrome 不认它，模糊整体失效。 */
   -webkit-backdrop-filter: var(--glass-blur-nav);
   backdrop-filter: var(--glass-blur-nav);
-  box-shadow: var(--glass-rim), var(--glass-shadow);
+  box-shadow: var(--glass-highlight), var(--glass-shadow);
 }
 
 /* 悬浮导航胶囊（分组导航 / 设置页导航）：
@@ -481,17 +454,11 @@ html[data-glass='on'] .glass-topbar-chips {
      变量里存的是裸 rgba()，简写会把它当成 image 层的值而整体失效
      （实测 computed backgroundImage = none）。 */
   background-color: var(--glass-bg-nav);
-  /* 柔光三层：噪点在顶、tint 线性层在下，底色仍是 background-color ——
-     不能改成 background 简写：变量里是裸 rgba()/url()，简写会把 rgba 当 image
-     层解析，整条背景直接失效（这个坑 2026-11 已踩过一次）。 */
-  background-image: var(--glass-noise), linear-gradient(var(--glass-tint), var(--glass-tint));
-  background-size: 24px 24px, auto;
-  background-repeat: repeat, no-repeat;
   border-color: var(--glass-border-nav);
   -webkit-backdrop-filter: var(--glass-blur-panel);
   backdrop-filter: var(--glass-blur-panel);
   /* 不叠 --glass-highlight：胶囊本身已是半透明玻璃，再加顶部高光会显脏 */
-  box-shadow: var(--glass-rim), var(--glass-shadow-nav);
+  box-shadow: var(--glass-shadow-nav);
 }
 
 /* —— 卡片与磁贴 ——
@@ -553,16 +520,10 @@ html[data-glass='on'] .tile-shell:hover {
    判断标准是「同屏实例数」，不是「是否叫玻璃」。 */
 html[data-glass='on'] .glass-sheet {
   background-color: var(--glass-bg-sheet);
-  /* 柔光三层：噪点在顶、tint 线性层在下，底色仍是 background-color ——
-     不能改成 background 简写：变量里是裸 rgba()/url()，简写会把 rgba 当 image
-     层解析，整条背景直接失效（这个坑 2026-11 已踩过一次）。 */
-  background-image: var(--glass-noise), linear-gradient(var(--glass-tint), var(--glass-tint));
-  background-size: 24px 24px, auto;
-  background-repeat: repeat, no-repeat;
   border: 1px solid var(--glass-border-sheet);
   -webkit-backdrop-filter: var(--glass-blur-sheet);
   backdrop-filter: var(--glass-blur-sheet);
-  box-shadow: var(--glass-rim), var(--glass-shadow-sheet);
+  box-shadow: var(--glass-highlight), var(--glass-shadow-sheet);
 }
 
 /* —— 浮层内的输入框：内凹玻璃 ——
