@@ -8,6 +8,8 @@ import RequireAuth from './components/RequireAuth'
 
 // 设置页低频访问：路由级懒加载，把 papaparse 等导入依赖从首屏主包里剥出去
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
+// 柔光玻璃实验室：独立实验页，不进任何导航
+const SoftGlassLab = lazy(() => import('./pages/SoftGlassLab'))
 
 export default function App() {
   return (
@@ -16,6 +18,14 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         {/* 重置页必须放在 RequireAuth 之外：忘密码时本来就没登录态 */}
         <Route path="/reset" element={<ResetPage />} />
+        <Route
+          path="/labs/softglass"
+          element={
+            <Suspense fallback={null}>
+              <SoftGlassLab />
+            </Suspense>
+          }
+        />
         <Route
           path="/"
           element={
