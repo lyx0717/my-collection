@@ -4,9 +4,7 @@ import { iconForCollection } from '../lib/collectionIcons'
 import type { Collection, Scope } from '../types'
 
 interface GroupNavProps {
-  total: number
   collections: Collection[]
-  collectionCounts: Map<string, number>
   scope: Scope
   onScope: (scope: Scope) => void
 }
@@ -27,13 +25,7 @@ function scopeIsActive(scope: Scope, target: Scope['type'], id?: string): boolea
  * 图标用 lucide SVG 而非 emoji：emoji 是彩色位图，与单色线性图标混排时
  * 笔画粗细、视觉重量全不一致，且跨平台渲染差异大。详见 lib/collectionIcons.ts。
  */
-export default function GroupNav({
-  total,
-  collections,
-  collectionCounts,
-  scope,
-  onScope,
-}: GroupNavProps) {
+export default function GroupNav({ collections, scope, onScope }: GroupNavProps) {
   // 没有分组时整条胶囊不渲染：只剩一个「全部」的导航没有任何可选目标，
   // 而把「去设置里创建分组」塞进胶囊会让它看起来像按钮组，误触成本高于收益。
   // 这条空白由调用方（HomePage 的 sticky 外层）决定如何收掉。
@@ -43,7 +35,6 @@ export default function GroupNav({
     {
       key: '__all__',
       label: '全部',
-      count: total,
       icon: <Bookmark size={16} strokeWidth={1.8} />,
       active: scopeIsActive(scope, 'all'),
       onClick: () => onScope({ type: 'all' }),
@@ -53,7 +44,6 @@ export default function GroupNav({
       return {
         key: col.id,
         label: col.name,
-        count: collectionCounts.get(col.id) ?? 0,
         icon: <Icon size={16} strokeWidth={1.8} />,
         active: scopeIsActive(scope, 'collection', col.id),
         onClick: () => onScope({ type: 'collection', id: col.id }),

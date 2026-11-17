@@ -67,14 +67,14 @@ export default function AboutSection({ onClear }: Props) {
               setPwOpen((v) => !v)
               setPwError('')
             }}
-            className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-surface px-3.5 text-[12.5px] font-medium text-ink2 hover:border-line2 hover:text-ink"
+            className="liquid-glass liquid-glass--control flex h-9 items-center gap-1.5 rounded-[10px] px-3.5 text-[12.5px] font-medium text-ink2 hover:text-ink"
           >
             <KeyRound size={13} />
             {pwOpen ? '收起' : '修改密码'}
           </button>
           <button
             onClick={onClear}
-            className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-surface px-3.5 text-[12.5px] font-medium text-ink2 hover:border-danger/40 hover:text-danger"
+            className="liquid-glass liquid-glass--control flex h-9 items-center gap-1.5 rounded-[10px] px-3.5 text-[12.5px] font-medium text-ink2 hover:text-danger"
           >
             清空全部数据
           </button>
@@ -83,7 +83,7 @@ export default function AboutSection({ onClear }: Props) {
           <button
             type="button"
             onClick={() => void logout()}
-            className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-surface px-3.5 text-[12.5px] font-medium text-ink2 hover:border-line2 hover:text-ink"
+            className="liquid-glass liquid-glass--control flex h-9 items-center gap-1.5 rounded-[10px] px-3.5 text-[12.5px] font-medium text-ink2 hover:text-ink"
           >
             <LogOut size={13} />
             退出登录
@@ -121,7 +121,7 @@ export default function AboutSection({ onClear }: Props) {
               <button
                 type="submit"
                 disabled={pwBusy}
-                className="flex h-9 items-center gap-2 rounded-[10px] bg-accent px-4 text-[13px] font-semibold text-white transition-colors hover:bg-accent-ink disabled:opacity-60"
+                className="liquid-glass liquid-glass--accent flex h-9 items-center gap-2 rounded-[10px] px-4 text-[13px] font-semibold text-white disabled:opacity-60"
               >
                 {pwBusy && <Loader2 size={13} className="animate-spin" />}
                 确认修改

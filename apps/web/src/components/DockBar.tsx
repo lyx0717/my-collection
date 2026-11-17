@@ -4,6 +4,7 @@ import { LogOut, Settings } from 'lucide-react'
 import EngineSearchBox from './EngineSearchBox'
 import GlassThemeToggle from './GlassThemeToggle'
 import { useAuth } from '../store/AuthContext'
+import { useLiquidGlass } from '../lib/glass/useLiquidGlass'
 
 /**
  * 顶部通栏导航（fixed，贴边通栏）。
@@ -22,6 +23,8 @@ import { useAuth } from '../store/AuthContext'
 export default function DockBar() {
   const { pathname } = useLocation()
   const { user, logout } = useAuth()
+  // 顶栏是页面上最大的玻璃面：折射带只在这里和分组胶囊上挂
+  const barRef = useLiquidGlass<HTMLElement>('bar')
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -43,7 +46,10 @@ export default function DockBar() {
   }, [menuOpen])
 
   return (
-    <header className="glass-chrome fixed inset-x-0 top-0 z-40 h-14 border-b px-4 sm:px-6">
+    <header
+      ref={barRef}
+      className="liquid-glass liquid-glass--bar liquid-glass--refract fixed inset-x-0 top-0 z-40 h-14 px-4 sm:px-6"
+    >
       <div className="mx-auto flex h-full max-w-6xl items-center gap-3 sm:gap-4">
         <Link
           to="/"
@@ -77,8 +83,8 @@ export default function DockBar() {
           <Link
             to="/settings"
             aria-label="设置"
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-ink2 transition-colors hover:bg-surface-2 hover:text-accent ${
-              pathname === '/settings' ? 'bg-accent-soft text-accent' : ''
+            className={`liquid-glass liquid-glass--control flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-ink2 hover:text-accent-ink ${
+              pathname === '/settings' ? 'liquid-glass--selected' : ''
             }`}
           >
             <Settings size={16} />
@@ -91,7 +97,7 @@ export default function DockBar() {
               onClick={() => setMenuOpen((open) => !open)}
               aria-label="账号"
               aria-expanded={menuOpen}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-soft text-[12.5px] font-bold text-accent-ink transition-colors hover:bg-accent/20"
+              className="liquid-glass liquid-glass--selected flex h-9 w-9 items-center justify-center rounded-full text-[12.5px] font-bold text-accent-ink"
             >
               {(user?.email ?? '?').charAt(0).toUpperCase()}
             </button>

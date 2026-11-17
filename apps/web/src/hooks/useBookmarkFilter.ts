@@ -7,13 +7,12 @@ export interface BookmarkFilterResult {
   domainFilter: string
   visible: Bookmark[]
   collectionMap: Map<string, Collection>
-  collectionCounts: Map<string, number>
   contextTitle: string
   hasActiveFilter: boolean
   searchFiltered: boolean
 }
 
-/** 书签库筛选：URL query → 可见列表 + 分组计数 */
+/** 书签库筛选：URL query → 可见列表 + 分组名映射 */
 export function useBookmarkFilter(
   bookmarks: Bookmark[],
   collections: Collection[],
@@ -29,13 +28,6 @@ export function useBookmarkFilter(
   return useMemo(() => {
     const scope: Scope = collectionId ? { type: 'collection', id: collectionId } : { type: 'all' }
     const collectionMap = new Map(collections.map((c) => [c.id, c]))
-    const collectionCounts = new Map<string, number>()
-
-    for (const bm of bookmarks) {
-      if (bm.collectionId) {
-        collectionCounts.set(bm.collectionId, (collectionCounts.get(bm.collectionId) ?? 0) + 1)
-      }
-    }
 
     const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
     const result = bookmarks.filter((bm) => {
@@ -64,7 +56,6 @@ export function useBookmarkFilter(
       domainFilter,
       visible: result,
       collectionMap,
-      collectionCounts,
       contextTitle,
       hasActiveFilter: Boolean(query || domainFilter) || scope.type !== 'all',
       /** 搜索/域名筛选：临时视图，禁用拖拽排序 */

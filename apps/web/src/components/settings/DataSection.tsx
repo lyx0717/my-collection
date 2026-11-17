@@ -281,14 +281,14 @@ export default function DataSection() {
                   setPreview(null)
                   setParsed(null)
                 }}
-                className="h-9 rounded-[10px] border border-line2 px-4 text-[13px] font-medium text-ink2 hover:bg-surface-2"
+                className="liquid-glass liquid-glass--control h-9 rounded-[10px] px-4 text-[13px] font-medium text-ink2"
               >
                 取消
               </button>
               <button
                 onClick={() => void confirmImport()}
                 disabled={selectedCount === 0 || importing}
-                className="flex h-9 items-center gap-1.5 rounded-[10px] bg-accent px-4 text-[13px] font-semibold text-white hover:bg-accent-ink disabled:opacity-40"
+                className="liquid-glass liquid-glass--accent flex h-9 items-center gap-1.5 rounded-[10px] px-4 text-[13px] font-semibold text-white disabled:opacity-40"
               >
                 {importing ? (
                   <Loader2 size={14} className="animate-spin" />
@@ -306,14 +306,14 @@ export default function DataSection() {
           <div className="ml-auto flex gap-2.5">
             <button
               onClick={downloadJson}
-              className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-surface px-3.5 text-[12.5px] font-medium text-ink2 hover:bg-surface-2"
+              className="liquid-glass liquid-glass--control flex h-9 items-center gap-1.5 rounded-[10px] px-3.5 text-[12.5px] font-medium text-ink2"
             >
               <Download size={14} />
               导出 JSON
             </button>
             <button
               onClick={downloadNetscape}
-              className="flex h-9 items-center gap-1.5 rounded-[10px] border border-line bg-surface px-3.5 text-[12.5px] font-medium text-ink2 hover:bg-surface-2"
+              className="liquid-glass liquid-glass--control flex h-9 items-center gap-1.5 rounded-[10px] px-3.5 text-[12.5px] font-medium text-ink2"
             >
               <Download size={14} />
               导出浏览器 HTML

@@ -22,13 +22,12 @@
   /* —— iOS 浅色毛玻璃 ——
      规范：backdrop 高斯模糊 16px、柔和低透明度白底、1px 半透明白描边、
      20px 大圆角、极淡柔和阴影、低饱和配色。
-     整页只有一个玻璃色板（--glass-bg 系列），不再分 nav/panel/card 三档 ——
-     iOS 的 System Materials 靠「同一材质、不同层级」表达关系，
-     分三档 blur 只会让页面显得层数混乱。 */
+     悬浮控件的材质统一在 --liquid-*（bar / control / accent 三档浓度），
+     卡片与弹窗仍是实底；分档只在「浮在内容上」的表面成立 ——
+     卡片不透明就没必要再做一层毛玻璃。 */
   --canvas: #f2f2f7;
   --surface: #ffffff;
   --surface-2: #f7f7fa;
-  --segment: #ececf0;
 
   /* 文字层级：iOS label 色阶。正文用近黑，次级用 60% 灰，
      保证在半透明白玻璃上依然清晰可读（这是「可读性高」的底线）。 */
@@ -45,6 +44,8 @@
   --accent: #0a84ff;
   --accent-ink: #0071e3;
   --accent-soft: rgba(10, 132, 255, 0.1);
+  /* 选中态 hover：比常态再压深一档，让「已选中」的按钮也有按压反馈 */
+  --accent-soft-hover: rgba(10, 132, 255, 0.16);
   --accent-ring: rgba(10, 132, 255, 0.18);
   --accent-shadow: rgba(10, 132, 255, 0.22);
   --danger: #ff3b30;
@@ -70,9 +71,6 @@
      白底 68%：这是 iOS System Material Light 的典型取值。
      底太透会让文字直接压在背景上，可读性崩；太实就失去玻璃感。
      68% + 16px 模糊是「能看清背后轮廓但不影响阅读」的平衡点。 */
-  --glass-bg: rgba(255, 255, 255, 0.68);
-  --glass-bg-soft: rgba(255, 255, 255, 0.6);
-  --glass-bg-hover: rgba(255, 255, 255, 0.82);
   /* —— 卡片材质：实底 + 冷灰描边 ——
      曾经是 68% 白 + 1px 白描边：描边与卡底合成后几乎是同一个白（对比 ≈1.0:1），
      卡片与页面浅灰底也只差 9 个色阶（≈1.08:1），一屏 45 张卡的边界全靠
@@ -95,28 +93,77 @@
   --glass-field-bg-focus: rgba(15, 20, 35, 0.02);
   --glass-field-border: rgba(15, 20, 35, 0.12);
   --glass-field-inset: inset 0 1px 2px rgba(15, 20, 35, 0.1);
-  /* 悬浮导航专用材质：**保持透明**。
-     玻璃的可见度不来自自身颜色深浅，而来自「背后有没有明暗对比」——
-     胶囊半透明地压在一块有深浅差异的背景上，边界自然浮现；
-     把它涂成实色反而失去玻璃感（且在浅底上依然只是「一条灰带」）。
-
-     所以这里只做两件事：
-     1) 描边加到接近不透明（0.95）—— 白边压在深色背景上才看得见，这是边界的主要来源
-     2) 投影加重 —— 给「浮在内容之上」一个物理线索
-     真正让胶囊显形的是 body 的明暗渐变（见下方 body 规则）。 */
-  --glass-bg-nav: rgba(255, 255, 255, 0.66);
-  --glass-border-nav: rgba(255, 255, 255, 0.95);
-  --glass-shadow-nav: 0 8px 28px -10px rgba(15, 20, 35, 0.26);
   /* 1px 半透明白描边：玻璃的边界全靠它 */
-  --glass-border: rgba(255, 255, 255, 0.7);
-  --glass-border-hover: rgba(255, 255, 255, 0.95);
   /* 极淡柔和阴影：iOS 不用纯黑阴影，用带点冷灰的浅色投影 */
   --glass-shadow: 0 2px 10px -2px rgba(15, 20, 35, 0.06);
   --glass-shadow-hover: 0 6px 20px -4px rgba(15, 20, 35, 0.1);
   /* 顶部微高光：只给 1px、极淡，给玻璃一点「上边缘受光」的存在感。
      不用 inset 大面积高光 —— 那是塑料感与「发光」的来源。 */
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  --glass-ring: rgba(255, 255, 255, 0.5);
+
+  /* —— 液态玻璃导航（分组胶囊 / 设置页导航）——
+     玻璃本体几乎全透明（thin 0.10），远看只靠折射与 rim 成形；
+     九层 box-shadow 是 rim light + 倒角，不要合并成一层。 */
+  --liquid-nav-bg: rgba(255, 255, 255, 0.10);
+  --liquid-nav-shadow:
+    inset 1.5px 1.5px 1px -1px rgba(255, 255, 255, 1),
+    inset -1.5px -1.5px 1px -1px rgba(255, 255, 255, 0.6),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.3),
+    0 0 0 0.5px rgba(15, 20, 35, 0.1),
+    0 6px 20px -8px rgba(15, 20, 35, 0.22),
+    inset 0 6px 8px -6px rgba(255, 255, 255, 0.5),
+    inset 4px 0 8px -6px rgba(255, 255, 255, 0.22),
+    inset -4px 0 8px -6px rgba(255, 255, 255, 0.12),
+    inset 0 -6px 8px -6px rgba(0, 0, 0, 0.06);
+  /* 选中态：玻璃里再垫一层薄玻璃（只有 tint + rim，不加第二层 backdrop，
+     两层 backdrop 会把背景糊两遍、出现亮度台阶） */
+  --liquid-pill-bg: rgba(255, 255, 255, 0.40);
+  --liquid-pill-highlight: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.35) 34%,
+    rgba(255, 255, 255, 0) 58%
+  );
+  --liquid-pill-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.55),
+    inset 1px 0 0 rgba(255, 255, 255, 0.7),
+    inset -1px 0 0 rgba(255, 255, 255, 0.3),
+    0 0 0 0.5px rgba(15, 20, 35, 0.09),
+    0 1px 2px rgba(15, 20, 35, 0.12),
+    0 8px 18px -6px rgba(15, 20, 35, 0.22),
+    0 12px 26px -12px rgba(10, 132, 255, 0.55);
+
+  /* —— 液态玻璃材质档位（顶栏 / 控件 / 主操作）——
+     bg 决定「多透」，shadow 决定「多厚」。顶栏最透（背后满屏内容要透出来），
+     控件稍实（文字要读得清），主操作是蓝玻璃。 */
+  --liquid-bar-bg: rgba(255, 255, 255, 0.42);
+  --liquid-bar-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(15, 20, 35, 0.05),
+    0 0 0 0.5px rgba(15, 20, 35, 0.07),
+    0 8px 24px -16px rgba(15, 20, 35, 0.3);
+  --liquid-control-bg: rgba(255, 255, 255, 0.55);
+  --liquid-control-bg-hover: rgba(255, 255, 255, 0.75);
+  /* 片内未选中项 hover：极淡的冷灰，比面板底再压一档，
+     这样鼠标扫过胶囊时是「透出背景」，而不是给每个 tab 都套个白底。 */
+  --liquid-tab-hover-bg: rgba(15, 20, 35, 0.055);
+  --liquid-tab-press-bg: rgba(15, 20, 35, 0.09);
+  --liquid-control-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.55),
+    0 0 0 0.5px rgba(15, 20, 35, 0.09),
+    0 1px 2px rgba(15, 20, 35, 0.08),
+    0 4px 10px -6px rgba(15, 20, 35, 0.18);
+  --liquid-accent-bg: rgba(10, 132, 255, 0.88);
+  --liquid-accent-bg-hover: rgba(0, 113, 227, 0.94);
+  --liquid-accent-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.22),
+    0 1px 2px rgba(10, 90, 200, 0.25),
+    0 6px 16px -8px rgba(10, 132, 255, 0.6);
 
   /* —— 卡片内 logo 容器底色（网格视图用）——
      刻意做成**单色弱化底**而不是按域名取色：网格一屏 20+ 张卡，
@@ -153,7 +200,6 @@
   --canvas: #000000;
   --surface: #1c1c1e;
   --surface-2: #2c2c2e;
-  --segment: #2c2c2e;
 
   /* iOS 深色 label 色阶：正文接近纯白但不用 #fff（刺眼），
      次级降到 60% 不透明度 —— 这就是「低对比度但不糊」的来源。 */
@@ -168,6 +214,7 @@
   --accent: #0a84ff;
   --accent-ink: #409cff;
   --accent-soft: rgba(10, 132, 255, 0.18);
+  --accent-soft-hover: rgba(10, 132, 255, 0.26);
   --accent-ring: rgba(10, 132, 255, 0.3);
   --accent-shadow: rgba(10, 132, 255, 0.28);
   --danger: #ff453a;
@@ -191,9 +238,6 @@
      深色底 62%：比浅色略高，因为深色下同样的 alpha 会显得更薄。
      描边 0.12 白是 iOS 深色材质的标准值 —— 比浅色看着更「实」，
      正好补上深色背景里卡片边界容易消失的问题。 */
-  --glass-bg: rgba(28, 28, 30, 0.62);
-  --glass-bg-soft: rgba(28, 28, 30, 0.54);
-  --glass-bg-hover: rgba(44, 44, 46, 0.72);
   --glass-bg-card: #1c1c1e;
   --glass-bg-card-hover: #1c1c1e;
   --card-line: rgba(255, 255, 255, 0.18);
@@ -211,17 +255,64 @@
   --glass-field-bg-focus: rgba(0, 0, 0, 0.32);
   --glass-field-border: rgba(255, 255, 255, 0.14);
   --glass-field-inset: inset 0 1px 3px rgba(0, 0, 0, 0.4);
-  --glass-bg-nav: rgba(30, 30, 32, 0.6);
-  --glass-border-nav: rgba(255, 255, 255, 0.2);
-  --glass-shadow-nav: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-border-hover: rgba(255, 255, 255, 0.2);
   /* 深色下阴影几乎不可见，主要靠描边分层；这里只留一道极淡的 */
   --glass-shadow: 0 2px 10px -2px rgba(0, 0, 0, 0.3);
   --glass-shadow-hover: 0 6px 20px -4px rgba(0, 0, 0, 0.45);
   /* 深色的顶部高光要更淡，否则卡片上边缘会出现一条亮线（廉价感） */
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --glass-ring: rgba(255, 255, 255, 0.1);
+  --liquid-nav-bg: rgba(30, 30, 34, 0.26);
+  --liquid-nav-shadow:
+    inset 1.5px 1.5px 1px -1px rgba(255, 255, 255, 0.46),
+    inset -1.5px -1.5px 1px -1px rgba(255, 255, 255, 0.18),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.06),
+    0 0 0 0.5px rgba(0, 0, 0, 0.28),
+    0 6px 18px -8px rgba(0, 0, 0, 0.6),
+    inset 0 6px 8px -6px rgba(255, 255, 255, 0.18),
+    inset 4px 0 8px -6px rgba(255, 255, 255, 0.07),
+    inset -4px 0 8px -6px rgba(255, 255, 255, 0.04),
+    inset 0 -6px 8px -6px rgba(0, 0, 0, 0.08);
+  --liquid-pill-bg: rgba(255, 255, 255, 0.10);
+  --liquid-pill-highlight: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.12) 36%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  --liquid-pill-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.14),
+    inset 1px 0 0 rgba(255, 255, 255, 0.24),
+    inset -1px 0 0 rgba(255, 255, 255, 0.08),
+    0 0 0 0.5px rgba(255, 255, 255, 0.22),
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 6px 16px -6px rgba(0, 0, 0, 0.55),
+    0 12px 28px -12px rgba(64, 156, 255, 0.55);
+
+  /* 深色的玻璃靠「亮一档的底 + 白描边」立起来，不靠阴影（黑底阴影看不见） */
+  --liquid-bar-bg: rgba(28, 28, 30, 0.55);
+  --liquid-bar-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 0 0 0.5px rgba(255, 255, 255, 0.06),
+    0 10px 30px -18px rgba(0, 0, 0, 0.8);
+  --liquid-control-bg: rgba(255, 255, 255, 0.08);
+  --liquid-control-bg-hover: rgba(255, 255, 255, 0.14);
+  --liquid-tab-hover-bg: rgba(255, 255, 255, 0.08);
+  --liquid-tab-press-bg: rgba(255, 255, 255, 0.13);
+  --liquid-control-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.06),
+    0 0 0 0.5px rgba(255, 255, 255, 0.1),
+    0 2px 6px -3px rgba(0, 0, 0, 0.5);
+  --liquid-accent-bg: rgba(10, 132, 255, 0.8);
+  --liquid-accent-bg-hover: rgba(10, 132, 255, 0.94);
+  --liquid-accent-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.14),
+    0 2px 6px -2px rgba(0, 0, 0, 0.45),
+    0 8px 20px -10px rgba(10, 132, 255, 0.6);
 
   /* 深色徽章：底为深色系统灰，前景低饱和 */
   --badge-bg-0: #2c2c2e; --badge-fg-0: #a8a8ad;
@@ -243,7 +334,6 @@
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
-  --color-segment: var(--segment);
   --color-ink: var(--ink);
   --color-ink2: var(--ink-2);
   --color-ink3: var(--ink-3);
@@ -274,11 +364,6 @@
      iOS 的 System Material 是同一模糊半径 + 不同底色透明度，
      层级靠底色与描边表达，不靠模糊强度。
      saturate 180% 是 iOS 的 vibrancy 效果：让透过来的颜色略微鲜艳。 */
-  --glass-blur: blur(10px) saturate(180%);
-  --glass-blur-nav: blur(10px) saturate(180%);
-  --glass-blur-panel: blur(10px) saturate(180%);
-  --glass-blur-card: blur(10px) saturate(180%);
-  --glass-blur-tile: blur(10px) saturate(180%);
   /* 浮层专用：模糊半径更大。层级不靠模糊表达（见上方说明），
      这里加强只是为了压住背后频繁移动的内容，24px 足以化开。 */
   --glass-blur-sheet: blur(24px) saturate(180%);
@@ -416,12 +501,27 @@ body {
      结果是色彩互相打架。iOS 的做法是背景保持纯净，
      玻璃只负责把背景糊开，颜色层次交给底色与描边。 */
 
-/* 主题切换的雾化过渡：放 base 层，避免盖掉组件自己的 transition 工具类 */
+/* 主题切换的雾化过渡：放 base 层，避免盖掉组件自己的 transition 工具类；
+   点击目标的手型指针也在这里统一收回 —— Tailwind v4 preflight 把 button 的
+   cursor 交还给浏览器默认（default），按钮、tab、下拉全是箭头，
+   点之前没有任何「这里能点」的提示。禁用态用 not-allowed，不做手型。 */
 @layer base {
+  /* 点击目标 */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  select:not(:disabled),
+  summary,
+  label[for] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
   body,
-  .glass-chrome,
-  .glass-topbar,
-  .glass-topbar-chips,
+  .liquid-glass,
   .glass-card,
   .tile-shell {
     transition:
@@ -432,33 +532,167 @@ body {
   }
 }
 
-/* —— chrome：通栏顶栏与悬浮胶囊 ——
-   强制覆盖 Tailwind 的实色 bg-surface / border-line，否则会残留发黄边线。 */
-html[data-glass='on'] .glass-chrome,
-html[data-glass='on'] .glass-topbar {
-  background-color: var(--glass-bg);
-  border-color: var(--glass-border) !important;
-  /* -webkit- 必须写在标准写法前面：lightningcss 把两者视为同一属性、
-     同规则内后者胜，标准写法放后面才能在产物里活下来。
-     顺序反了会被压缩成只剩 -webkit- 形态 —— Chrome 不认它，模糊整体失效。 */
-  -webkit-backdrop-filter: var(--glass-blur-nav);
-  backdrop-filter: var(--glass-blur-nav);
-  box-shadow: var(--glass-highlight), var(--glass-shadow);
+/* —— 液态玻璃材质 ——
+   顶栏、分组胶囊、按钮、输入框共用这一套：
+   半透明底色 + 小半径模糊 + rim 高光／倒角。三档只在「底多实、rim 多厚」上不同，
+   由 --liquid-{bar,control,accent}-* 三个 token 组决定。
+
+   为什么 blur 只有 2–3px：真玻璃是清楚的，糊成十几 px 就成了毛玻璃，
+   背后的内容全糊成色块，rim 也读不出来。
+
+   -webkit- 必须写在标准写法前面：lightningcss 把两者视为同一属性、
+   同规则内后者胜，标准写法放后面才能在产物里活下来。
+   顺序反了会被压缩成只剩 -webkit- 形态 —— Chrome 不认它，模糊整体失效。 */
+html[data-glass='on'] .liquid-glass {
+  --lg-bg: var(--liquid-control-bg);
+  --lg-shadow: var(--liquid-control-shadow);
+  --lg-blur: blur(3px) saturate(1.7) brightness(1.04);
+
+  background-color: var(--lg-bg);
+  /* 玻璃不用 border：亮边全靠 box-shadow 的 rim light 与倒角画出来，
+     加一条 1px 描边会立刻变成「贴纸」。border-color 必须显式清掉，
+     否则带 border 工具类的元素会残留一条发黄的线。 */
+  border-color: transparent;
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+  box-shadow: var(--lg-shadow);
 }
 
-/* 悬浮导航胶囊（分组导航 / 设置页导航）：
-   用独立的 --glass-bg-nav + --glass-shadow-nav 档位，
-   比卡片更实、投影更重 —— 这是让它从内容里「浮出来」的关键。 */
-html[data-glass='on'] .glass-topbar-chips {
-  /* 必须用 background-color，不能用 background 简写 ——
-     变量里存的是裸 rgba()，简写会把它当成 image 层的值而整体失效
-     （实测 computed backgroundImage = none）。 */
-  background-color: var(--glass-bg-nav);
-  border-color: var(--glass-border-nav);
-  -webkit-backdrop-filter: var(--glass-blur-panel);
-  backdrop-filter: var(--glass-blur-panel);
-  /* 不叠 --glass-highlight：胶囊本身已是半透明玻璃，再加顶部高光会显脏 */
-  box-shadow: var(--glass-shadow-nav);
+/* 折射只给支撑得起的表面：顶栏与分组胶囊 */
+html[data-glass='on'] .liquid-glass--refract {
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur) var(--glass-lens,);
+}
+
+html[data-glass='on'] .liquid-glass--bar {
+  --lg-bg: var(--liquid-bar-bg);
+  --lg-shadow: var(--liquid-bar-shadow);
+  --lg-blur: blur(3px) saturate(1.8) brightness(1.06);
+}
+
+html[data-glass='on'] .liquid-glass--control:hover:not(:disabled) {
+  --lg-bg: var(--liquid-control-bg-hover);
+}
+
+/* 主操作：蓝色玻璃。文字仍是白字，rim 换成更暗的一圈，
+   免得蓝底上一道纯白高光把边缘照得发灰。 */
+html[data-glass='on'] .liquid-glass--accent {
+  --lg-bg: var(--liquid-accent-bg);
+  --lg-shadow: var(--liquid-accent-shadow);
+  --lg-blur: blur(8px) saturate(1.4) brightness(1.02);
+}
+
+html[data-glass='on'] .liquid-glass--accent:hover:not(:disabled) {
+  --lg-bg: var(--liquid-accent-bg-hover);
+}
+
+html[data-glass='on'] .liquid-glass--selected:hover:not(:disabled) {
+  --lg-bg: var(--accent-soft-hover);
+}
+
+/* 片内的 tab（导航项、视图切换按钮）：hover 只动底色，
+   不位移、不缩放 —— 一排 tab 同时抖起来比不做动画更廉价。 */
+.liquid-tab {
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out);
+}
+
+.liquid-tab:hover:not([aria-current='page']):not(:disabled) {
+  background-color: var(--liquid-tab-hover-bg);
+}
+
+.liquid-tab:active:not([aria-current='page']):not(:disabled) {
+  background-color: var(--liquid-tab-press-bg);
+}
+
+/* 选中／按下态：底色换成 accent-soft，再加一圈 accent-ring 当焦点 */
+html[data-glass='on'] .liquid-glass--selected {
+  --lg-bg: var(--accent-soft);
+  --lg-shadow: var(--liquid-control-shadow), 0 0 0 0.5px var(--accent-ring);
+}
+
+/* 输入框容器获得焦点时补一圈 ring：材质自带的 shadow 不能被 utilities 覆盖 */
+html[data-glass='on'] .liquid-glass--field:focus-within {
+  --lg-shadow: var(--liquid-control-shadow), 0 0 0 3px var(--accent-ring);
+}
+
+/* —— 液态玻璃导航 ——
+   与普通毛玻璃的唯一区别是边缘会折射：lens.js 把一张九宫格位移图塞进
+   backdrop-filter: url(#…)，背后的像素在边缘被「掰」进去，圆角处弯折。
+   所以这里的 blur 只有 2px —— 真玻璃是清楚的，糊成一片就变毛玻璃了。
+   折射只在 Chromium 生效；Safari / Firefox 拿不到 url()，只剩下面的
+   rim + 轻微模糊，看上去仍是一块玻璃（降级不塌）。
+   --glass-lens 由 lens.js 写入，末尾那个逗号是「未定义时为空串」的写法。 */
+html[data-glass='on'] .liquid-glass--nav {
+  --lg-bg: var(--liquid-nav-bg);
+  --lg-shadow: var(--liquid-nav-shadow);
+  --lg-blur: blur(2px) saturate(1.8) brightness(1.06);
+}
+
+/* 选中片：一小块真正有厚度的玻璃，不是一块半透明色块。
+   - 自己的 backdrop-filter 带 var(--glass-lens,)：lens 在片子边缘生成折射带，
+     切换时片子滑动、边缘把路过的内容掰进去，「液体溢出」的感觉就在这条带上。
+   - 顶部一道高光渐变 + 四边 inset rim：玻璃的厚度靠这几层亮边说出来。
+   - 外面两圈投影：一层中性（浮起来），一层蓝调（把选中色洇到周围一圈）。
+   文字与图标用 accent-ink（浅 #0071e3 / 深 #409cff），在半透明底上够读。 */
+html[data-glass='on'] .liquid-pill {
+  background-color: var(--liquid-pill-bg);
+  background-image: var(--liquid-pill-highlight);
+  background-clip: padding-box;
+  isolation: isolate;
+  /* 片子自己**不接** var(--glass-lens,)：父级导航把 --glass-lens 写在身上，
+     自定义属性会继承，子元素跟着用同一张位移图 ——
+     那张图按导航尺寸铺，采到片子这么小的地方会把图外的透明区吸进来，
+     整片从 254 掉到 230，玻璃没做成、倒多一块灰斑。 */
+  -webkit-backdrop-filter: blur(4px) saturate(1.7) brightness(1.06);
+  backdrop-filter: blur(4px) saturate(1.7) brightness(1.06);
+  box-shadow: var(--liquid-pill-shadow);
+  /* 滑动：transform 与 width 一起过渡。两个属性用同一条带回弹的曲线，
+     位移先到、宽度后到，视觉上片子在「拉丝」，落位时轻轻 overshoot。
+     对齐 iOS 分段控件的手感；纯灯光/阴影变化不做动画（会脏）。 */
+  transition:
+    transform 380ms cubic-bezier(0.32, 1.5, 0.5, 1),
+    width 400ms cubic-bezier(0.32, 1.5, 0.5, 1),
+    height 320ms cubic-bezier(0.32, 1.5, 0.5, 1);
+  /* 只动 transform/width，交给合成层跑，避免滑动时整条导航重排 */
+  will-change: transform, width;
+}
+
+/* 顶部那道弧光：玻璃「厚」是靠边缘那圈高光读出来的，
+   不是靠把填充做白。放在伪元素上是为了不参与 backdrop 采样。 */
+html[data-glass='on'] .liquid-pill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    140% 100% at 50% -35%,
+    rgba(255, 255, 255, 0.75) 0%,
+    rgba(255, 255, 255, 0.18) 42%,
+    transparent 72%
+  );
+}
+
+/* 内圈高光 + 底边暗边：上下明暗一比，片子就有厚度了 */
+html[data-glass='on'] .liquid-pill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28),
+    inset 0 -6px 10px -8px rgba(15, 20, 35, 0.35);
+}
+
+html[data-theme='dark'] .liquid-pill::after {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    inset 0 -6px 10px -8px rgba(0, 0, 0, 0.6);
 }
 
 /* —— 卡片与磁贴 ——
@@ -578,9 +812,8 @@ html[data-glass='on'] .glass-select {
    毛玻璃靠背后内容做折射，视力障碍用户往往看不清那层半透明，
    与其给个看不清的效果，不如直接给清楚的实色。 */
 @media (prefers-reduced-transparency: reduce) {
-  html[data-glass='on'] .glass-chrome,
-  html[data-glass='on'] .glass-topbar,
-  html[data-glass='on'] .glass-topbar-chips,
+  html[data-glass='on'] .liquid-glass,
+  html[data-glass='on'] .liquid-pill,
   html[data-glass='on'] .glass-card,
   html[data-glass='on'] .glass-sheet {
     backdrop-filter: none !important;

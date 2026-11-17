@@ -82,7 +82,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={busy}
-            className="mt-1 flex h-10 items-center justify-center gap-2 rounded-[10px] bg-accent text-[13.5px] font-semibold text-white transition-colors hover:bg-accent-ink disabled:opacity-60"
+            className="liquid-glass liquid-glass--accent mt-1 flex h-10 items-center justify-center gap-2 rounded-[10px] text-[13.5px] font-semibold text-white disabled:opacity-60"
           >
             {busy && <Loader2 size={14} className="animate-spin" />}
             登录

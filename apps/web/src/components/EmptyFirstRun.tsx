@@ -231,14 +231,14 @@ export default function EmptyFirstRun({ onAdd, onImport }: EmptyFirstRunProps) {
       <div className="mt-6 flex w-full flex-wrap items-center justify-center gap-3">
         <button
           onClick={onAdd}
-          className="inline-flex h-11 items-center gap-2 whitespace-nowrap rounded-xl bg-accent px-5 text-[14px] font-semibold text-white hover:bg-accent-ink"
+          className="liquid-glass liquid-glass--accent inline-flex h-11 items-center gap-2 whitespace-nowrap rounded-xl px-5 text-[14px] font-semibold text-white"
         >
           <Plus size={16} strokeWidth={2.4} />
           添加第一个书签
         </button>
         <button
           onClick={onImport}
-          className="inline-flex h-11 items-center gap-2 whitespace-nowrap rounded-xl border border-line2 bg-surface px-5 text-[14px] font-medium text-ink2 hover:bg-surface-2"
+          className="liquid-glass liquid-glass--control inline-flex h-11 items-center gap-2 whitespace-nowrap rounded-xl px-5 text-[14px] font-medium text-ink2"
         >
           <Upload size={15} />
           导入浏览器书签

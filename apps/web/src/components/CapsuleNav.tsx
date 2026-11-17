@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useLiquidGlass } from '../lib/glass/useLiquidGlass'
+import { useSlidingPill } from '../hooks/useSlidingPill'
 
 /**
  * 悬浮胶囊导航 —— 首页分组导航与设置页导航共用同一个组件，
@@ -33,8 +35,6 @@ const FADE = 20
 export interface CapsuleNavItem {
   key: string
   label: string
-  /** 计数（可选）。显示为更小、更淡的数字 */
-  count?: number
   /** Lucide 线性图标，与设置页保持同一套视觉语言 */
   icon: ReactNode
   active: boolean
@@ -53,9 +53,22 @@ export default function CapsuleNav({
   items,
   maxWidth = 'min(860px, calc(100vw - 32px))',
 }: CapsuleNavProps) {
+  const navRef = useLiquidGlass<HTMLElement>('nav')
   const scrollerRef = useRef<HTMLDivElement>(null)
   const [edges, setEdges] = useState({ left: false, right: false })
 
+  const activeIndex = items.findIndex((item) => item.active)
+  // 片子的位置与宽度都靠实测，不受横向滚动影响：
+  // offsetLeft 相对 listRef（position: relative），滚走时片子和 tab 一起走。
+  const { containerRef: listRef, itemRefs: btnRefs, rect: pill } = useSlidingPill(
+    activeIndex,
+    items.length,
+  )
+
+  // 选中片**不挂** lens：实测片子只有 90×36，位移图铺满整块时
+  // Chromium 会把图外的透明区域采进片子内部（整片从 254 掉到 230），
+  // 玻璃没做成、倒做出一块灰斑。片子的「厚度」改用 rim 高光 + 顶部弧光表达，
+  // 真正的折射留在导航外框那条带上（那里有足够的边距）。
   // 溢出状态要随三件事变化：内容宽度（items 增减）、容器宽度（窗口缩放）、
   // 以及自身滚动位置。三者都会影响「还剩多少可滚空间」。
   useEffect(() => {
@@ -98,8 +111,9 @@ export default function CapsuleNav({
     // pointer-events-auto：调用方的 sticky 容器是通栏且整体穿透的，
     // 这里把可点区域精确收回到可见胶囊上，避免容器空白处吃掉下层内容的点击。
     <nav
+      ref={navRef}
       aria-label={ariaLabel}
-      className="glass-topbar-chips pointer-events-auto mx-auto w-fit max-w-full rounded-full border"
+      className="liquid-glass liquid-glass--nav liquid-glass--refract pointer-events-auto mx-auto w-fit max-w-full rounded-full"
       style={{ maxWidth }}
     >
       {/* 内层：真正的横向滚动容器。渐隐遮罩挂在这里，
@@ -109,36 +123,46 @@ export default function CapsuleNav({
         className="scrollbar-none flex items-center gap-1 overflow-x-auto rounded-full px-1 py-1"
         style={fadeMask ? { maskImage: fadeMask, WebkitMaskImage: fadeMask } : undefined}
       >
-        {items.map((item) => (
+        <div ref={listRef} className="relative flex items-center gap-1">
+          {/* 选中片：绝对定位 + transform/width 过渡。两层都带过渡是为了「拉丝」——
+              位移先到、宽度后到，视觉上像一滴液体被拽着走，
+              最后 overshoot 一点点回弹，这就是 iOS 分段控件的手感。 */}
+          {pill && (
+            <span
+              aria-hidden
+              className="liquid-pill pointer-events-none absolute top-0 left-0 rounded-full"
+              style={{
+                transform: `translate3d(${pill.x}px, ${pill.y}px, 0)`,
+                width: `${pill.w}px`,
+                height: `${pill.h}px`,
+              }}
+            />
+          )}
+        {items.map((item, index) => (
           <button
             key={item.key}
+            ref={(el) => {
+              btnRefs.current[index] = el
+            }}
             onClick={item.onClick}
             aria-current={item.active ? 'page' : undefined}
             // 文字隐藏后图标单独承载语义，aria-label / title 必须留着，
             // 否则读屏用户只会听到一串无意义的「按钮」。
-            aria-label={item.count !== undefined ? `${item.label}，${item.count} 条` : item.label}
+            aria-label={item.label}
             title={item.label}
-            className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] whitespace-nowrap transition-[background-color,color,box-shadow] duration-[var(--dur-2)] ease-[var(--ease-out)] max-sm:gap-0 max-sm:px-3 ${
+            className={`liquid-tab relative flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] whitespace-nowrap max-sm:gap-0 max-sm:px-3 ${
               item.active
-                ? 'bg-accent font-semibold text-white shadow-[0_4px_14px_-6px_var(--accent-shadow)]'
-                : 'text-ink2 hover:bg-surface-2 hover:text-ink'
+                ? 'font-semibold text-accent-ink'
+                : 'text-ink2 hover:text-ink'
             }`}
           >
-            <span className={item.active ? 'text-white' : 'text-ink3'}>{item.icon}</span>
+            <span className={item.active ? 'text-accent-ink' : 'text-ink3'}>{item.icon}</span>
             {/* 窄屏（移动端）只留图标：分组一多，文字会把胶囊撑到需要横向滚动，
-                而横向滚动在竖屏页面里几乎不可用。计数同理，先让位给图标。 */}
+                而横向滚动在竖屏页面里几乎不可用。 */}
             <span className="max-sm:hidden">{item.label}</span>
-            {item.count !== undefined && (
-              <span
-                className={`text-[11.5px] tabular-nums max-sm:hidden ${
-                  item.active ? 'text-white/70' : 'text-ink4'
-                }`}
-              >
-                {item.count}
-              </span>
-            )}
           </button>
         ))}
+        </div>
       </div>
     </nav>
   )

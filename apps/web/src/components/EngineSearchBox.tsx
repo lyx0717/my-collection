@@ -51,7 +51,7 @@ export default function EngineSearchBox() {
   return (
     // 固定上限 380px：宽屏时不撑满整条顶栏（之前 flex-1 会一直拉到最右端，
     // 看着像被拉长的输入条）；窄屏时靠 w-full 自适应缩窄。
-    <div className="flex h-9 w-full min-w-0 max-w-[600px] items-center gap-1 rounded-[10px] border border-line bg-canvas/70 pl-2 pr-1 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_3px_var(--accent-ring)]">
+    <div className="liquid-glass liquid-glass--control liquid-glass--field flex h-9 w-full min-w-0 max-w-[600px] items-center gap-1 rounded-[10px] pr-1 pl-2">
       {/* 引擎切换：只留 favicon + 箭头，引擎名交给输入框 placeholder。
           曾经这里是「favicon + 中文名 + 箭头」≈90px，常驻顶栏第二显眼的位置，
           而它一个月才切一次。名字并不丢失 —— placeholder 一直是

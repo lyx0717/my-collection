@@ -17,6 +17,7 @@ import type { Bookmark, Scope, ViewMode } from '../types'
 import { dedupeKey } from '../lib/url'
 import { itemEnter, viewContainer } from '../lib/motion'
 import { useBookmarkFilter } from '../hooks/useBookmarkFilter'
+import { useSlidingPill } from '../hooks/useSlidingPill'
 import { useBatchSelection } from '../hooks/useBatchSelection'
 import DockBar from '../components/DockBar'
 import GroupNav from '../components/GroupNav'
@@ -59,6 +60,9 @@ export default function HomePage() {
     return saved === 'list' || saved === 'tile' ? saved : 'grid'
   }
   const [view, setView] = useState<ViewMode>(initialView)
+  // 网格 / 磁贴 / 列表：顺序与下方渲染的一致，indicator 要按这个下标去量
+  const viewModes: ViewMode[] = ['grid', 'tile', 'list']
+  const viewPill = useSlidingPill(viewModes.indexOf(view), viewModes.length)
 
   const {
     query,
@@ -66,7 +70,6 @@ export default function HomePage() {
     domainFilter,
     visible,
     collectionMap,
-    collectionCounts,
     contextTitle,
     hasActiveFilter,
     searchFiltered,
@@ -167,13 +170,7 @@ export default function HomePage() {
           这层 sticky 带也要一起收掉 —— 否则 py-3 会让标题上方凭空多 24px 空白。 */}
       {collections.length > 0 && (
         <div className="pointer-events-none sticky top-14 z-30 px-4 py-3 sm:px-6">
-          <GroupNav
-            total={bookmarks.length}
-            collections={collections}
-            collectionCounts={collectionCounts}
-            scope={scope}
-            onScope={setScope}
-          />
+          <GroupNav collections={collections} scope={scope} onScope={setScope} />
         </div>
       )}
 
@@ -203,7 +200,7 @@ export default function HomePage() {
               <div className="ml-auto flex items-center gap-2.5">
                 <button
                   onClick={() => setModal({ mode: 'add' })}
-                  className="flex h-[34px] items-center gap-1.5 rounded-[10px] bg-accent px-3 text-[12.5px] font-semibold text-white shadow-[0_4px_12px_-5px_var(--accent-shadow)] transition-colors hover:bg-accent-ink"
+                  className="liquid-glass liquid-glass--accent flex h-[34px] items-center gap-1.5 rounded-[10px] px-3 text-[12.5px] font-semibold text-white"
                 >
                   <Plus size={14} strokeWidth={2.4} />
                   <span className="hidden sm:inline">添加书签</span>
@@ -215,10 +212,8 @@ export default function HomePage() {
                 {view === 'list' && (
                 <button
                   onClick={() => (batchMode ? exitBatch() : enterBatch())}
-                  className={`flex h-[34px] items-center gap-1.5 rounded-[10px] border px-2.5 text-[12.5px] font-medium transition-colors ${
-                    batchMode
-                      ? 'border-accent bg-accent-soft text-accent-ink'
-                      : 'border-line bg-surface text-ink2 hover:border-line2'
+                  className={`liquid-glass liquid-glass--control flex h-[34px] items-center gap-1.5 rounded-[10px] px-2.5 text-[12.5px] font-medium ${
+                    batchMode ? 'liquid-glass--selected text-accent-ink' : 'text-ink2'
                   }`}
                 >
                   <CheckSquare size={13} />
@@ -231,7 +226,8 @@ export default function HomePage() {
                     已勾选的 id 会与展示内容对不上，产生「看不见却仍在选中集」
                     的错觉操作。所以多选时整组禁用，退出多选自动恢复。 */}
                 <div
-                  className={`flex rounded-[10px] bg-segment p-[3px] transition-opacity ${
+                  ref={viewPill.containerRef}
+                  className={`liquid-glass liquid-glass--control relative flex rounded-[10px] p-[3px] transition-opacity ${
                     batchMode ? 'pointer-events-none opacity-40' : ''
                   }`}
                   aria-disabled={batchMode}
@@ -245,26 +241,35 @@ export default function HomePage() {
                       ['tile', LayoutDashboard, '磁贴视图'],
                       ['list', List, '列表视图'],
                     ] as const
-                  ).map(([mode, Icon, label]) => (
+                  ).map(([mode, Icon, label], index) => (
                     <button
                       key={mode}
+                      ref={(el) => {
+                        viewPill.itemRefs.current[index] = el
+                      }}
                       aria-label={label}
                       title={batchMode ? '多选模式下不可切换视图' : label}
                       onClick={() => setView(mode)}
-                      className={`relative flex h-7 w-[30px] items-center justify-center rounded-[6px] ${
-                        view === mode ? 'text-ink' : 'text-ink4'
+                      className={`liquid-tab relative flex h-7 w-[30px] items-center justify-center rounded-[6px] ${
+                        view === mode ? 'text-accent-ink' : 'text-ink4 hover:text-ink2'
                       }`}
                     >
-                      {view === mode && (
-                        <m.span
-                          layoutId="view-pill"
-                          className="absolute inset-0 rounded-[6px] bg-surface shadow-[0_1px_3px_rgba(30,40,60,.12)]"
-                          transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.9 }}
-                        />
-                      )}
                       <Icon size={15} className="relative z-10" />
                     </button>
                   ))}
+                  {/* 指示器只渲染一片、随选中项滑动：每颗按钮各挂一片会在切换瞬间
+                      出现「旧片消失、新片凭空出现」，看不出是被拽过去的。 */}
+                  {viewPill.rect && (
+                    <span
+                      aria-hidden
+                      className="liquid-pill pointer-events-none absolute top-0 left-0 rounded-[6px]"
+                      style={{
+                        transform: `translate3d(${viewPill.rect.x}px, ${viewPill.rect.y}px, 0)`,
+                        width: `${viewPill.rect.w}px`,
+                        height: `${viewPill.rect.h}px`,
+                      }}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -350,7 +355,7 @@ export default function HomePage() {
                               p.delete('c')
                             })
                           }
-                          className="inline-flex h-10 items-center rounded-lg bg-accent px-4 text-[13px] font-semibold text-white hover:bg-accent-ink"
+                          className="liquid-glass liquid-glass--accent inline-flex h-10 items-center rounded-lg px-4 text-[13px] font-semibold text-white"
                         >
                           清除筛选
                         </button>

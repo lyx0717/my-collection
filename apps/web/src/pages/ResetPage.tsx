@@ -87,7 +87,7 @@ export default function ResetPage() {
             </p>
             <Link
               to="/login"
-              className="mt-5 flex h-10 items-center justify-center rounded-[10px] bg-accent text-[13.5px] font-semibold text-white transition-colors hover:bg-accent-ink"
+              className="liquid-glass liquid-glass--accent mt-5 flex h-10 items-center justify-center rounded-[10px] text-[13.5px] font-semibold text-white"
             >
               去登录
             </Link>
@@ -149,7 +149,7 @@ export default function ResetPage() {
             <button
               type="submit"
               disabled={busy}
-              className="mt-1 flex h-10 items-center justify-center gap-2 rounded-[10px] bg-accent text-[13.5px] font-semibold text-white transition-colors hover:bg-accent-ink disabled:opacity-60"
+              className="liquid-glass liquid-glass--accent mt-1 flex h-10 items-center justify-center gap-2 rounded-[10px] text-[13.5px] font-semibold text-white disabled:opacity-60"
             >
               {busy && <Loader2 size={14} className="animate-spin" />}
               设置新密码

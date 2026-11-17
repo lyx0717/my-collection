@@ -22,11 +22,15 @@
 | 背板 `--canvas` | `#f2f2f7` | `#000000` |
 | 卡片底 `--glass-bg-card` | `#ffffff`（实底） | `#1c1c1e`（实底） |
 | 卡片描边 `--card-line` | `rgba(60,60,67,.09)` | `rgba(255,255,255,.18)` |
-| 悬浮控件底 `--glass-bg-nav` | `rgba(255,255,255,.66)` | `rgba(30,30,32,.6)` |
-| 悬浮控件描边 `--glass-border-nav` | `rgba(255,255,255,.95)` | `rgba(255,255,255,.2)` |
-| 悬浮控件阴影 `--glass-shadow-nav` | `0 8px 28px -10px rgba(15,20,35,.26)` | `0 10px 30px -10px rgba(0,0,0,.7)` |
+| 胶囊导航底 `--liquid-nav-bg` | `rgba(255,255,255,.10)` | `rgba(30,30,34,.26)` |
+| 胶囊导航 rim `--liquid-nav-shadow` | 9 层（rim + 发丝线 + 投影 + 倒角） | 同结构，白边降到 .46 |
+| 顶栏底 `--liquid-bar-bg` | `rgba(255,255,255,.42)` | `rgba(28,28,30,.55)` |
+| 控件底 `--liquid-control-bg` / hover | `rgba(255,255,255,.55)` / `.75` | `rgba(255,255,255,.08)` / `.14` |
+| 主操作底 `--liquid-accent-bg` | `rgba(10,132,255,.88)` | `rgba(10,132,255,.8)` |
+| 选中片底 `--liquid-pill-bg` | `rgba(255,255,255,.40)` | `rgba(255,255,255,.10)` |
 | 弹窗底 `--glass-bg-sheet` | `rgba(255,255,255,.78)` | `rgba(28,28,30,.82)` |
-| backdrop 模糊 `--glass-blur` | `blur(10px) saturate(180%)`；弹窗 `--glass-blur-sheet` 24px | 同 |
+| 液态玻璃模糊 | 导航 `blur(2px)`、顶栏/控件 `blur(3px)`、主操作 `blur(8px)`，均带 `saturate` + `brightness` | 同 |
+| 弹窗底 `--glass-bg-sheet` 模糊 `--glass-blur-sheet` | `blur(24px) saturate(180%)` | 同 |
 | 1px 亮描边 `--glass-border` | `rgba(255,255,255,.7)` | `rgba(255,255,255,.12)` |
 | 主色 `--accent` | `#0a84ff` | `#0a84ff` |
 | 圆角 | 行与弹窗 20px、网格卡 16px、磁贴 12px | 同 |

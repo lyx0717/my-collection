@@ -25,10 +25,10 @@ export default function AppearanceSection() {
             type="button"
             aria-pressed={following}
             onClick={() => setTheme(following ? resolvedTheme('system') : 'system')}
-            className={`rounded-full border px-4 py-2 text-[13px] font-medium transition-[background-color,color,border-color] duration-[var(--dur-2)] ${
+            className={`liquid-glass liquid-glass--control rounded-full px-4 py-2 text-[13px] font-medium ${
               following
-                ? 'border-accent/60 bg-accent-soft text-accent-ink'
-                : 'border-line2/70 bg-surface/60 text-ink2 hover:border-line2 hover:bg-surface-2 hover:text-ink'
+                ? 'liquid-glass--selected text-accent-ink'
+                : 'text-ink2 hover:text-ink'
             }`}
           >
             跟随系统

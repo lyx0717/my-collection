@@ -17,7 +17,7 @@ export default function BookmarkletSection() {
             href={href}
             onClick={(e) => e.preventDefault()}
             draggable
-            className="flex h-11 cursor-grab items-center gap-2 rounded-full bg-accent px-5 text-[14px] font-semibold text-white shadow-[0_6px_14px_-6px_var(--accent-shadow)] active:cursor-grabbing"
+            className="liquid-glass liquid-glass--accent flex h-11 cursor-grab items-center gap-2 rounded-full px-5 text-[14px] font-semibold text-white active:cursor-grabbing"
           >
             <Bookmark size={15} fill="white" />
             收藏到狗蛋书签
