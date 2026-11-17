@@ -25,17 +25,23 @@ export default function BookmarkTile({ bookmark, onOpen }: BookmarkTileProps) {
   const color = letterColor(bookmark.domain)
 
   return (
-    <div
-      className="tile-shell group flex min-h-[100px] min-w-[80px] flex-col items-center gap-2 rounded-[12px] border px-2.5 py-4 text-center transition-[transform,background-color,border-color,box-shadow] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px]"
+    <a
+      href={bookmark.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={bookmark.description ? `${bookmark.title}\n${bookmark.description}` : bookmark.title}
+      onClick={(e) => {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+        e.preventDefault()
+        onOpen(bookmark)
+      }}
+      className="tile-shell group flex min-h-[100px] min-w-[80px] cursor-pointer flex-col items-center gap-2 rounded-[14px] border px-2.5 py-4 text-center no-underline transition-[background-color,border-color,box-shadow] duration-[var(--dur-2)] ease-[var(--ease-out)] focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:outline-none"
     >
-      <button
-        onClick={() => onOpen(bookmark)}
-        title={bookmark.description ? `${bookmark.title}\n${bookmark.description}` : bookmark.title}
-        aria-label={`打开 ${bookmark.title}`}
+      <span
         className="relative flex h-14 w-14 items-center justify-center transition-transform group-hover:scale-105"
       >
         <span
-          className="absolute inset-0 overflow-hidden rounded-[12px] shadow-[0_2px_8px_-2px_rgba(30,40,60,.12)]"
+          className="absolute inset-0 overflow-hidden rounded-[9px] shadow-[0_1px_3px_-1px_rgba(30,40,60,.14)]"
           style={{
             background: failed ? color.bg : 'var(--surface)',
             borderColor: failed ? color.bg : 'var(--color-line)',
@@ -47,7 +53,7 @@ export default function BookmarkTile({ bookmark, onOpen }: BookmarkTileProps) {
               alt=""
               loading="lazy"
               onError={handleError}
-              className="h-full w-full rounded-[8px]"
+              className="h-full w-full rounded-[9px]"
             />
           ) : failed ? (
             <span
@@ -62,10 +68,10 @@ export default function BookmarkTile({ bookmark, onOpen }: BookmarkTileProps) {
             </span>
           )}
         </span>
-      </button>
+      </span>
       <span className="line-clamp-2 w-full break-words text-[12px] leading-[1.35] text-ink2 group-hover:text-ink">
         {bookmark.title}
       </span>
-    </div>
+    </a>
   )
 }

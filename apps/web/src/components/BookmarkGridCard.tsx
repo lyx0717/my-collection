@@ -43,19 +43,30 @@ export default function BookmarkGridCard({
 
   // 圆角两档统一 10px：logo 容器尺寸分档（视觉层级），圆角不分 ——
   // 同一屏里出现两种圆角会读成两种控件。
-  const logoBox = compact ? 'h-9 w-9 rounded-[10px]' : 'h-11 w-11 rounded-[10px]'
+  const logoBox = compact ? 'h-8 w-8 rounded-[8px]' : 'h-10 w-10 rounded-[8px]'
   // 图片铺满容器：外框已经有 overflow-hidden + object-contain 的按比例缩放，
   // 留内边距只会让图标显得比容器小一圈。非正方形图标自动收进可视区居中。
   const logoImg = 'h-full w-full object-contain'
   // 文字 logo 随容器同步放大：h-9(36px)→19px / h-11(44px)→23px，
   // 约 0.53 倍容器边长，首字在方块里视觉重量与图片 logo 相当。
-  const letter = compact ? 'text-[19px]' : 'text-[23px]'
+  const letter = compact ? 'text-[17px]' : 'text-[21px]'
   const gap = compact ? 'gap-2.5' : 'gap-3'
-  const pad = compact ? 'p-2.5' : 'p-3'
+  const pad = compact ? 'p-3' : 'p-3.5'
 
   return (
-    <article
-      className={`glass-card group relative flex items-start overflow-hidden rounded-[16px] border transition-[transform,box-shadow,border-color,background-color] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px] ${pad} ${gap}`}
+    <a
+      href={bookmark.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={bookmark.title}
+      onClick={(e) => {
+        // 只接管未加修饰键的左键：中键 / ctrl+点击 / 右键菜单仍走浏览器原生，
+        // 这样「在新标签打开」「复制链接」都对，我们只是补一次 onOpen。
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+        e.preventDefault()
+        onOpen(bookmark)
+      }}
+      className={`glass-card group relative flex cursor-pointer overflow-hidden rounded-[14px] border no-underline transition-[box-shadow,border-color,background-color] duration-[var(--dur-2)] ease-[var(--ease-out)] focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:outline-none ${pad} ${gap}`}
     >
       {/* 有封面时降为底层衬底：保留数据但压到几乎不抢视线。
           opacity-[0.16] + 遮罩渐变，保证上层文字始终可读。 */}
@@ -96,31 +107,25 @@ export default function BookmarkGridCard({
         )}
       </span>
 
-      {/* 右：文字列。min-w-0 是防溢出关键，flex-1 吃掉剩余空间 */}
+      {/* 右：文字列。min-w-0 是防溢出关键，flex-1 吃掉剩余空间。
+          卡片只承担两件事：认出标题、看清去哪。描述不进卡片 ——
+          一屏二十多张卡都挂着说明时，扫读变成读文章；描述统一在列表
+          视图里给（那里一行一项，有横向空间放得下）。 */}
       <div className="relative flex min-w-0 flex-1 flex-col">
-        <button
-          onClick={() => onOpen(bookmark)}
-          title={bookmark.title}
-          className={`min-w-0 text-left leading-[1.35] font-semibold text-ink transition-colors hover:text-accent ${
-            compact ? 'line-clamp-1 text-[13.5px]' : 'line-clamp-2 text-[14.5px]'
+        {/* 整张卡就是链接，标题不再单独可点 —— 点名字以外的空白处也照样跳转 */}
+        <span
+          className={`min-w-0 leading-[1.3] font-semibold text-ink transition-colors group-hover:text-accent ${
+            compact ? 'line-clamp-1 text-[13.5px]' : 'line-clamp-2 text-[14px]'
           }`}
         >
           {bookmark.title}
-        </button>
+        </span>
 
-        <div className="mt-1 flex min-w-0 items-center">
-          <span className="min-w-0 flex-1 truncate text-[11.5px] text-ink3">{bookmark.domain}</span>
+        <div className="mt-0.5 flex min-w-0 items-center">
+          <span className="min-w-0 flex-1 truncate text-[11px] text-ink4">{bookmark.domain}</span>
         </div>
 
-        {bookmark.description && (
-          <p
-            title={bookmark.description}
-            className="mt-1 line-clamp-2 min-w-0 text-[12px] leading-[1.45] text-ink3"
-          >
-            {bookmark.description}
-          </p>
-        )}
       </div>
-    </article>
+    </a>
   )
 }

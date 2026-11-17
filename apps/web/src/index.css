@@ -97,6 +97,23 @@
   /* 极淡柔和阴影：iOS 不用纯黑阴影，用带点冷灰的浅色投影 */
   --glass-shadow: 0 2px 10px -2px rgba(15, 20, 35, 0.06);
   --glass-shadow-hover: 0 6px 20px -4px rgba(15, 20, 35, 0.1);
+  /* 卡片：白底与画布差 6 阶亮度 + 一条 1px 冷灰描边分开，
+     「厚度」靠 rim 自己画 —— 顶部 1px 高光 + 底部 1px 内暗边，不依赖背后内容。
+     外面再垫两层极淡环境影（1px 贴合 + 3px 扩散）：没有它，白卡在浅灰背板上
+     像一块贴纸；有了之后边缘才有「离纸面 1mm」的层次。hover 再加一层更远的投影。 */
+  --card-rim:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(60, 60, 67, 0.05),
+    0 1px 2px rgba(15, 20, 35, 0.05),
+    0 3px 8px -6px rgba(15, 20, 35, 0.12);
+  --card-rim-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(60, 60, 67, 0.04),
+    0 1px 2px rgba(15, 20, 35, 0.07),
+    0 8px 20px -10px rgba(15, 20, 35, 0.26);
+  /* 极淡颗粒：近白底上肉眼能看出「不是一块纯色」，
+     这是 iOS 质感里最便宜的一招 —— 一张贴图、零重采样。 */
+  --card-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='20' height='20' filter='url(%23n)' opacity='.075'/%3E%3C/svg%3E");
   /* 顶部微高光：只给 1px、极淡，给玻璃一点「上边缘受光」的存在感。
      不用 inset 大面积高光 —— 那是塑料感与「发光」的来源。 */
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.6);
@@ -258,6 +275,17 @@
   /* 深色下阴影几乎不可见，主要靠描边分层；这里只留一道极淡的 */
   --glass-shadow: 0 2px 10px -2px rgba(0, 0, 0, 0.3);
   --glass-shadow-hover: 0 6px 20px -4px rgba(0, 0, 0, 0.45);
+  /* 深色下黑投影在纯黑画布上几乎不可见，改用顶部 1px 高光提示厚度；
+     上下左右各一道极淡白边，模拟玻璃边缘受光（16 阶以内的差别）。 */
+  --card-rim:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+  --card-rim-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+    0 8px 22px -14px rgba(0, 0, 0, 0.7);
+  /* 深色噪点要更淡：白点压在近黑底上比黑点压在近白底上更显眼 */
+  --card-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='20' height='20' filter='url(%23n)' opacity='.055'/%3E%3C/svg%3E");
   /* 深色的顶部高光要更淡，否则卡片上边缘会出现一条亮线（廉价感） */
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   --liquid-nav-bg: rgba(30, 30, 34, 0.26);
@@ -716,20 +744,21 @@ html[data-theme='dark'] .liquid-pill::after {
    毛玻璃只留给真正有内容可折射的 chrome / 顶栏 / 胶囊。 */
 html[data-glass='on'] .glass-card {
   background-color: var(--glass-bg-card);
+  background-image: var(--card-noise);
   border-color: var(--card-line);
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--card-rim);
 }
 
 html[data-glass='on'] .glass-card:hover {
   background-color: var(--glass-bg-card-hover);
   border-color: var(--card-line-hover);
-  box-shadow: var(--glass-highlight), var(--glass-shadow-hover);
+  box-shadow: var(--card-rim-hover);
 }
 
-/* 磁贴：常态「无壳」，hover 才浮出玻璃卡片。
-   只清 background-color 是不够的 —— box-shadow 与 border 都不依赖背景，
-   在透明底色上会变成一圈无主的灰影 + 一个白色空框，比有底色时更难看。
-   所以常态三层（背景/描边/投影）一起撤掉，hover 时原样回来。 */
+/* 磁贴：常态「无壳」，hover 才浮出 —— 磁贴以大图标为主，图标自带底色与
+   浅投影已经构成"卡片"，再套一层白壳就成了图标的第二层方框。
+   注意三层（背景/描边/投影）必须一起撤：只清背景的话，投影与边框
+   在透明底上会变成无主灰影 + 白色空框，比有壳时更难看。 */
 html[data-glass='on'] .tile-shell {
   background-color: transparent;
   border-color: transparent;
@@ -739,7 +768,7 @@ html[data-glass='on'] .tile-shell {
 html[data-glass='on'] .tile-shell:hover {
   background-color: var(--glass-bg-card-hover);
   border-color: var(--card-line-hover);
-  box-shadow: var(--glass-highlight), var(--glass-shadow-hover);
+  box-shadow: var(--card-rim-hover);
 }
 
 /* —— 浮层玻璃（弹窗 / 对话框）——
