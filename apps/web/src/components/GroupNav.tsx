@@ -1,4 +1,4 @@
-import { Bookmark, Library } from 'lucide-react'
+import { Bookmark } from 'lucide-react'
 import CapsuleNav, { type CapsuleNavItem } from './CapsuleNav'
 import { iconForCollection } from '../lib/collectionIcons'
 import type { Collection, Scope } from '../types'
@@ -34,6 +34,11 @@ export default function GroupNav({
   scope,
   onScope,
 }: GroupNavProps) {
+  // 没有分组时整条胶囊不渲染：只剩一个「全部」的导航没有任何可选目标，
+  // 而把「去设置里创建分组」塞进胶囊会让它看起来像按钮组，误触成本高于收益。
+  // 这条空白由调用方（HomePage 的 sticky 外层）决定如何收掉。
+  if (collections.length === 0) return null
+
   const items: CapsuleNavItem[] = [
     {
       key: '__all__',
@@ -55,19 +60,6 @@ export default function GroupNav({
       }
     }),
   ]
-
-  // 没有分组时给个引导入口，而不是留一条空胶囊
-  if (collections.length === 0) {
-    items.push({
-      key: '__empty__',
-      label: '去设置里创建分组',
-      icon: <Library size={16} strokeWidth={1.8} />,
-      active: false,
-      onClick: () => {
-        window.location.hash = '#/settings'
-      },
-    })
-  }
 
   return <CapsuleNav ariaLabel="分组导航" items={items} maxWidth="min(760px, calc(100vw - 32px))" />
 }

@@ -14,8 +14,12 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
-  // 书签小工具的深链经 history state 带过来，登录后原样回去
-  const from = (location.state as { from?: string } | null)?.from ?? '/'
+  // 登录后的落点只认书签小工具的 /add 深链（经 history state 带过来，
+  // 里面的 u/t 不会被二次编码）；其余入口一律回首页。
+  // 之前直接沿用任意 from，导致访客从 #/settings 之类的内页被踢去登录后，
+  // 会在登录成功的一瞬间被塞进设置页 —— 那不是他要去的地方，只是他恰好点到的页面。
+  const requested = (location.state as { from?: string } | null)?.from
+  const from = requested?.startsWith('/add') ? requested : '/'
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()

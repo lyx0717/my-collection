@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   Loader2,
   Plus,
-  Upload,
   X,
 } from 'lucide-react'
 import { useBookmarks } from '../store/BookmarksContext'
@@ -32,6 +31,7 @@ import BatchToolbar from '../components/BatchToolbar'
 import DomainBatchBar from '../components/DomainBatchBar'
 import SortableBookmarks from '../components/SortableBookmarks'
 import EmptyState from '../components/EmptyState'
+import EmptyFirstRun from '../components/EmptyFirstRun'
 import ConfirmDialog from '../components/ConfirmDialog'
 import LocalMigrationBanner from '../components/LocalMigrationBanner'
 
@@ -161,16 +161,21 @@ export default function HomePage() {
           （占满视口宽），而胶囊只有 ~700px 居中，两侧空出来的部分
           同样会参与命中测试 —— 滚动时从胶囊下方掠过的卡片会被它吃掉点击，
           表现就是「导航栏左右两侧的内容点不动」。
-          让容器整体穿透、只把胶囊本身恢复可点，点击区域就精确等于可见胶囊。 */}
-      <div className="pointer-events-none sticky top-14 z-30 px-4 py-3 sm:px-6">
-        <GroupNav
-          total={bookmarks.length}
-          collections={collections}
-          collectionCounts={collectionCounts}
-          scope={scope}
-          onScope={setScope}
-        />
-      </div>
+          让容器整体穿透、只把胶囊本身恢复可点，点击区域就精确等于可见胶囊。
+
+          没有分组时 GroupNav 自己返回 null（只剩「全部」一条没有可选目标），
+          这层 sticky 带也要一起收掉 —— 否则 py-3 会让标题上方凭空多 24px 空白。 */}
+      {collections.length > 0 && (
+        <div className="pointer-events-none sticky top-14 z-30 px-4 py-3 sm:px-6">
+          <GroupNav
+            total={bookmarks.length}
+            collections={collections}
+            collectionCounts={collectionCounts}
+            scope={scope}
+            onScope={setScope}
+          />
+        </div>
+      )}
 
       {/* pt-6：与吸顶胶囊保持舒适间距（胶囊自身 py-3 已占 12px） */}
       <main className="mx-auto max-w-6xl px-4 pt-6 pb-24 sm:px-6">
@@ -324,27 +329,11 @@ export default function HomePage() {
 
             {visible.length === 0 ? (
               bookmarks.length === 0 ? (
-                <EmptyState
-                  title="还没有任何书签"
-                  hint="把想留住的链接粘贴进来，标题、描述和图标会自动补全。也可以先从浏览器一键导入。"
-                  action={
-                    <div className="flex flex-wrap items-center justify-center gap-3">
-                      <button
-                        onClick={() => setModal({ mode: 'add' })}
-                        className="inline-flex h-11 items-center gap-2 rounded-xl bg-accent px-5 text-[14px] font-semibold text-white hover:bg-accent-ink"
-                      >
-                        <Plus size={16} strokeWidth={2.4} />
-                        添加第一个书签
-                      </button>
-                      <a
-                        href="#/settings"
-                        className="inline-flex h-11 items-center gap-2 rounded-xl border border-line2 bg-surface px-5 text-[14px] font-medium text-ink2 hover:bg-surface-2"
-                      >
-                        <Upload size={15} />
-                        导入浏览器书签
-                      </a>
-                    </div>
-                  }
+                <EmptyFirstRun
+                  onAdd={() => setModal({ mode: 'add' })}
+                  onImport={() => {
+                    window.location.hash = '#/settings'
+                  }}
                 />
               ) : (
                 <EmptyState
