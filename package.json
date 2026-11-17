@@ -12,7 +12,6 @@
     "db:down": "docker compose --env-file .env -f dev/docker-compose.yml down",
     "db:reset": "docker compose --env-file .env -f dev/docker-compose.yml down -v && pnpm db:up && pnpm migrate",
     "migrate": "pnpm --filter @my-collection/api migrate",
-    "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck"
   },
   "pnpm": {

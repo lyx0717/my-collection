@@ -100,7 +100,6 @@ pnpm db:up             # 起本地 Postgres
 pnpm migrate           # 建表
 pnpm dev               # 同时起前端(5173) 与后端(3000)
 
-pnpm test              # 单测；后端集成测试连不上库时会自动跳过
 pnpm typecheck         # 三个包一起类型检查
 pnpm -r build          # 生产构建（web → apps/web/dist，api → apps/api/dist）
 ```
