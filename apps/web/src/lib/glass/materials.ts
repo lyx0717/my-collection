@@ -10,9 +10,9 @@ import type { LensOptions } from './lens'
  */
 export const LENS = {
   /** 分组胶囊：宽而扁，最长的一档边带，折射最明显 */
-  nav: { rim: 30, edge: 1, power: 2.6, dispersion: 0.12 },
+  nav: { rim: 44, edge: 1.1, power: 2.6, dispersion: 0.15 },
   /** 通栏顶栏：只有上下两条边带，rim 收窄以免糊掉顶栏内容 */
-  bar: { rim: 24, edge: 1.05, power: 2.4, dispersion: 0.14 },
+  bar: { rim: 44, edge: 1.1, power: 2.6, dispersion: 0.15 },
 } satisfies Record<string, LensOptions>
 
 export type LensMaterial = keyof typeof LENS

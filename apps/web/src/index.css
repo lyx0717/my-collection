@@ -162,10 +162,10 @@
     0 8px 24px -16px rgba(15, 20, 35, 0.3);
   --liquid-control-bg: rgba(255, 255, 255, 0.55);
   --liquid-control-bg-hover: rgba(255, 255, 255, 0.75);
-  /* 片内未选中项 hover：极淡的冷灰，比面板底再压一档，
-     这样鼠标扫过胶囊时是「透出背景」，而不是给每个 tab 都套个白底。 */
-  --liquid-tab-hover-bg: rgba(15, 20, 35, 0.055);
-  --liquid-tab-press-bg: rgba(15, 20, 35, 0.09);
+  /* 片内未选中项 hover：浅色玻璃上加白几乎看不出（实测整块只涨 2 阶），
+     所以浅色走「压一档」——极淡的冷灰 8%，按下再深到 12%。 */
+  --liquid-tab-hover-bg: rgba(15, 20, 35, 0.08);
+  --liquid-tab-press-bg: rgba(15, 20, 35, 0.12);
   --liquid-control-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 1),
     inset 0 -1px 0 rgba(255, 255, 255, 0.4),
@@ -325,8 +325,9 @@
     0 10px 30px -18px rgba(0, 0, 0, 0.8);
   --liquid-control-bg: rgba(255, 255, 255, 0.08);
   --liquid-control-bg-hover: rgba(255, 255, 255, 0.14);
-  --liquid-tab-hover-bg: rgba(255, 255, 255, 0.08);
-  --liquid-tab-press-bg: rgba(255, 255, 255, 0.13);
+  /* 深色底上反过来：提亮 12% 才看得见，按下回落到 8%。 */
+  --liquid-tab-hover-bg: rgba(255, 255, 255, 0.12);
+  --liquid-tab-press-bg: rgba(255, 255, 255, 0.08);
   --liquid-control-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.16),
     inset 0 -1px 0 rgba(0, 0, 0, 0.35),
@@ -516,6 +517,21 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+/* —— 材质 token 的注册 ——
+   @property 让这些颜色变成可插值的类型属性：换主题、hover、切换选中态时，
+   玻璃的着色会从现值过渡到新值，而不是「跳」一下。
+   只登记颜色；阴影是列表、模糊是函数，都不支持插值，硬登记反而会让它们失效。 */
+@property --lg-bg { syntax: '<color>'; inherits: false; initial-value: transparent; }
+@property --liquid-bar-bg { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --liquid-control-bg { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --liquid-control-bg-hover { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --liquid-accent-bg { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --liquid-accent-bg-hover { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --liquid-nav-bg { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --liquid-pill-bg { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --liquid-tab-hover-bg { syntax: '<color>'; inherits: true; initial-value: transparent; }
+@property --liquid-tab-press-bg { syntax: '<color>'; inherits: true; initial-value: transparent; }
+
 /* —— 玻璃材质实现 ——
    三层，全部对应 iOS System Material 的构成：
    1) 半透明底色（--glass-bg 系列）
@@ -573,6 +589,9 @@ body {
    顺序反了会被压缩成只剩 -webkit- 形态 —— Chrome 不认它，模糊整体失效。 */
 html[data-glass='on'] .liquid-glass {
   --lg-bg: var(--liquid-control-bg);
+  /* 换主题 / hover 时着色走这条曲线；背景色本身也在 base 层有过渡，
+     两条都指向同一个最终值，所以不会互相拖慢。 */
+  transition: --lg-bg var(--dur-3) var(--ease-in-out);
   --lg-shadow: var(--liquid-control-shadow);
   --lg-blur: blur(3px) saturate(1.7) brightness(1.04);
 
