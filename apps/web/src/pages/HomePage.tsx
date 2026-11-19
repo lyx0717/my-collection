@@ -250,7 +250,7 @@ export default function HomePage() {
                       aria-label={label}
                       title={batchMode ? '多选模式下不可切换视图' : label}
                       onClick={() => setView(mode)}
-                      className={`liquid-tab relative flex h-7 w-[30px] items-center justify-center rounded-[6px] ${
+                      className={`liquid-tab relative flex h-7 w-[30px] items-center justify-center rounded-[6px] active:scale-[0.94] ${
                         view === mode ? 'text-accent-ink' : 'text-ink4 hover:text-ink2'
                       }`}
                     >

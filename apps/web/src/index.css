@@ -640,9 +640,13 @@ html[data-glass='on'] .liquid-glass--selected:hover:not(:disabled) {
 /* 片内的 tab（导航项、视图切换按钮）：hover 只动底色，
    不位移、不缩放 —— 一排 tab 同时抖起来比不做动画更廉价。 */
 .liquid-tab {
+  /* transform 也要过渡：按下回弹（active:scale-94）走 150ms，比底色的 200/320ms 更快，
+     手感上"按下去立刻有反应、松开慢慢化开"。 */
   transition:
     background-color var(--dur-2) var(--ease-out),
-    color var(--dur-2) var(--ease-out);
+    color var(--dur-2) var(--ease-out),
+    transform 150ms var(--ease-out),
+    scale 150ms var(--ease-out);
 }
 
 .liquid-tab:hover:not([aria-current='page']):not(:disabled) {
@@ -883,5 +887,14 @@ html[data-glass='on'] .glass-select {
   html[data-glass='on'] .tile-shell:hover {
     background: var(--color-surface) !important;
     border-color: var(--line) !important;
+  }
+}
+
+/* 按下回弹靠 Tailwind 的 active:scale；选中"描一遍"由 CapsuleNav 用 Web Animations 现算路径长度驱动，
+   这里只保留一个兜底：减弱动效时把所有过渡收回到颜色，避免 scale 仍然跳变。 */
+@media (prefers-reduced-motion: reduce) {
+  .liquid-tab,
+  .liquid-tab:active {
+    transition-property: background-color, color;
   }
 }

@@ -97,7 +97,37 @@ export default function CapsuleNav({
   }, [items])
 
   // 只在单侧溢出时挂渐变，避免给不需要的那侧也留一段透明
-  const fadeMask =
+    // 选中时给图标"描一遍"：取每条 path 的真实长度，用 Web Animations 把 dashoffset 从 len 归零。
+  // 为什么不用 CSS 关键帧：lucide 每个图标的 path 长度都不同，写死 dasharray 只对某几个图标成立；
+  // 这里现算现用，任何图标都成立。fills 为空（lucide 全是描边），所以不会出现"只描了半边"。
+  const iconRefs = useRef<Map<string, HTMLSpanElement>>(new Map())
+  const mountAt = useRef(performance.now())
+  const activeKey = items.find((i) => i.active)?.key
+  useEffect(() => {
+    // 首帧不描：进入页面时图标不该动，只有"用户切换分组"这一个动作才值得反馈。
+    // 用时间窗而不是布尔标记 —— StrictMode 会卸载重挂，布尔标记在第二次挂载时已经是 false 了。
+    if (performance.now() - mountAt.current < 600) return
+    if (!activeKey) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const host = iconRefs.current.get(activeKey)
+    const svg = host?.querySelector('svg')
+    if (!svg) return
+    const shapes = svg.querySelectorAll<SVGGeometryElement>('path, circle, rect, line, polyline, polygon, ellipse')
+    shapes.forEach((shape, i) => {
+      const len = shape.getTotalLength()
+      if (!len) return
+      shape.style.strokeDasharray = `${len}`
+      shape.style.strokeDashoffset = `${len}`
+      shape.animate([{ strokeDashoffset: `${len}` }, { strokeDashoffset: '0' }], {
+        duration: 380,
+        delay: i * 40,
+        easing: 'cubic-bezier(0.3, 0.12, 0.2, 1)',
+        fill: 'forwards',
+      })
+    })
+  }, [activeKey])
+
+const fadeMask =
     edges.left || edges.right
       ? `linear-gradient(to right, ${
           edges.left ? 'transparent 0, #000 20px' : '#000 0'
@@ -150,13 +180,24 @@ export default function CapsuleNav({
             // 否则读屏用户只会听到一串无意义的「按钮」。
             aria-label={item.label}
             title={item.label}
-            className={`liquid-tab relative flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] whitespace-nowrap max-sm:gap-0 max-sm:px-3 ${
+            // 按下回弹：scale 收到 0.94 松开弹回，150ms —— 16px 的胶囊上幅度再大就会"抖"
+            className={`liquid-tab relative flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] whitespace-nowrap active:scale-[0.94] max-sm:gap-0 max-sm:px-3 ${
               item.active
                 ? 'font-semibold text-accent-ink'
                 : 'text-ink2 hover:text-ink'
             }`}
           >
-            <span className={item.active ? 'text-accent-ink' : 'text-ink3'}>{item.icon}</span>
+            {/* 选中瞬间图标"点一下头"（-1.5px + 6°，220ms 回位）：切换分组时给出明确的落位感，
+                幅度刻意压得很小 —— 导航浮在玻璃上，动作一大就破坏稳定感。 */}
+            <span
+              ref={(el) => {
+                if (el) iconRefs.current.set(item.key, el)
+                else iconRefs.current.delete(item.key)
+              }}
+              className={`nav-icon inline-flex ${item.active ? 'text-accent-ink' : 'text-ink3'}`}
+            >
+              {item.icon}
+            </span>
             {/* 窄屏（移动端）只留图标：分组一多，文字会把胶囊撑到需要横向滚动，
                 而横向滚动在竖屏页面里几乎不可用。 */}
             <span className="max-sm:hidden">{item.label}</span>
