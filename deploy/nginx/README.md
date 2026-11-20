@@ -8,12 +8,17 @@
 | 仓库 | 服务器 |
 |---|---|
 | `deploy/nginx/my-collection.conf` | `/opt/gateway/nginx/sites/my-collection.conf` |
+| `deploy/nginx/locations/my-collection-app.conf` | `/opt/gateway/nginx/locations/my-collection-app.conf` |
 | `deploy/nginx/snippets/gzip.conf` | `/opt/gateway/nginx/snippets/gzip.conf` |
 | `deploy/nginx/snippets/proxy_common.conf` | `/opt/gateway/nginx/snippets/proxy_common.conf` |
 | `deploy/nginx/snippets/security-headers.conf` | `/opt/gateway/nginx/snippets/security-headers.conf` |
 
 `snippets/` 是**整机多项目共用**的，不属于本项目独有；`sites/` 下一项目一个文件。
 同机还有另一个项目的 `libretv.conf`，不在本仓库里。
+
+`locations/my-collection-app.conf` 是本项目的 location 集合（healthz、`/api/`、`/assets/`、
+`/index.html`、`/.well-known/acme-challenge/`、dotfile deny），被 80（IP 回退）与 443（域名）
+两个 server 块共同 `include` —— 同一套规则只维护一份，改一处两边同时生效。
 
 `/etc/nginx/nginx.conf` 里由这两行接上（nginx 1.18.0 / Ubuntu）：
 
@@ -29,6 +34,7 @@ include /opt/gateway/nginx/sites/*.conf;
 
 ```bash
 scp huawei-flexus:/opt/gateway/nginx/sites/my-collection.conf deploy/nginx/my-collection.conf
+scp huawei-flexus:/opt/gateway/nginx/locations/my-collection-app.conf deploy/nginx/locations/my-collection-app.conf
 for f in gzip proxy_common security-headers; do
   scp "huawei-flexus:/opt/gateway/nginx/snippets/$f.conf" "deploy/nginx/snippets/$f.conf"
 done
@@ -39,6 +45,7 @@ git diff -- deploy/nginx/     # 确认改动就是你以为的那几行
 
 ```bash
 scp deploy/nginx/my-collection.conf huawei-flexus:/opt/gateway/nginx/sites/my-collection.conf
+scp deploy/nginx/locations/my-collection-app.conf huawei-flexus:/opt/gateway/nginx/locations/my-collection-app.conf
 ssh huawei-flexus 'nginx -t && systemctl reload nginx'
 ```
 
@@ -61,5 +68,10 @@ diff <(ssh huawei-flexus 'cat /opt/gateway/nginx/sites/my-collection.conf') \
   否则用户永远拿旧版本。
 - 限流 `limit_req zone=api burst=20 nodelay`，桶定义在 `/etc/nginx/nginx.conf`。
 - 这个 server **不是** `default_server`，未知 Host 的兜底 404 由 `00-default.conf` 承担。
-- `server_name` 目前只有 `121.36.46.119` 和 `my-collection.local`，全站只有 80：**域名、443、证书
-  都属于备案通过后的动作**，放回这里改完再同步（步骤见 `deploy/HUAWEI-CLOUD.md` 的「备案与域名」）。
+- 三个 server：`80 + 121.36.46.119 / my-collection.local`（直出站点，域名或证书故障时的回退入口）、
+  `80 + qiyaoqi.pw / www.qiyaoqi.pw`（`return 301 https://$host$request_uri`）、
+  `443 + 域名`（证书 `/opt/gateway/certs/qiyaoqi.pw/`，`acme.sh` 续期）。
+- 域名站里的 `location ^~ /.well-known/acme-challenge/` **必须排在 dotfile deny 之前**：`.well-known`
+  以点开头，被 `location ~ /\.` 吃掉就会让续期 403、证书悄悄过期。
+- 没开 HSTS：证书续期失败或想临时退回 http 时，HSTS 会把浏览器锁死。
+- 域名/证书/备案的来龙去脉与踩过的坑见 `deploy/HUAWEI-CLOUD.md` 的「备案与域名」。

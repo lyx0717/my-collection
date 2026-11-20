@@ -135,14 +135,17 @@ pnpm -r build          # 生产构建（web → apps/web/dist，api → apps/api
 
 ## 部署
 
-线上跑在**华为云 Flexus 应用服务器**（<http://121.36.46.119>）：宿主机 nginx 同源提供前端静态文件 + 反代 `/api`，
+线上跑在**华为云 Flexus 应用服务器**，入口 <https://qiyaoqi.pw>（裸 IP <http://121.36.46.119> 保留为回退入口）：
+宿主机 nginx 同源提供前端静态文件 + 反代 `/api`，
 后端由 systemd 托管，数据库是同机的 PostgreSQL。完整运维手册见
 [`deploy/HUAWEI-CLOUD.md`](./deploy/HUAWEI-CLOUD.md)；网关配置在 [`deploy/nginx/`](./deploy/nginx/)（与服务器上
 `/opt/gateway/nginx/` 逐字节同步），首次装机脚本是 [`deploy/install-huawei.sh`](./deploy/install-huawei.sh)。
 
-> **域名与备案**：目前只能按 IP 直访 —— 站点 `server_name` 是 IP，没有域名、没有 HTTPS，ICP 备案尚未提交。
-> 备案填表文案见 [`deploy/BEIAN.md`](./deploy/BEIAN.md)；备案通过后要做的服务器侧改动（域名、443、证书、
-> `COOKIE_SECURE=true`、`PUBLIC_BASE_URL`）写在 HUAWEI-CLOUD.md 的「备案与域名」一节。
+> **域名与备案**：域名 `qiyaoqi.pw` 已备案（京ICP备2025115934号，页脚展示），HTTPS 用 Let's Encrypt
+> 证书（`acme.sh` 自动续期），HTTP 一律 301 跳 HTTPS。裸 IP 保留在 80 上做回退，但 `COOKIE_SECURE=true`
+> 之后 IP 入口登录不了（cookie 不保存）—— 只用于查看站点/排查故障。
+> 备案填表文案见 [`deploy/BEIAN.md`](./deploy/BEIAN.md)；服务器侧动作与踩坑记在
+> [`deploy/HUAWEI-CLOUD.md`](./deploy/HUAWEI-CLOUD.md) 的「备案与域名」一节。公安联网备案（开通后 30 日内）尚未办。
 
 旧版静态站仍由 `new-UI` 分支跟随 GitHub Pages 自动发布（`.github/workflows/deploy.yml`），与本分支互不影响。
 

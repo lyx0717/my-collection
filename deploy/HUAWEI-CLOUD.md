@@ -147,9 +147,9 @@ sudo -u mybook env $(grep -v '^#' /opt/apps/my-collection/deploy/.env | xargs) \
   node dist/reset.js 你的邮箱
 ```
 
-输出的是 `/#/reset?token=...`。**当前 `.env` 里没有 `PUBLIC_BASE_URL`**，所以只输出相对路径，
-要自己拼上站点地址 → `http://121.36.46.119/#/reset?token=...`，粘到地址栏打开即可设新密码
-（配了 `PUBLIC_BASE_URL` 才会直接输出完整链接）。规则：
+输出的是完整链接（`.env` 里 `PUBLIC_BASE_URL=https://qiyaoqi.pw`，所以直接拼成
+`https://qiyaoqi.pw/#/reset?token=...`），粘到地址栏打开即可设新密码。
+用 IP 访问的场合把域名部分换成 `http://121.36.46.119` 即可。规则：
 
 - **15 分钟有效，且只能用一次**（用掉即删，库里只存 sha256，不存明文令牌）；
   时长可用 `--minutes N` 改（1–1440）
@@ -283,116 +283,54 @@ proxy_common、security-headers 是整机多项目共用的。
 
 ## 备案与域名
 
-### 现状（2026-11-06）
+### 现状（2026-11-20 更新：域名与 HTTPS 已上线）
 
 | 项 | 现状 | 核对方式 |
 |---|---|---|
-| 访问方式 | 仅公网 IP 直访 `http://121.36.46.119/` | `curl -I http://121.36.46.119/` → 200 |
-| 域名 | **无**，`server_name` 只有 IP + `my-collection.local` | `cat sites/my-collection.conf` |
-| HTTPS | **无**：443 无监听、无证书 | `ss -lntp` 无 443；`curl https://121.36.46.119/` 失败 |
-| 备案 | **未备案**（个人非经营性站点，纯自用） | 无域名即无需备案；管局侧状态未核查 |
+| 访问方式 | 主入口 `https://qiyaoqi.pw/`（443）；`http://qiyaoqi.pw/` 301 跳过去 | `curl -I https://qiyaoqi.pw/` → 200 |
+| IP 回退 | `http://121.36.46.119/` 仍提供同一份站点（证书签不到 IP，只能 HTTP） | `curl -o /dev/null -w '%{http_code}' http://121.36.46.119/` → 200 |
+| 域名 | `qiyaoqi.pw` + `www.qiyaoqi.pw`，阿里云万网 DNS，A 记录均指向 `121.36.46.119` | Cloudflare DoH 查 A；服务器 `getent hosts qiyaoqi.pw` |
+| HTTPS | Let's Encrypt（ECC），SAN 含 apex 与 www，有效期至 **2027-02-18**，`acme.sh` 自动续期 | `openssl x509 -in /opt/gateway/certs/qiyaoqi.pw/fullchain.pem -noout -dates` |
+| 备案 | **已通过**，京ICP备2025115934号，页脚可见 | 登录页/首页 footer 文本 |
+| 公安备案 | **未办**（开通后 30 日内须办） | `beian.mps.gov.cn` |
 | 内容性质 | 个人书签管理，无广告 / 无付费 / 无交易 / 无发帖 | 与 `deploy/BEIAN.md` 一致 |
 
 站点性质定性、网站名称、简介等填表文字见 `deploy/BEIAN.md`；**本文只管服务器 / nginx / 后端侧动作**。
 
-### ICP 备案前置（域名到手前就要做对）
+### 已落地的动作（2026-11-20）
 
-1. **域名持有者必须与备案主体一致**（本人实名认证，信息要与身份证一致）；
-   在境内注册商买域名更省事，`.com/.cn/.net` 最稳，冷门后缀先确认能不能备案。
-2. 在华为云控制台申请**备案服务号**（每台服务器有额度），再按引导提交资料、做核验。
-3. **首次备案期间不要先把域名解析上线**：管局会核验网站，域名提前解析访问容易被驳回。
-   这段时间站点继续用 IP 访问，不需要改任何配置。
-4. 备案要求网站内容与申报一致。当前站点需要登录才能看到书签页，
-   申报时按 `deploy/BEIAN.md` 的定性写；若要改成公开注册，先想清楚内容责任。
+1. **DNS**：`qiyaoqi.pw`、`www.qiyaoqi.pw` 的 A 记录 → `121.36.46.119`（NS 仍是阿里云万网 `dns19/dns20.hichina.com`）。
+2. **nginx 拆成三个 server**（`/opt/gateway/nginx/sites/my-collection.conf`，仓库镜像见 `deploy/nginx/`）：
+   - 80 + `server_name 121.36.46.119 my-collection.local`：原样保留，作为域名/证书故障时的回退入口；
+   - 80 + 域名：`return 301 https://$host$request_uri`，其中 `^~ /.well-known/acme-challenge/` 单独放行（续期用）；
+   - 443 + 域名：证书 `/opt/gateway/certs/qiyaoqi.pw/{fullchain,privkey}.pem`，`ssl_protocols TLSv1.2 TLSv1.3`。
+3. **location 集合抽成共享片段** `/opt/gateway/nginx/locations/my-collection-app.conf`（62 行），两个 server 各自 `include`，
+   避免同一套规则维护两份。仓库镜像 `deploy/nginx/locations/my-collection-app.conf`。
+4. **证书**：服务器上 `~/.acme.sh/acme.sh --issue -d qiyaoqi.pw -d www.qiyaoqi.pw -w /var/www/my-collection --server letsencrypt --keylength ec-256`，
+   再 `--install-cert ... --reloadcmd 'systemctl reload nginx'` 装到网关证书目录。http-01 走 webroot，文件落在 `/var/www/my-collection/.well-known/acme-challenge/`。
+5. **后端 env**（`/opt/apps/my-collection/deploy/.env`，备份 `.env.bak-20261120-1415`）：`COOKIE_SECURE=true`、`PUBLIC_BASE_URL=https://qiyaoqi.pw`，重启后 `Set-Cookie: __Host-sid=…; Secure; HttpOnly; SameSite=Lax`（HTTPS 注册实测）。
+6. **页脚备案号**：`apps/web/src/components/SiteFooter.tsx`，挂在 `apps/web/src/pages/HomePage.tsx`（首页底部）与 `LoginPage.tsx`（未登录也能看到，备案核查从公开入口抓）。
+7. **备份**：nginx 配置 `sites/my-collection.conf.bak-20261120-1402`、env `.env.bak-20261120-1415`、静态站 `/var/www/.bak/my-collection-20261120-141217`。
 
-### 备案通过后的技术动作（checklist，逐条可执行）
+### 踩过的坑（改这块之前先看）
 
-```bash
-# 0) 前提：域名已备案通过，A 记录已解析到 121.36.46.119，dig 能查到
-dig +short example.com        # → 121.36.46.119
-```
+- **本机 curl 不可信**：`http://qiyaoqi.pw` 的 301 一度显示 `Location: https://`（host 为空），是本地代理 fake-ip 拦截造成的假象；
+  用 `curl --resolve qiyaoqi.pw:80:121.36.46.119` 或服务器上 `curl -H 'Host: qiyaoqi.pw' http://127.0.0.1/` 才是真值。
+- **`$host` / `$request_uri` 被本地 shell 吃掉**：在本地用双引号 heredoc 往服务器写 nginx 配置时，`$host` 会在本机展开成空串，
+  结果 `return 301 https://;`。写 nginx 配置一律用单引号 heredoc 或 `ssh bash -s <<'EOF'`。
+- **ACME 目录必须抢在 dotfile 规则之前**：站点里有 `location ~ /\. { deny all; }`，而 `.well-known` 以点开头，
+  不加 `^~` 前缀块就会出现「续期时 403、证书悄悄过期」。
+- **没开 HSTS**：一旦开了，证书到期/续期失败或想临时退回 http 会被浏览器硬拦，收益不抵风险。
+- **IP 回退入口在 `COOKIE_SECURE=true` 下登录不了**（cookie 带 Secure，http 不保存，表现为「登录后立刻跳回登录页」）。
+  它只用于查看站点/排查故障；真要在 IP 上登录，临时把该值改回 `false` 重启，用完再改回来。
 
-- [ ] **① 页脚加 ICP 备案号并链接管局**（法定要求，首页底部可见）
-      前端**目前没有页脚组件**（全局 grep 无 footer），需要在 `apps/web/src/pages/HomePage.tsx`
-      列表底部新增一行（登录页可不加，管局看的是访问首页能被"看到"的备案信息）。
-      号码照抄管局/华为云下发的，**不要自己编**，形如：
-      `<a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">&lt;省份简称&gt;ICP备XXXXXXXX号-1</a>`，
-      然后按「发布新版本」重新构建前端（备案号必须在**首页底部可见**，且链接指向管局网站）。
-- [ ] **② nginx 加域名 + 443 + 证书 + HTTP→HTTPS 跳转**
-      改 `deploy/nginx/my-collection.conf`（改完按 `deploy/nginx/README.md` 推到服务器）：
+### 剩余事项
 
-      ```nginx
-      # 新增：80 只负责跳转
-      server {
-          listen 80;
-          listen [::]:80;
-          server_name example.com;
-          return 301 https://$host$request_uri;
-      }
-
-      # 原 80 站点改成 443（保留 IP 直访的那份，或整体合并）
-      # 注意：线上 nginx 是 1.18，HTTP/2 要写在 listen 里（`http2 on;` 是 1.25+ 语法）
-      server {
-          listen 443 ssl http2;
-          listen [::]:443 ssl http2;
-          server_name example.com;
-          ssl_certificate     /etc/nginx/ssl/example.com/fullchain.pem;
-          ssl_certificate_key /etc/nginx/ssl/example.com/privkey.pem;
-          # ...原有 location 段整体照搬...
-      }
-      ```
-
-      证书两条路，选一条。**顺序都是「先拿证书，再开 443」**，否则 `nginx -t` 会因为
-      证书文件不存在而失败：
-
-      - **华为云证书**（最省事，适合不想折腾 ACME 的情况）：控制台申请/上传 → 下载 nginx 格式
-        → 服务器上放 `/etc/nginx/ssl/example.com/`（`fullchain.pem` + `privkey.pem`，`600 root:root`），
-        上面的 `ssl_certificate` 路径就按这个写。**有效期 1 年，到期前要回控制台续**。
-      - **certbot**：先只把域名的 80 站点加好（`server_name example.com`，不写 443），
-        再 `apt install certbot python3-certbot-nginx -y && certbot --nginx -d example.com`；
-        证书会落在 `/etc/letsencrypt/live/example.com/`，`ssl_certificate` 改成
-        `.../fullchain.pem`、`ssl_certificate_key` 改成 `.../privkey.pem`。
-        certbot 会自动加 80→443 跳转并装好续期 timer（`systemctl list-timers | grep certbot` 可查）。
-
-      上线前先自查：`nginx -t` 通过才 reload，失败不要 reload（当前进程会继续用旧配置）。
-
-      ```bash
-      ssh huawei-flexus 'nginx -t && systemctl reload nginx'
-      curl -I https://example.com/            # → 200
-      curl -I http://example.com/             # → 301
-      ```
-- [ ] **③ 后端 `COOKIE_SECURE=true`**
-      `sed -i 's/^COOKIE_SECURE=false/COOKIE_SECURE=true/' /opt/apps/my-collection/deploy/.env`
-      改完必须 `systemctl restart mybook-api`。代码在 `COOKIE_SECURE=true` 时会把 cookie 名
-      自动切成 `__Host-sid`（`apps/api/src/auth.ts:16`），不用另外加前缀。
-      **顺序很重要**：先让 HTTPS 能访问，再改这个值；反了会导致登录后立刻跳回登录页。
-- [ ] **④ 新增 `PUBLIC_BASE_URL`（指向新域名）**
-      当前 `.env` **没有**这个变量（实测只有 5 个键），需要新增一行：
-
-      ```bash
-      ssh huawei-flexus "echo 'PUBLIC_BASE_URL=https://example.com' >> /opt/apps/my-collection/deploy/.env \
-        && ls -l /opt/apps/my-collection/deploy/.env && systemctl restart mybook-api"
-      ```
-
-      追加不会改权限（应仍是 `-rw-r----- root:mybook`，`ls -l` 顺手确认一下）。
-      它只影响 `node dist/reset.js` 拼重置链接（设了才输出完整 URL）。
-      另外记得在 `deploy/BEIAN.md` 的「事实清单」里同步站点地址。
-- [ ] **⑤ 验证整链路**
-      ```bash
-      curl -I https://example.com/                       # 200
-      curl    https://example.com/api/v1/healthz         # {"ok":true}
-      curl -I http://example.com/                        # 301 → https
-      # 浏览器登录一次，确认 DevTools 里 cookie 名是 __Host-sid 且带 Secure
-      ```
-- [ ] **⑥ 公安联网备案**：网站**开通后 30 日内**到全国互联网安全管理服务平台登记，
-      通过后页脚再加一行公安备案号（同样带链接）。这条是法定义务，别忘了。
-
-> 域名切换期间旧 IP 地址仍可访问（keep-alive 与书签里的旧链接都还能用）；
-> 若想强制收敛到域名，把原 80 站点改成 `return 301 https://example.com$request_uri`。
+- **公安联网备案**：网站开通后 30 日内到 `beian.mps.gov.cn` 登记，通过后页脚再加一行公安备案号（同样带链接）。
 
 ## 环境变量
 
-见 `/opt/apps/my-collection/deploy/.env`（`-rw-r-----` root:mybook，208 B，**实测只有 5 个键**）：
+见 `/opt/apps/my-collection/deploy/.env`（`-rw-r-----` root:mybook，**现为 7 个键**，2026-11-20 起含 `COOKIE_SECURE` 与 `PUBLIC_BASE_URL`）：
 
 | 变量 | 当前值 | 说明 |
 |---|---|---|
@@ -400,9 +338,9 @@ dig +short example.com        # → 121.36.46.119
 | `DB_PASSWORD` | `<随机 48 位十六进制>` | 与上面保持一致 |
 | `PORT` | `3000` | 下个项目用 3001 |
 | `HOST` | `127.0.0.1` | **不要改成 0.0.0.0**，只让 nginx 反代 |
-| `COOKIE_SECURE` | `false` | **纯 http 必须 false**，设 true 会导致登录后立刻跳回登录页 |
+| `COOKIE_SECURE` | `true`（2026-11-20 起） | 站点已上 HTTPS。**纯 http 访问时必须设回 false**，否则 cookie 带 Secure 不保存、登录后立刻跳回登录页 |
 | `NODE_ENV` | **未设置** | 代码里不读它（`apps/api/src/config.ts` 无该字段），加了也没行为差异 |
-| `PUBLIC_BASE_URL` | **未设置** | 可选。只用于 `reset.js` 拼完整重置链接；不设则只输出相对路径 |
+| `PUBLIC_BASE_URL` | `https://qiyaoqi.pw` | 只用于 `reset.js` 拼完整重置链接；不设则只输出相对路径 |
 
 后端**不读任何 `.env` 文件**（无 dotenv），只认进程环境变量。systemd 通过 `EnvironmentFile=` 注入。
 手动前台启动必须自己 `export` 或 `set -a; . .env; set +a`。
@@ -513,8 +451,9 @@ systemctl restart mybook-api
 5. 机器 **2 核 1.7 GiB**（实测），已配 2 GB swap；系统盘 40 G 用了 30%。
    API 进程 `MemoryHigh=320M` / `MemoryMax=400M`（`systemctl cat mybook-api` 实测），PG `shared_buffers=256MB`。
    同时再跑第二个重量级项目前，先看 `free -h` 和 `docker`/进程内存占用。
-6. `.env` 里 `COOKIE_SECURE=false`（纯 http 必须这样）。上 HTTPS 后改成 `true` 并重启：
-   代码会自动把 cookie 名切成 `__Host-sid`（`apps/api/src/auth.ts:16`），**不需要手工加前缀**。
+6. `.env` 里 `COOKIE_SECURE=true`（2026-11-20 上 HTTPS 后改的）。代码会自动把 cookie 名切成
+   `__Host-sid`（`apps/api/src/auth.ts:16`），**不需要手工加前缀**。代价：裸 IP 走 http 时登录不了
+   （cookie 不保存），IP 入口只剩「查看站点/排查」用途。
 7. **同机 libretv 容器把 8080 直接暴露公网**（`0.0.0.0:8080->8080/tcp`，实测公网 200）。
    它不经 nginx，也就吃不到网关的安全头与限流；本项目本身的 3000/5432 仍只在 `127.0.0.1`。
 
@@ -629,14 +568,14 @@ PATCH  /bookmarks/bulk 移动到 B 自己以外的分组                     →
 | 数据量 | `users=1`，`bookmarks=150`，`collections=6`，`login_attempts=1`（一条 `succeeded=true`，2026-11-04 15:58）；最新书签 `created_at=2026-11-03 09:27:39+08` | `psql -c "select count(*) ..."` |
 | API 监听 | `127.0.0.1:3000`（node pid 1878） | `ss -lntp` |
 | nginx 监听 | `0.0.0.0:80`、`[::]:80`；**无 443** | `ss -lntp` |
-| 网关配置镜像 | 与仓库 `deploy/nginx/` **完全一致**（1 个 site + 3 个 snippet，逐文件 `diff` 无差异） | `diff <(ssh huawei-flexus 'cat ...') deploy/nginx/...` |
-| 站点配置 | `server_name 121.36.46.119 my-collection.local;`；`location = /api/v1/healthz` 不限流；`/api/` `limit_req burst=20 nodelay`；`/assets/` 一年 immutable；`/index.html` no-store | `cat sites/my-collection.conf` |
+| 网关配置镜像 | 与仓库 `deploy/nginx/` **完全一致**（1 个 site + 1 个 locations 片段 + 3 个 snippet，`sha256sum` 逐文件相同） | `shasum -a 256 deploy/nginx/...` 对比服务器同名文件 |
+| 站点配置 | 三个 server：80 IP/本地名（回退，直出站点）、80 域名（301 → https）、443 域名（Let's Encrypt）；location 共享片段里 `location = /api/v1/healthz` 不限流、`/api/` `limit_req burst=20 nodelay`、`/assets/` 一年 immutable、`/index.html` no-store | `cat sites/my-collection.conf`、`cat locations/my-collection-app.conf` |
 | 限流桶 | `limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s`（`/etc/nginx/nginx.conf:60`） | `grep -n limit_req_zone /etc/nginx/nginx.conf` |
 | 其他站点 | `00-default.conf`（default_server 404）、`libretv.conf`（`server_name yinghe.local` → `127.0.0.1:8080`） | `ls /opt/gateway/nginx/sites` |
-| 环境变量 | `.env` 5 个键：`DATABASE_URL` / `DB_PASSWORD` / `PORT=3000` / `HOST=127.0.0.1` / `COOKIE_SECURE=false`；**无 `NODE_ENV`、无 `PUBLIC_BASE_URL`** | `wc -l .env`；`/proc/<pid>/environ` |
-| 端口暴露 | 本项目仅 nginx 的 80 对公网；`3000`/`5432` 公网无响应（绑 `127.0.0.1`）；**`8080` 公网可达**（libretv 容器） | `ss -lntp`；`curl http://121.36.46.119:8080/` |
-| HTTP 冒烟 | `GET /` → 200 1702 B；`GET /api/v1/healthz` → `{"ok":true}`；`GET /assets/index-Di_DgKjW.js` → 200 415 932 B `application/javascript`；旧哈希 `index-BXj33Jkr.js` → 404 | `curl -I` / `curl` |
-| HTTPS | 未启用：`curl https://121.36.46.119/` 失败（连接被重置 / 443 无监听） | `curl -k https://121.36.46.119/` |
+| 环境变量 | `.env` 7 个键：`DATABASE_URL` / `DB_PASSWORD` / `PORT=3000` / `HOST=127.0.0.1` / `COOKIE_SECURE=true` / `PUBLIC_BASE_URL=https://qiyaoqi.pw`（仍无 `NODE_ENV`） | `cat .env`；`/proc/<pid>/environ` |
+| 端口暴露 | 本项目 nginx 的 **80 与 443** 对公网；`3000`/`5432` 公网无响应（绑 `127.0.0.1`）；**`8080` 公网可达**（libretv 容器） | `ss -lntp`；`curl http://121.36.46.119:8080/` |
+| 冒烟 | `GET https://qiyaoqi.pw/` → 200 1702 B；`GET https://qiyaoqi.pw/api/v1/healthz` → `{"ok":true}`；`GET http://qiyaoqi.pw/` → 301 到 `https://qiyaoqi.pw/`；`GET http://121.36.46.119/` → 200；`GET https://qiyaoqi.pw/assets/index-CDJMiSW_.js` → 200 455 731 B；旧哈希 → 404 | `curl -I` / `curl` |
+| HTTPS | 已启用（2026-11-20）：Let's Encrypt ECC，SAN `qiyaoqi.pw` + `www.qiyaoqi.pw`，至 2027-02-18；`acme.sh` 自动续期。**IP 上没有证书**，`https://121.36.46.119/` 仍然失败（预期） | `openssl s_client -connect qiyaoqi.pw:443 -servername qiyaoqi.pw` |
 | ufw | `active`，放行 `22 / 80 / 443 / 8080`（v4 + v6） | `ufw status` |
 | 备份 cron | `/etc/cron.d/mybook-backup` 存在，`20 3 * * * root /usr/local/bin/mybook-backup.sh` | `cat /etc/cron.d/mybook-backup` |
 | 备份结果 | 最近 `mybook-20261106-032001.dump` 24 650 B；daily 8 份；weekly/monthly 已有内容；总占用 264 KB | `ls -t /srv/data/backups/daily`；`journalctl -t mybook-backup -n 8` |
@@ -662,10 +601,10 @@ PATCH  /bookmarks/bulk 移动到 B 自己以外的分组                     →
 |---|---|---|
 | 架构 | 「没有任何服务直接暴露端口」「安全组(22/80)」 | 本项目不暴露；但 libretv 的 8080 直接对公网（实测 200），ufw 放行 22/80/443/8080 |
 | 账号运维 · 重置 | 「重复执行会生成新链接，旧链接不作废」 | 脚本每次先删该用户全部旧令牌，**旧链接立即作废** |
-| 账号运维 · 重置 | 「输出一个 `#/reset?token=...` 链接」 | 未设 `PUBLIC_BASE_URL`，只输出相对路径，需自己拼 IP |
+| 账号运维 · 重置 | 「输出一个 `#/reset?token=...` 链接」 | 已设 `PUBLIC_BASE_URL=https://qiyaoqi.pw`，直接输出完整 https 链接 |
 | 登录限流 | 「改 `apps/api/src/ratelimit.ts` 里的 `EMAIL_LIMIT`」 | 实际常量名 `EMAIL_MAX_FAILS` / `IP_MAX_FAILS` / `WINDOW_MINUTES` |
 | 登录限流 | 未提成功记录 | 成功登录也写一行（`succeeded=true`），明细保留 7 天 |
-| 环境变量表 | `NODE_ENV=production`、`PUBLIC_BASE_URL=http://121.36.46.119` | 两个都**未设置**；`.env` 只有 5 个键 |
+| 环境变量表 | `NODE_ENV=production`、`PUBLIC_BASE_URL=http://121.36.46.119` | 2026-11-20 起 `PUBLIC_BASE_URL=https://qiyaoqi.pw`；`NODE_ENV` 仍不设置（代码不读），`.env` 7 个键 |
 | 已知事项 · 6 | 「未来上 HTTPS 后…并给 cookie 加 `__Host-` 前缀」 | 代码已实现：`COOKIE_SECURE=true` 时 cookie 自动叫 `__Host-sid` |
 | 备份 | 日备「7 天」= 7 份 | `-mtime +7`，实际保留 8 份左右（实测 8 份） |
 | 批量操作 | 只列 2 个接口 | 另有 `POST /bookmarks/bulk`（导入 `{drafts}`） |

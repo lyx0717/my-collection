@@ -35,6 +35,7 @@ import EmptyState from '../components/EmptyState'
 import EmptyFirstRun from '../components/EmptyFirstRun'
 import ConfirmDialog from '../components/ConfirmDialog'
 import LocalMigrationBanner from '../components/LocalMigrationBanner'
+import SiteFooter from '../components/SiteFooter'
 
 const VIEW_KEY = 'mybookmarks:view'
 
@@ -438,6 +439,10 @@ export default function HomePage() {
               </SortableBookmarks>
             )}
       </main>
+
+      {/* 备案号：非经营性网站要在首页底部展示 ICP 备案号并链接工信部备案系统。
+          登录页另有一份（未登录访客看不到首页）。 */}
+      <SiteFooter className="pb-10" />
 
       {modal?.mode === 'add' && (
         <BookmarkModal

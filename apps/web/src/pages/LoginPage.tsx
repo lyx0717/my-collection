@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { ApiError } from '../lib/api'
 import { useAuth } from '../store/AuthContext'
+import SiteFooter from '../components/SiteFooter'
 
 /** 登录与注册合一：账号不存在时服务端直接建号，前端只留一次提交 */
 export default function LoginPage() {
@@ -36,7 +37,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4 py-10">
+    <div className="flex min-h-dvh flex-col items-center justify-center px-4 py-10">
       <div className="glass-card w-full max-w-[380px] rounded-[20px] border p-7">
         <div className="mb-6 flex items-center gap-2.5">
           <img
@@ -106,6 +107,9 @@ export default function LoginPage() {
           </p>
         </details>
       </div>
+
+      {/* 备案号：未登录访客（以及备案核查）看到的第一个公开页面就是这里 */}
+      <SiteFooter className="mt-6" />
     </div>
   )
 }
