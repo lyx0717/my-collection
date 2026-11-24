@@ -83,7 +83,7 @@ export default function DockBar() {
           <Link
             to="/settings"
             aria-label="设置"
-            className={`liquid-glass liquid-glass--control flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-ink2 hover:text-accent-ink ${
+            className={`liquid-glass liquid-glass--control flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-ink2 hover:text-ink ${
               pathname === '/settings' ? 'liquid-glass--selected' : ''
             }`}
           >

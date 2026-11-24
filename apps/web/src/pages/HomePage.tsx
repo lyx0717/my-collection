@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Loader2,
   Plus,
+  Search,
   X,
 } from 'lucide-react'
 import { useBookmarks } from '../store/BookmarksContext'
@@ -46,6 +47,8 @@ export default function HomePage() {
   const [params, setParams] = useSearchParams()
   const [deleting, setDeleting] = useState<Bookmark | null>(null)
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false)
+  // 移动端工具条空间只够标题 + 图标：搜索默认收起，点图标展开成独立一行
+  const [mobileSearch, setMobileSearch] = useState(false)
 
   const [modal, setModal] = useState<
     | { mode: 'add' }
@@ -176,12 +179,12 @@ export default function HomePage() {
       )}
 
       {/* pt-6：与吸顶胶囊保持舒适间距（胶囊自身 py-3 已占 12px） */}
-      <main className="mx-auto max-w-6xl px-4 pt-6 pb-24 sm:px-6">
+      <main className="mx-auto max-w-6xl px-4 pt-8 pb-24 sm:px-6">
           {/* 老版本旧档还在这台机器的 localStorage 里时的导入入口 */}
           <LocalMigrationBanner />
-          <div className="mb-4 flex flex-wrap items-center gap-3">
+          <div className="mb-6 flex flex-wrap items-center gap-3">
             <h1 className="text-[22px] font-bold tracking-[-0.01em]">{contextTitle}</h1>
-            <span className="text-[12.5px] text-ink3">
+            <span className="text-[13px] tabular-nums text-ink4">
               {/* digits 传书签总数：筛选时计数在 0~总数之间跳，
                   按总数预留位数，99→100 这类进位也不会撑宽容器。 */}
               <CountUp value={visible.length} digits={String(bookmarks.length).length} /> 条
@@ -191,17 +194,27 @@ export default function HomePage() {
                 <span className="text-ink4"> / {bookmarks.length}</span>
               )}
             </span>
-              <BookmarkFilterInput
-                value={query}
-                onChange={(q) => updateParams((p) => (q ? p.set('q', q) : p.delete('q')))}
-              />
+              <div className="hidden sm:block">
+                <BookmarkFilterInput
+                  value={query}
+                  onChange={(q) => updateParams((p) => (q ? p.set('q', q) : p.delete('q')))}
+                />
+              </div>
+              <button
+                onClick={() => setMobileSearch((v) => !v)}
+                aria-label="搜索书签"
+                aria-expanded={mobileSearch}
+                className="liquid-glass liquid-glass--control flex h-7 w-7 items-center justify-center rounded-[8px] text-ink2 sm:hidden"
+              >
+                <Search size={14} />
+              </button>
               {/* 操作组：添加 / 多选 / 视图切换。
                   「添加书签」原先在顶栏，但用户想加书签时视线在卡片区，
                   按钮却要移到屏幕最上方 —— 移到内容工具条，与多选、视图切换同组。 */}
               <div className="ml-auto flex items-center gap-2.5">
                 <button
                   onClick={() => setModal({ mode: 'add' })}
-                  className="liquid-glass liquid-glass--accent flex h-[34px] items-center gap-1.5 rounded-[10px] px-3 text-[12.5px] font-semibold text-white"
+                  className="liquid-glass liquid-glass--accent flex h-7 items-center gap-1.5 rounded-[8px] px-2.5 text-[12px] font-semibold text-white"
                 >
                   <Plus size={14} strokeWidth={2.4} />
                   <span className="hidden sm:inline">添加书签</span>
@@ -213,8 +226,8 @@ export default function HomePage() {
                 {view === 'list' && (
                 <button
                   onClick={() => (batchMode ? exitBatch() : enterBatch())}
-                  className={`liquid-glass liquid-glass--control flex h-[34px] items-center gap-1.5 rounded-[10px] px-2.5 text-[12.5px] font-medium ${
-                    batchMode ? 'liquid-glass--selected text-accent-ink' : 'text-ink2'
+                  className={`liquid-glass liquid-glass--control flex h-7 items-center gap-1.5 rounded-[8px] px-2 text-[12px] font-medium ${
+                    batchMode ? 'liquid-glass--selected text-ink' : 'text-ink2'
                   }`}
                 >
                   <CheckSquare size={13} />
@@ -228,7 +241,7 @@ export default function HomePage() {
                     的错觉操作。所以多选时整组禁用，退出多选自动恢复。 */}
                 <div
                   ref={viewPill.containerRef}
-                  className={`liquid-glass liquid-glass--control relative flex rounded-[10px] p-[3px] transition-opacity ${
+                  className={`liquid-glass liquid-glass--control relative flex rounded-[8px] p-[3px] transition-opacity ${
                     batchMode ? 'pointer-events-none opacity-40' : ''
                   }`}
                   aria-disabled={batchMode}
@@ -251,7 +264,7 @@ export default function HomePage() {
                       aria-label={label}
                       title={batchMode ? '多选模式下不可切换视图' : label}
                       onClick={() => setView(mode)}
-                      className={`liquid-tab relative flex h-7 w-[30px] items-center justify-center rounded-[6px] active:scale-[0.94] ${
+                      className={`liquid-tab relative flex h-[22px] w-[26px] items-center justify-center rounded-[6px] active:scale-[0.94] ${
                         view === mode ? 'text-accent-ink' : 'text-ink4 hover:text-ink2'
                       }`}
                     >
@@ -275,11 +288,22 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* 移动端搜索：工具条只留图标，展开后单独占一行（宽度够写完整关键词） */}
+            {mobileSearch && (
+              <div className="mb-4 sm:hidden">
+                <BookmarkFilterInput
+                  value={query}
+                  autoFocus
+                  onChange={(q) => updateParams((p) => (q ? p.set('q', q) : p.delete('q')))}
+                />
+              </div>
+            )}
+
             {/* 激活的域名筛选 */}
             {domainFilter && (
               <div className="mb-3 flex flex-wrap items-center gap-1.5">
                 {domainFilter && (
-                  <span className="flex items-center gap-1 rounded-md bg-accent-soft px-2 py-1 text-[12px] font-medium text-accent-ink">
+                  <span className="flex items-center gap-1 rounded-md border border-line2 bg-surface-2 px-2 py-1 text-[12px] font-medium text-ink2">
                     <Globe size={11} />
                     {domainFilter}
                     <button
@@ -293,7 +317,7 @@ export default function HomePage() {
                 )}
                 <button
                   onClick={() => updateParams((p) => p.delete('d'))}
-                  className="text-[12px] text-ink3 underline-offset-2 hover:text-accent hover:underline"
+                  className="text-[12px] text-ink3 underline-offset-2 hover:text-ink hover:underline"
                 >
                   清除筛选
                 </button>
@@ -395,8 +419,8 @@ export default function HomePage() {
                       view === 'list'
                         ? 'flex flex-col gap-2'
                         : view === 'tile'
-                          ? 'grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-7'
-                          : 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+                          ? 'grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-6'
+                          : 'grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4'
                     }
                   >
                     {visible.map((bm, i) => (

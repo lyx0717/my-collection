@@ -35,13 +35,13 @@ export default function BookmarkTile({ bookmark, onOpen }: BookmarkTileProps) {
         e.preventDefault()
         onOpen(bookmark)
       }}
-      className="tile-shell group flex min-h-[100px] min-w-[80px] cursor-pointer flex-col items-center gap-2 rounded-[14px] border px-2.5 py-4 text-center no-underline transition-[background-color,border-color,box-shadow] duration-[var(--dur-2)] ease-[var(--ease-out)] focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:outline-none"
+      className="tile-shell group flex min-h-[100px] min-w-[80px] cursor-pointer flex-col items-center gap-2 rounded-[16px] border px-2.5 py-4 text-center no-underline transition-[background-color,border-color,box-shadow] duration-[var(--dur-2)] ease-[var(--ease-out)] focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:outline-none"
     >
       <span
         className="relative flex h-14 w-14 items-center justify-center transition-transform group-hover:scale-105"
       >
         <span
-          className="absolute inset-0 overflow-hidden rounded-[9px] shadow-[0_1px_3px_-1px_rgba(30,40,60,.14)]"
+          className="absolute inset-0 overflow-hidden rounded-[10px] shadow-[0_1px_3px_-1px_rgba(30,40,60,.14)]"
           style={{
             background: failed ? color.bg : 'var(--surface)',
             borderColor: failed ? color.bg : 'var(--color-line)',
@@ -53,7 +53,7 @@ export default function BookmarkTile({ bookmark, onOpen }: BookmarkTileProps) {
               alt=""
               loading="lazy"
               onError={handleError}
-              className="h-full w-full rounded-[9px]"
+              className="h-full w-full rounded-[10px]"
             />
           ) : failed ? (
             <span

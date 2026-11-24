@@ -4,6 +4,8 @@ import { Search, X } from 'lucide-react'
 interface BookmarkFilterInputProps {
   value: string
   onChange: (v: string) => void
+  /** 移动端从图标展开时自动聚焦 */
+  autoFocus?: boolean
 }
 
 /**
@@ -16,21 +18,22 @@ interface BookmarkFilterInputProps {
  * 工具条只有 36px 高，插一行会把整排按钮挤下去。
  * 入口常年只有一个「/」角标，新用户看不见快捷键，提示总得在某个时刻露一次面。
  */
-export default function BookmarkFilterInput({ value, onChange }: BookmarkFilterInputProps) {
+export default function BookmarkFilterInput({ value, onChange, autoFocus = false }: BookmarkFilterInputProps) {
   const [focused, setFocused] = useState(false)
 
   return (
-    <div className="relative w-full sm:w-72">
-      <div className="flex h-9 w-full items-center gap-2 rounded-[10px] border border-line bg-surface px-3 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_3px_var(--accent-ring)]">
+    <div className="relative w-full sm:w-[220px]">
+      <div className="flex h-8 w-full items-center gap-2 rounded-[8px] border border-line bg-surface px-2.5 transition-shadow focus-within:border-accent focus-within:shadow-[0_0_0_3px_var(--accent-ring)]">
         <Search size={14} className="shrink-0 text-ink3" />
         <input
           id="bookmark-filter-input"
+          autoFocus={autoFocus}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           placeholder="筛选书签库（标题/域名/描述）…"
-          className="w-full min-w-0 bg-transparent text-[13px] outline-none placeholder:text-ink4"
+          className="w-full min-w-0 bg-transparent text-[12.5px] outline-none placeholder:text-ink4"
         />
         {value ? (
           <button
@@ -48,7 +51,7 @@ export default function BookmarkFilterInput({ value, onChange }: BookmarkFilterI
       </div>
 
       {focused && (
-        <div className="animate-fade-in absolute top-11 left-0 z-20 flex items-center gap-2.5 whitespace-nowrap rounded-2xl border border-line bg-surface px-2.5 py-1.5 text-[11px] text-ink3 shadow-[0_8px_24px_-12px_rgba(30,40,60,.18)]">
+        <div className="liquid-glass liquid-glass--control animate-fade-in absolute top-10 left-0 z-20 hidden items-center gap-2.5 whitespace-nowrap rounded-[10px] border px-2.5 py-1.5 text-[11px] text-ink3 sm:flex">
           <span>
             <kbd className="font-mono text-ink2">n</kbd> 新建书签
           </span>

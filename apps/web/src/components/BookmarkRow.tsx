@@ -31,7 +31,7 @@ function RowBody({
 }) {
   return (
     <div
-      className={`glass-card group flex items-center gap-3 rounded-[20px] border border-line bg-surface px-3.5 py-2.5 shadow-[0_1px_2px_rgba(30,40,60,.05)] transition-[transform,box-shadow,border-color] duration-[var(--dur-2)] ease-[var(--ease-out)] hover:-translate-y-[1.5px] hover:border-line2 hover:shadow-[0_8px_24px_-12px_rgba(30,40,60,.18),0_2px_6px_rgba(30,40,60,.05)] ${
+      className={`glass-card group flex items-center gap-3 rounded-[20px] border bg-surface px-3.5 py-2.5 transition-[box-shadow,border-color] duration-[var(--dur-2)] ease-[var(--ease-out)] ${
         isDragging ? 'z-10 opacity-60 shadow-xl ring-2 ring-accent/40' : ''
       }`}
     >
@@ -52,7 +52,7 @@ function RowBody({
             href={bookmark.url}
             target="_blank"
             rel="noreferrer noopener"
-            className="truncate text-[14px] font-semibold text-ink hover:text-accent"
+            className="truncate text-[14px] font-semibold text-ink group-hover:underline decoration-1 underline-offset-2"
             title={bookmark.title}
           >
             {bookmark.title}
@@ -61,7 +61,7 @@ function RowBody({
         <div className="mt-0.5 flex items-center gap-2 text-[12px] text-ink3">
           <button
             onClick={() => onDomainClick?.(bookmark.domain)}
-            className="truncate hover:text-accent"
+            className="truncate group-hover:underline decoration-1 underline-offset-2"
             title={`筛选 ${bookmark.domain}`}
           >
             {bookmark.domain}

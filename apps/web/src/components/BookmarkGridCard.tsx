@@ -43,7 +43,7 @@ export default function BookmarkGridCard({
 
   // 圆角两档统一 10px：logo 容器尺寸分档（视觉层级），圆角不分 ——
   // 同一屏里出现两种圆角会读成两种控件。
-  const logoBox = compact ? 'h-8 w-8 rounded-[8px]' : 'h-10 w-10 rounded-[8px]'
+  const logoBox = compact ? 'h-8 w-8 rounded-[6px]' : 'h-10 w-10 rounded-[6px]'
   // 图片铺满容器：外框已经有 overflow-hidden + object-contain 的按比例缩放，
   // 留内边距只会让图标显得比容器小一圈。非正方形图标自动收进可视区居中。
   const logoImg = 'h-full w-full object-contain'
@@ -66,7 +66,7 @@ export default function BookmarkGridCard({
         e.preventDefault()
         onOpen(bookmark)
       }}
-      className={`glass-card group relative flex cursor-pointer overflow-hidden rounded-[14px] border no-underline transition-[box-shadow,border-color,background-color] duration-[var(--dur-2)] ease-[var(--ease-out)] focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:outline-none ${pad} ${gap}`}
+      className={`glass-card group relative flex cursor-pointer overflow-hidden rounded-[16px] border no-underline transition-[box-shadow,border-color,background-color] duration-[var(--dur-2)] ease-[var(--ease-out)] focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:outline-none ${pad} ${gap}`}
     >
       {/* 有封面时降为底层衬底：保留数据但压到几乎不抢视线。
           opacity-[0.16] + 遮罩渐变，保证上层文字始终可读。 */}
@@ -114,15 +114,15 @@ export default function BookmarkGridCard({
       <div className="relative flex min-w-0 flex-1 flex-col">
         {/* 整张卡就是链接，标题不再单独可点 —— 点名字以外的空白处也照样跳转 */}
         <span
-          className={`min-w-0 leading-[1.3] font-semibold text-ink transition-colors group-hover:text-accent ${
-            compact ? 'line-clamp-1 text-[13.5px]' : 'line-clamp-2 text-[14px]'
+          className={`min-w-0 leading-[1.3] font-semibold text-ink ${
+            compact ? 'line-clamp-1 text-[14px]' : 'line-clamp-2 text-[14px]'
           }`}
         >
           {bookmark.title}
         </span>
 
         <div className="mt-0.5 flex min-w-0 items-center">
-          <span className="min-w-0 flex-1 truncate text-[11px] text-ink4">{bookmark.domain}</span>
+          <span className="min-w-0 flex-1 truncate text-[12px] text-ink4">{bookmark.domain}</span>
         </div>
 
       </div>

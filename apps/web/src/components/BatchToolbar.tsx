@@ -29,8 +29,8 @@ export default function BatchToolbar({
     'flex h-8 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 text-[12px] font-medium text-ink2 hover:border-line2 hover:bg-surface-2'
 
   return (
-    <div className="animate-rise mb-3 flex flex-wrap items-center gap-2 rounded-[20px] border border-accent/30 bg-accent-soft/40 px-3 py-2.5">
-      <button onClick={onSelectAll} className="flex items-center gap-1.5 text-[12.5px] font-semibold text-accent-ink">
+    <div className="animate-rise mb-3 flex flex-wrap items-center gap-2 rounded-[20px] border border-line2 bg-surface-2 px-3 py-2.5">
+      <button onClick={onSelectAll} className="flex items-center gap-1.5 text-[12.5px] font-semibold text-ink">
         <CheckSquare size={14} />
         {allSelected ? `取消全选（${selectedCount}）` : `已选 ${selectedCount} / ${totalCount}`}
       </button>

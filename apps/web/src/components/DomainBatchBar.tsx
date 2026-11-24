@@ -15,7 +15,7 @@ export default function DomainBatchBar({ domain, count, collections, onMove }: D
 
   return (
     <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2">
-      <Globe size={14} className="shrink-0 text-accent" />
+      <Globe size={14} className="shrink-0 text-ink3" />
       <span className="text-[12.5px] text-ink2">
         当前显示 <b>{count}</b> 个来自 <b>{domain}</b> 的书签，可统一归类：
       </span>
