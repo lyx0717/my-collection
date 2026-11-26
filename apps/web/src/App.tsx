@@ -8,6 +8,9 @@ import RequireAuth from './components/RequireAuth'
 
 // 设置页低频访问：路由级懒加载，把 papaparse 等导入依赖从首屏主包里剥出去
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
+// 设计特效页同样低频：路由级懒加载，后续放进来的动画代码不占首屏包
+const EffectsPage = lazy(() => import('./pages/EffectsPage'))
+const EffectDetailPage = lazy(() => import('./pages/EffectDetailPage'))
 
 export default function App() {
   return (
@@ -21,6 +24,26 @@ export default function App() {
           element={
             <RequireAuth>
               <HomePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/effects"
+          element={
+            <RequireAuth>
+              <Suspense fallback={null}>
+                <EffectsPage />
+              </Suspense>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/effects/:id"
+          element={
+            <RequireAuth>
+              <Suspense fallback={null}>
+                <EffectDetailPage />
+              </Suspense>
             </RequireAuth>
           }
         />

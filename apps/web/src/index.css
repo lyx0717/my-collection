@@ -1,5 +1,16 @@
 @import 'tailwindcss';
 
+/* Geist（SIL OFL 1.1，见 src/assets/fonts/LICENSE.txt）：只供「设计特效」里的
+   canvas 场景使用 —— 主界面的 iOS System Material 字体栈保持不变。
+   Vite 会把 @font-face 里的相对路径打包成带 hash 的静态资源，base './' 也能用。 */
+@font-face {
+  font-family: 'Geist';
+  src: url('./assets/fonts/Geist-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ===================================================================
    主题机制：双轨 CSS 变量
    1) 实际值挂 :root（亮色），:root[data-theme='dark'] 整体覆盖（深色）

@@ -1,0 +1,615 @@
+/* ===================================================================
+   书页卡片 / Book Card
+   平面时就是普通产品卡；hover / focus 时封面绕书脊翻开，
+   四张纸按 0.7 的衰减角扇形跟出。只动 transform 和 opacity。
+   =================================================================== */
+
+.bookcard {
+  --book-radius: 16px;
+  --book-pages: 4;
+  --book-dur: 420ms;
+  --book-ease: cubic-bezier(0.3, 1.2, 0.5, 1);
+  --book-shadow: 1;
+  --book-shadow-rgb: 40 44 58;
+  --book-board: #f3f3f6;
+  --book-paper: #fdfdfd;
+  --book-page-line: rgba(60, 60, 67, 0.14);
+  --ry: -1;
+  --rx: 0;
+
+  position: relative;
+  display: block;
+  width: 280px;
+  height: 280px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: var(--book-radius);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bookcard:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.bookcard.is-inert {
+  pointer-events: none;
+}
+
+/* —— 阴影：两块预先模糊好的实色形状，绝不用 box-shadow —— */
+.bookcard__shadows,
+.bookcard__shadow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bookcard__shadows {
+  z-index: 0;
+}
+
+.bookcard__shadow {
+  transition:
+    opacity var(--book-dur) var(--book-ease),
+    transform var(--book-dur) var(--book-ease);
+}
+
+.bookcard__shadow--rest {
+  opacity: 1;
+}
+
+.bookcard__shadow--open {
+  opacity: 0;
+  transform: translateY(0) scaleX(1);
+  transform-origin: bottom center;
+}
+
+.bookcard__shadow::before,
+.bookcard__shadow::after {
+  content: '';
+  position: absolute;
+  background: rgb(var(--book-shadow-rgb) / 0.22);
+}
+
+/* 贴地接触阴影：卡片下半截，左右各缩 4px，向下 2px */
+.bookcard__shadow--rest::before {
+  left: 4px;
+  right: 4px;
+  top: 52%;
+  bottom: -2px;
+  border-radius: 0 0 var(--book-radius) var(--book-radius);
+  filter: blur(4px);
+  opacity: calc(0.9 * var(--book-shadow));
+}
+
+/* 环境阴影：更淡、更大 */
+.bookcard__shadow--rest::after {
+  inset: 8px 6px 6px;
+  border-radius: var(--book-radius);
+  background: rgb(var(--book-shadow-rgb) / 0.12);
+  filter: blur(14px);
+  transform: translateY(6px);
+  opacity: calc(0.9 * var(--book-shadow));
+}
+
+/* 翻开后的长软阴影 */
+.bookcard__shadow--open::before {
+  left: 2px;
+  right: 2px;
+  top: 42%;
+  bottom: -12px;
+  border-radius: 0 0 var(--book-radius) var(--book-radius);
+  filter: blur(12px);
+  opacity: calc(0.85 * var(--book-shadow));
+}
+
+.bookcard__shadow--open::after {
+  inset: 4% 1% -2%;
+  border-radius: var(--book-radius);
+  background: rgb(var(--book-shadow-rgb) / 0.12);
+  filter: blur(38px);
+  transform: translateY(26px);
+  opacity: calc(0.85 * var(--book-shadow));
+}
+
+/* —— 3D 舞台 —— */
+.bookcard__scene {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  perspective: 1100px;
+  perspective-origin: 30% 50%;
+}
+
+.bookcard--right .bookcard__scene {
+  perspective-origin: 70% 50%;
+}
+
+.bookcard--top .bookcard__scene {
+  perspective-origin: 50% 30%;
+}
+
+.bookcard__body {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.bookcard__layer {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform-origin: left center;
+  backface-visibility: hidden;
+  pointer-events: none;
+  transform: translateZ(var(--z)) rotateY(0deg) rotateX(0deg);
+  transition: transform var(--book-dur) var(--book-ease);
+  /* 合上时反向延迟：最里面那页先落 */
+  transition-delay: calc((var(--book-pages) - var(--i)) * 28ms);
+}
+
+.bookcard--right .bookcard__layer {
+  transform-origin: 100% 50%;
+}
+
+.bookcard--top .bookcard__layer {
+  transform-origin: 50% 0;
+}
+
+/* 翻开：封面带路，纸张按 0.7^n 逐层跟上 */
+.bookcard.is-open .bookcard__layer,
+.bookcard:focus-visible .bookcard__layer {
+  transform: translateZ(var(--z)) rotateY(calc(var(--angle) * var(--ry) * 1deg))
+    rotateX(calc(var(--angle) * var(--rx) * 1deg));
+  transition-delay: calc(var(--i) * 28ms);
+}
+
+.bookcard.is-open .bookcard__shadow--rest,
+.bookcard:focus-visible .bookcard__shadow--rest {
+  opacity: 0;
+}
+
+.bookcard.is-open .bookcard__shadow--open,
+.bookcard:focus-visible .bookcard__shadow--open {
+  opacity: 1;
+  transform: translateY(14px) scaleX(1.04);
+}
+
+@media (hover: hover) {
+  .bookcard:hover .bookcard__layer {
+    transform: translateZ(var(--z)) rotateY(calc(var(--angle) * var(--ry) * 1deg))
+      rotateX(calc(var(--angle) * var(--rx) * 1deg));
+    transition-delay: calc(var(--i) * 28ms);
+  }
+
+  .bookcard:hover .bookcard__shadow--rest {
+    opacity: 0;
+  }
+
+  .bookcard:hover .bookcard__shadow--open {
+    opacity: 1;
+    transform: translateY(14px) scaleX(1.04);
+  }
+}
+
+/* 触屏：按住时翻开，松手合上；轻点仍然是一次正常激活 */
+@media (hover: none) {
+  .bookcard:active .bookcard__layer {
+    transform: translateZ(var(--z)) rotateY(calc(var(--angle) * var(--ry) * 1deg))
+      rotateX(calc(var(--angle) * var(--rx) * 1deg));
+    transition-delay: calc(var(--i) * 28ms);
+  }
+
+  .bookcard:active .bookcard__shadow--rest {
+    opacity: 0;
+  }
+
+  .bookcard:active .bookcard__shadow--open {
+    opacity: 1;
+    transform: translateY(14px) scaleX(1.04);
+  }
+}
+
+/* —— 封面：保持普通产品卡的内容与排版 —— */
+.bookcard__cover {
+  border-radius: var(--book-radius);
+  border: 1px solid var(--card-line);
+  background: var(--glass-bg-card);
+  overflow: hidden;
+}
+
+.bookcard__cover-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px;
+}
+
+.bookcard__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bookcard__icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: none;
+  place-items: center;
+  border-radius: 12px;
+}
+
+.bookcard__arrow {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--ink-3);
+}
+
+.bookcard__title {
+  display: -webkit-box;
+  margin-top: 18px;
+  overflow: hidden;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.16;
+  letter-spacing: -0.02em;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.bookcard__desc {
+  display: -webkit-box;
+  margin-top: 8px;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.bookcard__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+/* —— 纸页 —— */
+.bookcard__page {
+  inset: 8px 8px 8px 4px;
+  border-radius: calc(var(--book-radius) - 8px);
+  border: 1px solid var(--book-page-line);
+  background: var(--book-paper);
+  overflow: hidden;
+}
+
+.bookcard--right .bookcard__page {
+  inset: 8px 4px 8px 8px;
+}
+
+.bookcard--right .bookcard__page::before {
+  left: 8px;
+  right: 16px;
+}
+
+.bookcard--top .bookcard__page {
+  inset: 4px 8px 8px;
+}
+
+.bookcard__page::before {
+  content: '';
+  position: absolute;
+  top: 54px;
+  right: 8px;
+  bottom: 22px;
+  left: 16px;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(36, 40, 56, 0.11) 0 1px,
+    transparent 1px 10px
+  );
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.bookcard__page::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.09), rgba(0, 0, 0, 0.035));
+  pointer-events: none;
+}
+
+.bookcard__page-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px 15px;
+}
+
+.bookcard__page-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.32) 0%,
+    rgba(0, 0, 0, 0.08) 55%,
+    transparent 85%
+  );
+  opacity: 0;
+  transition: opacity var(--book-dur) var(--book-ease);
+  transition-delay: calc((var(--book-pages) - var(--i)) * 28ms);
+}
+
+.bookcard--right .bookcard__page-shade {
+  background: linear-gradient(
+    270deg,
+    rgba(0, 0, 0, 0.32) 0%,
+    rgba(0, 0, 0, 0.08) 55%,
+    transparent 85%
+  );
+}
+
+.bookcard--top .bookcard__page-shade {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.32) 0%,
+    rgba(0, 0, 0, 0.08) 55%,
+    transparent 85%
+  );
+}
+
+.bookcard.is-open .bookcard__page-shade,
+.bookcard:focus-visible .bookcard__page-shade {
+  opacity: var(--shade);
+  transition-delay: calc(var(--i) * 28ms);
+}
+
+@media (hover: hover) {
+  .bookcard:hover .bookcard__page-shade {
+    opacity: var(--shade);
+    transition-delay: calc(var(--i) * 28ms);
+  }
+}
+
+.bookcard__page-head {
+  position: relative;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ink-4);
+}
+
+.bookcard__page-lines {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  color: var(--ink-4);
+}
+
+.bookcard__page-line {
+  display: block;
+  overflow: hidden;
+  font-size: 9.5px;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* —— 背板 —— */
+.bookcard__board {
+  inset: 6px;
+  border-radius: calc(var(--book-radius) - 6px);
+  border: 1px solid var(--card-line);
+  background: var(--book-board);
+  transition: none;
+}
+
+/* —— 减弱动态：不翻页，只抬起 2px，阴影交叉淡入 —— */
+@media (prefers-reduced-motion: reduce) {
+  .bookcard__layer {
+    transition-duration: 180ms;
+  }
+
+  .bookcard.is-open .bookcard__cover,
+  .bookcard:focus-visible .bookcard__cover {
+    transform: translateZ(var(--z)) translateY(-2px);
+  }
+
+  .bookcard.is-open .bookcard__page,
+  .bookcard:focus-visible .bookcard__page {
+    transform: translateZ(var(--z));
+  }
+
+  @media (hover: hover) {
+    .bookcard:hover .bookcard__cover {
+      transform: translateZ(var(--z)) translateY(-2px);
+    }
+
+    .bookcard:hover .bookcard__page {
+      transform: translateZ(var(--z));
+    }
+  }
+
+  .bookcard__page-shade {
+    transition: none;
+  }
+}
+
+/* ===================================================================
+   两个演示容器：总览封面 + 详情页 4:5 舞台
+   =================================================================== */
+
+.fx-bookcover {
+  position: relative;
+  display: grid;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  place-items: center;
+  overflow: hidden;
+  background-color: #f4f4f7;
+  background-image: radial-gradient(rgba(36, 40, 56, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+  container-type: inline-size;
+}
+
+.fx-bookcover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(62% 48% at 50% 0%, rgba(255, 255, 255, 0.95), transparent 70%);
+  pointer-events: none;
+}
+
+.fx-bookcover .bookcard {
+  position: relative;
+  z-index: 1;
+}
+
+.fx-bookcover__meta {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  letter-spacing: 0.17em;
+  color: rgba(34, 38, 50, 0.34);
+  pointer-events: none;
+}
+
+.fx-bookcover__hint {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: rgba(34, 38, 50, 0.28);
+  pointer-events: none;
+}
+
+.fx-bookstage {
+  position: relative;
+  display: grid;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--card-line);
+  border-radius: 24px;
+  background-color: #f4f4f7;
+  background-image: radial-gradient(rgba(36, 40, 56, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+  container-type: inline-size;
+}
+
+.fx-bookstage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(58% 42% at 50% 0%, rgba(255, 255, 255, 0.95), transparent 72%);
+  pointer-events: none;
+}
+
+.fx-bookstage__meta {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  letter-spacing: 0.17em;
+  color: rgba(34, 38, 50, 0.34);
+  pointer-events: none;
+}
+
+.fx-bookgrid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 280px);
+  gap: 80px 30px;
+}
+
+@container (max-width: 620px) {
+  .fx-bookgrid {
+    grid-template-columns: 280px;
+  }
+
+  .fx-bookgrid > :nth-child(n + 2) {
+    display: none;
+  }
+}
+
+@container (max-width: 420px) {
+  .fx-bookcover .bookcard {
+    transform: scale(0.82);
+  }
+}
+
+:root[data-theme='dark'] .fx-bookcover,
+:root[data-theme='dark'] .fx-bookstage {
+  background-color: #131317;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+}
+
+:root[data-theme='dark'] .fx-bookcover::before,
+:root[data-theme='dark'] .fx-bookstage::before {
+  background: radial-gradient(58% 42% at 50% 0%, rgba(255, 255, 255, 0.06), transparent 72%);
+}
+
+:root[data-theme='dark'] .fx-bookcover__meta,
+:root[data-theme='dark'] .fx-bookstage__meta,
+:root[data-theme='dark'] .fx-bookcover__hint {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+:root[data-theme='dark'] .bookcard {
+  --book-shadow-rgb: 0 0 0;
+  --book-board: #1b1b1f;
+  --book-paper: #232327;
+  --book-page-line: rgba(255, 255, 255, 0.12);
+}
+
+:root[data-theme='dark'] .bookcard__page::before {
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.1) 0 1px,
+    transparent 1px 10px
+  );
+}
+
+:root[data-theme='dark'] .bookcard__page::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.035));
+}
+
+:root[data-theme='dark'] .bookcard__shadow::before,
+:root[data-theme='dark'] .bookcard__shadow::after {
+  background: rgb(0 0 0 / 0.42);
+}

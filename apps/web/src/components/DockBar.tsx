@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { LogOut, Settings } from 'lucide-react'
+import { LogOut, Settings, Sparkles } from 'lucide-react'
 import EngineSearchBox from './EngineSearchBox'
 import GlassThemeToggle from './GlassThemeToggle'
 import { useAuth } from '../store/AuthContext'
@@ -80,6 +80,18 @@ export default function DockBar() {
           {/* 明暗切换：高频操作，抬到顶栏一键可达，不必先进设置页。
               完整三态（浅色 / 深色 / 跟随系统）仍在设置页「外观」里。 */}
           <GlassThemeToggle />
+          {/* 设计特效入口：贴着设置按钮左侧，与设置同一枚控件语法。
+              页面本身低频，所以只给图标；名称放 aria-label / title。 */}
+          <Link
+            to="/effects"
+            aria-label="设计特效"
+            title="设计特效"
+            className={`liquid-glass liquid-glass--control flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-ink2 hover:text-ink ${
+              pathname.startsWith('/effects') ? 'liquid-glass--selected' : ''
+            }`}
+          >
+            <Sparkles size={16} />
+          </Link>
           <Link
             to="/settings"
             aria-label="设置"
